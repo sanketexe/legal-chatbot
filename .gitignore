@@ -1,0 +1,26 @@
+# Logs
+*.log
+*.pyc
+__pycache__/
+
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+*.egg-info/
+build/
+dist/
+
+# Deployment
+.vercel/
