@@ -1,0 +1,19 @@
+[build]
+  publish = "."
+  command = "echo 'Build complete'"
+
+[build.environment]
+  PYTHON_VERSION = "3.12"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/simple_app/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[functions]
+  directory = "netlify/functions"

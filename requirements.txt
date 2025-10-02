@@ -1,0 +1,16 @@
+# Essential dependencies for simplified legal chatbot
+Flask==3.0.0
+google-generativeai==0.8.3
+python-dotenv==1.0.0
+gunicorn==21.2.0
+
+# Optional dependencies (uncomment if needed)
+# streamlit==1.28.1
+# pandas==2.1.3
+# numpy==1.25.2
+# pypdf2==3.0.1
+# beautifulsoup4==4.12.2
+# requests==2.31.0
+# python-docx==1.1.0
+# jinja2==3.1.2
+# plotly==5.17.0
