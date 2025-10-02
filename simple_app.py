@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session
+from flask_cors import CORS
 import os
 import sys
 import json
@@ -15,6 +16,9 @@ from simple_legal_engine import LegalReasoningEngine
 app = Flask(__name__)
 config = Config()
 app.secret_key = config.SECRET_KEY
+
+# Enable CORS for browser extension
+CORS(app, origins=['chrome-extension://*', 'moz-extension://*', '*'])
 
 # Initialize only the core legal engine
 legal_engine = LegalReasoningEngine()
@@ -34,15 +38,25 @@ def index():
     
     return render_template('simple.html')
 
-@app.route('/api/chat', methods=['POST'])
+@app.route('/api/chat', methods=['POST', 'OPTIONS'])
 def chat():
     """Handle simple chat messages"""
+    # Handle preflight OPTIONS request
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response
+    
     try:
         data = request.get_json()
         user_message = data.get('message', '').strip()
         
         if not user_message:
-            return jsonify({'error': 'Message is required'}), 400
+            response = jsonify({'error': 'Message is required'})
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            return response, 400
         
         # Initialize session if needed
         if 'messages' not in session:
@@ -74,13 +88,20 @@ def chat():
         # Update session
         session.modified = True
         
-        return jsonify({
+        response = jsonify({
+            'success': True,
             'response': response_content,
             'timestamp': assistant_msg['timestamp']
         })
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response
         
     except Exception as e:
-        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+        response = jsonify({'error': f'An error occurred: {str(e)}'})
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response, 500
 
 @app.route('/api/chat/clear', methods=['POST'])
 def clear_chat():
@@ -92,12 +113,16 @@ def clear_chat():
 @app.route('/api/health')
 def health_check():
     """Health check endpoint"""
-    return jsonify({
+    response = jsonify({
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
         'ai_provider': config.get_active_provider(),
         'available_providers': config.get_available_providers()
     })
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
 
 if __name__ == '__main__':
     # Create templates directory if it doesn't exist
