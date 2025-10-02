@@ -10,9 +10,7 @@
   "host_permissions": [
     "http://localhost:5000/*",
     "http://127.0.0.1:5000/*",
-    "https://*.vercel.app/*",
-    "https://*.netlify.app/*",
-    "https://*.herokuapp.com/*"
+    "https://legal-chatbot-ikpow5p6r-sankets-projects-34ae550b.vercel.app/*"
   ],
   "action": {
     "default_popup": "simple_popup.html",
@@ -31,6 +29,6 @@
     "128": "icons/icon128.png"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' http://localhost:5000 https://*.vercel.app https://*.netlify.app https://*.herokuapp.com"
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' http://localhost:5000 https://legal-chatbot-ikpow5p6r-sankets-projects-34ae550b.vercel.app"
   }
 }

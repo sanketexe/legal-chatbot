@@ -2,8 +2,7 @@
 class LegalAssistExtension {
     constructor() {
         this.apiUrls = [
-            'https://your-app.vercel.app',  // Replace with your deployed URL
-            'https://your-app.netlify.app', // Replace with your deployed URL
+            'https://legal-chatbot-ikpow5p6r-sankets-projects-34ae550b.vercel.app',  // Your deployed URL
             'http://127.0.0.1:5000',        // Local development
             'http://localhost:5000'         // Local development alternate
         ];
