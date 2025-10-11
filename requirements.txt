@@ -5,6 +5,9 @@ google-generativeai==0.8.3
 python-dotenv==1.0.0
 gunicorn==21.2.0
 
+# Optional dependencies (for specific deployment platforms)
+# requests==2.31.0  # For health checks if needed
+
 # Optional dependencies (uncomment if needed)
 # streamlit==1.28.1
 # pandas==2.1.3
