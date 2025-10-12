@@ -9,7 +9,7 @@ class Config:
     """Simple configuration for the Legal Assistant"""
     
     # API Keys - Only Gemini (free tier available)
-    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyAQMIOI9h0RJgnABVA1P1oX7tbaYUEe8lw')
+    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
     
     # AI Provider Settings (simplified)
     PREFERRED_AI_PROVIDER = 'gemini'  # Only gemini or fallback
