@@ -24,3 +24,15 @@ dist/
 
 # Deployment
 .vercel/
+
+# AWS Development Files (uncomment when ready to deploy AWS)
+# AWS_DATABASE_SETUP.md
+# AWS_QUICK_START.md
+# migrate_to_aws.py
+# requirements-aws.txt
+# setup_aws_database.ps1
+# setup_aws_database.sh
+
+# Database files
+instance/
+*.db
