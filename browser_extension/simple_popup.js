@@ -10,6 +10,8 @@ class LegalAssistExtension {
         this.currentApiUrl = null;
         this.chatHistory = [];
         this.isLoading = false;
+        this.authToken = null;
+        this.currentUser = null;
         
         this.init();
     }
@@ -17,6 +19,7 @@ class LegalAssistExtension {
     async init() {
         this.setupEventListeners();
         await this.findWorkingAPI();
+        this.checkAuthStatus();
         this.updateStatus();
     }
 
@@ -25,7 +28,7 @@ class LegalAssistExtension {
         document.getElementById('sendButton').addEventListener('click', () => this.sendMessage());
         
         // Send message on Enter (but allow Shift+Enter for new line)
-        document.getElementById('userInput').addEventListener('keydown', (e) => {
+        document.getElementById('messageInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 this.sendMessage();
@@ -33,7 +36,7 @@ class LegalAssistExtension {
         });
 
         // Auto-resize textarea
-        document.getElementById('userInput').addEventListener('input', this.autoResize);
+        document.getElementById('messageInput').addEventListener('input', this.autoResize);
     }
 
     autoResize(e) {
@@ -81,7 +84,7 @@ class LegalAssistExtension {
     }
 
     async sendMessage() {
-        const input = document.getElementById('userInput');
+        const input = document.getElementById('messageInput');
         const message = input.value.trim();
         
         if (!message || this.isLoading) return;
@@ -106,9 +109,15 @@ class LegalAssistExtension {
             // Show typing indicator
             this.showTyping();
             
+            // Prepare headers
+            const headers = { 'Content-Type': 'application/json' };
+            if (this.authToken) {
+                headers['Authorization'] = `Bearer ${this.authToken}`;
+            }
+            
             const response = await fetch(`${this.currentApiUrl}/api/chat`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify({
                     message: message,
                     chat_history: this.chatHistory
@@ -163,13 +172,24 @@ class LegalAssistExtension {
 
     addMessage(role, content) {
         const messagesContainer = document.getElementById('messages');
+        
+        // Remove welcome message when first message is sent
+        const welcome = messagesContainer.querySelector('.welcome');
+        if (welcome) {
+            welcome.remove();
+        }
+        
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${role}-message`;
+        messageDiv.className = `message ${role}`;
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
         
         // Convert markdown-style formatting to HTML
         const formattedContent = this.formatMessage(content);
-        messageDiv.innerHTML = formattedContent;
+        messageContent.innerHTML = formattedContent;
         
+        messageDiv.appendChild(messageContent);
         messagesContainer.appendChild(messageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
@@ -186,15 +206,21 @@ class LegalAssistExtension {
     showTyping() {
         const messagesContainer = document.getElementById('messages');
         const typingDiv = document.createElement('div');
-        typingDiv.className = 'message bot-message typing';
+        typingDiv.className = 'message assistant';
         typingDiv.id = 'typing-indicator';
-        typingDiv.innerHTML = `
-            <div class="loading">
+        
+        const typingContent = document.createElement('div');
+        typingContent.className = 'loading';
+        typingContent.innerHTML = `
+            <span>LegalAssist is thinking</span>
+            <div class="loading-dots">
                 <div class="loading-dot"></div>
                 <div class="loading-dot"></div>
                 <div class="loading-dot"></div>
             </div>
         `;
+        
+        typingDiv.appendChild(typingContent);
         messagesContainer.appendChild(typingDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
@@ -209,16 +235,18 @@ class LegalAssistExtension {
     setLoading(loading) {
         this.isLoading = loading;
         const sendButton = document.getElementById('sendButton');
-        const userInput = document.getElementById('userInput');
+        const messageInput = document.getElementById('messageInput');
         
         sendButton.disabled = loading;
-        userInput.disabled = loading;
+        messageInput.disabled = loading;
         
         if (loading) {
             sendButton.innerHTML = '⏳';
+            sendButton.style.opacity = '0.6';
         } else {
             sendButton.innerHTML = '▶';
-            userInput.focus();
+            sendButton.style.opacity = '1';
+            messageInput.focus();
         }
     }
 
@@ -230,13 +258,259 @@ class LegalAssistExtension {
         messagesContainer.appendChild(errorDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
+
+    // Authentication methods
+    checkAuthStatus() {
+        chrome.storage.local.get(['authToken', 'currentUser'], (result) => {
+            if (result.authToken && result.currentUser) {
+                this.authToken = result.authToken;
+                this.currentUser = result.currentUser;
+                this.updateAuthUI();
+            }
+        });
+    }
+
+    updateAuthUI() {
+        const authButtons = document.getElementById('authButtons');
+        const userInfo = document.getElementById('userInfo');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+
+        if (this.currentUser) {
+            authButtons.style.display = 'none';
+            userInfo.style.display = 'flex';
+            userNameDisplay.textContent = this.currentUser.full_name || this.currentUser.username;
+        } else {
+            authButtons.style.display = 'flex';
+            userInfo.style.display = 'none';
+        }
+    }
+
+    async login(username, password) {
+        try {
+            const response = await fetch(`${this.currentApiUrl}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.authToken = result.access_token;
+                this.currentUser = result.user;
+                
+                // Store in extension storage
+                chrome.storage.local.set({
+                    authToken: this.authToken,
+                    currentUser: this.currentUser
+                });
+                
+                this.updateAuthUI();
+                return { success: true };
+            } else {
+                return { success: false, error: result.error };
+            }
+        } catch (error) {
+            return { success: false, error: 'Login failed. Please try again.' };
+        }
+    }
+
+    async register(userData) {
+        try {
+            const response = await fetch(`${this.currentApiUrl}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            return { success: false, error: 'Registration failed. Please try again.' };
+        }
+    }
+
+    async logout() {
+        try {
+            if (this.authToken) {
+                await fetch(`${this.currentApiUrl}/api/auth/logout`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.authToken}` }
+                });
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+
+        this.authToken = null;
+        this.currentUser = null;
+        chrome.storage.local.remove(['authToken', 'currentUser']);
+        this.updateAuthUI();
+        this.chatHistory = []; // Clear chat history on logout
+    }
 }
 
 // Quick action functions
 function askQuick(question) {
-    const input = document.getElementById('userInput');
+    const input = document.getElementById('messageInput');
     input.value = question;
     legalAssist.sendMessage();
+}
+
+// Clear chat function
+function clearChat() {
+    const messagesContainer = document.getElementById('messages');
+    messagesContainer.innerHTML = `
+        <div class="welcome">
+            <h3>👋 Welcome to LegalAssist Pro!</h3>
+            <p>I'm here to help with your legal questions. Ask me about laws, rights, procedures, or get legal guidance.</p>
+            <div class="quick-questions">
+                <div class="quick-question" onclick="askQuick('What are my rights if I am arrested?')">
+                    👮 What are my rights if I'm arrested?
+                </div>
+                <div class="quick-question" onclick="askQuick('How do I file a small claims case?')">
+                    ⚖️ How do I file a small claims case?
+                </div>
+                <div class="quick-question" onclick="askQuick('What should I do after a car accident?')">
+                    🚗 What should I do after a car accident?
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Clear chat history
+    if (legalAssist) {
+        legalAssist.chatHistory = [];
+    }
+}
+
+// Authentication modal functions
+function showAuth(type) {
+    const overlay = document.getElementById('authModalOverlay');
+    const content = document.getElementById('authModalContent');
+    
+    if (type === 'login') {
+        content.innerHTML = `
+            <h3>👤 Sign In</h3>
+            <div id="authError" class="error-message" style="display: none;"></div>
+            <form class="auth-form" onsubmit="handleAuth(event, 'login')">
+                <div class="form-group">
+                    <label>Username or Email</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required>
+                </div>
+                <button type="submit" class="auth-submit">Sign In</button>
+            </form>
+            <div class="auth-toggle">
+                Don't have an account? <a href="#" onclick="showAuth('register')">Register here</a>
+            </div>
+        `;
+    } else {
+        content.innerHTML = `
+            <h3>➕ Create Account</h3>
+            <div id="authError" class="error-message" style="display: none;"></div>
+            <div id="authSuccess" class="success-message" style="display: none;"></div>
+            <form class="auth-form" onsubmit="handleAuth(event, 'register')">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Full Name (Optional)</label>
+                    <input type="text" name="full_name">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" name="confirm_password" required>
+                </div>
+                <button type="submit" class="auth-submit">Create Account</button>
+            </form>
+            <div class="auth-toggle">
+                Already have an account? <a href="#" onclick="showAuth('login')">Sign in here</a>
+            </div>
+        `;
+    }
+    
+    overlay.style.display = 'block';
+}
+
+function closeAuthModal() {
+    document.getElementById('authModalOverlay').style.display = 'none';
+}
+
+async function handleAuth(event, type) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const errorDiv = document.getElementById('authError');
+    const successDiv = document.getElementById('authSuccess');
+    
+    // Clear previous messages
+    if (errorDiv) errorDiv.style.display = 'none';
+    if (successDiv) successDiv.style.display = 'none';
+    
+    if (type === 'login') {
+        const result = await legalAssist.login(
+            formData.get('username'),
+            formData.get('password')
+        );
+        
+        if (result.success) {
+            closeAuthModal();
+        } else {
+            errorDiv.textContent = result.error;
+            errorDiv.style.display = 'block';
+        }
+    } else {
+        // Registration
+        const password = formData.get('password');
+        const confirmPassword = formData.get('confirm_password');
+        
+        if (password !== confirmPassword) {
+            errorDiv.textContent = 'Passwords do not match';
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
+        const userData = {
+            username: formData.get('username'),
+            email: formData.get('email'),
+            full_name: formData.get('full_name'),
+            password: password
+        };
+        
+        const result = await legalAssist.register(userData);
+        
+        if (result.success) {
+            successDiv.textContent = 'Account created successfully! You can now sign in.';
+            successDiv.style.display = 'block';
+            form.reset();
+            setTimeout(() => showAuth('login'), 2000);
+        } else {
+            errorDiv.textContent = result.error;
+            errorDiv.style.display = 'block';
+        }
+    }
+}
+
+function logout() {
+    legalAssist.logout();
+}
+
+function showChatHistory() {
+    // TODO: Implement chat history modal
+    alert('Chat history feature coming soon!');
 }
 
 // Initialize extension when DOM is loaded

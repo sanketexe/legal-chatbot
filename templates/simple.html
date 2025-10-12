@@ -3,31 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LegalAssist Pro - Professional Legal Assistant</title>
+    <title>LegalCounsel AI - Professional Legal Information System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
     <style>
         :root {
-            --primary-blue: #1e3a8a;
-            --secondary-blue: #3b82f6;
-            --dark-blue: #1e293b;
-            --gold-accent: #fbbf24;
-            --light-gray: #f8fafc;
-            --medium-gray: #e2e8f0;
-            --dark-gray: #64748b;
-            --white: #ffffff;
-            --success-green: #10b981;
-            --warning-amber: #f59e0b;
-            --error-red: #ef4444;
-            --text-primary: #1e293b;
-            --text-secondary: #475569;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            /* Professional Legal Color Palette */
+            --primary-navy: #1a237e;
+            --steel-blue: #2c5aa0;
+            --charcoal: #263238;
+            --platinum: #f5f7fa;
+            --pure-white: #ffffff;
+            --gold-accent: #d4af37;
+            --success-green: #2e7d32;
+            --alert-red: #c62828;
+            --soft-gray: #90a4ae;
+            --border-light: #e1e5e9;
+            
+            /* Enhanced Professional Gradient */
+            --gradient-professional: linear-gradient(135deg, var(--primary-navy) 0%, var(--steel-blue) 100%);
+            --gradient-subtle: linear-gradient(135deg, var(--platinum) 0%, var(--pure-white) 100%);
+            
+            /* Professional Shadows */
+            --shadow-subtle: 0 2px 8px rgba(26, 35, 126, 0.08);
+            --shadow-medium: 0 4px 16px rgba(26, 35, 126, 0.12);
+            --shadow-elevated: 0 8px 32px rgba(26, 35, 126, 0.16);
+            --shadow-floating: 0 12px 48px rgba(26, 35, 126, 0.20);
+            
+            /* Legacy compatibility */
+            --primary-color: var(--primary-navy);
+            --secondary-color: var(--steel-blue);
+            --accent-color: var(--gold-accent);
+            --success-color: var(--success-green);
+            --warning-color: var(--gold-accent);
+            --error-color: var(--alert-red);
+            --background-primary: var(--pure-white);
+            --background-secondary: var(--platinum);
+            --background-gradient: var(--gradient-professional);
+            --text-primary: var(--charcoal);
+            --text-secondary: var(--soft-gray);
+            --text-light: var(--soft-gray);
+            --border-color: var(--border-light);
+            --shadow-sm: var(--shadow-subtle);
+            --shadow-md: var(--shadow-medium);
+            --shadow-lg: var(--shadow-elevated);
+            --shadow-xl: var(--shadow-floating);
             --border-radius: 12px;
+            --border-radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -37,30 +63,80 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--light-gray) 0%, #e0f2fe 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #ffffff;
             min-height: 100vh;
-            color: var(--text-primary);
-            line-height: 1.6;
+            color: #1e293b;
+            line-height: 1.7;
+            overflow-x: hidden;
+            font-weight: 400;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Subtle Professional Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(13, 148, 136, 0.02) 0%, transparent 60%),
+                radial-gradient(circle at 75% 75%, rgba(13, 148, 136, 0.01) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: -1;
         }
 
         .app-container {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            max-width: 1200px;
-            margin: 0 auto;
-            background: var(--white);
-            box-shadow: var(--shadow-lg);
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            background: #ffffff;
         }
 
-        /* Professional Header */
+        /* Clean Chat Container */
+        .chat-container {
+            background: #ffffff;
+            backdrop-filter: none;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin: 0;
+            animation: slideUp 0.6s ease-out;
+            min-height: calc(100vh - 200px);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Refined Header */
         .header {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
-            color: var(--white);
-            padding: 2rem;
+            background: #ffffff;
+            color: #1e293b;
+            padding: 3rem 2rem 2rem 2rem;
+            text-align: center;
             position: relative;
             overflow: hidden;
+            border-radius: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .header::before {
@@ -68,166 +144,846 @@
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.1;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+        }
+
+        @keyframes professionalShine {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(300%); }
         }
 
         .header-content {
             position: relative;
             z-index: 1;
-            text-align: center;
+        }
+
+        /* Refined Features Box */
+        .features-box {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            margin: 2rem auto 0 auto;
+            max-width: 900px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
         }
 
         .logo {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 1rem;
+            gap: 1.5rem;
             margin-bottom: 1rem;
         }
 
         .logo-icon {
-            font-size: 3rem;
-            color: var(--gold-accent);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: 3.5rem;
+            color: #0D9488;
+            filter: none;
+            animation: none;
         }
 
         .logo-text {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-size: 2.5rem;
             font-weight: 700;
             letter-spacing: -0.02em;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            color: #1e293b;
+            text-shadow: none;
         }
 
-        .tagline {
+        .subtitle {
             font-size: 1.1rem;
-            opacity: 0.9;
+            color: #64748b;
             font-weight: 400;
-            margin-bottom: 0.5rem;
+            margin-top: 0.5rem;
         }
 
-        .credentials {
-            font-size: 0.9rem;
-            opacity: 0.8;
+        /* Quick Action Buttons */
+        .quick-actions {
             display: flex;
-            align-items: center;
+            gap: 1rem;
             justify-content: center;
-            gap: 0.5rem;
-        }
-
-        /* Professional Features Bar */
-        .features-bar {
-            background: var(--white);
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--medium-gray);
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
+            margin-top: 1.5rem;
             flex-wrap: wrap;
         }
 
-        .feature {
+        .quick-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        /* Authentication Section */
+        .auth-section {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .auth-btn {
+            background: #0D9488;
+            border: 1px solid #0D9488;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
             font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
-        .feature i {
-            color: var(--secondary-blue);
+        .auth-btn:hover {
+            background: #0f766e;
+            border-color: #0d47a1;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(26, 35, 126, 0.3);
+        }
+
+        .register-btn {
+            background: #263238;
+            border: 2px solid #37474f;
+        }
+
+        .register-btn:hover {
+            background: #37474f;
+            border-color: #455a64;
+        }
+
+        .user-menu {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            min-width: 300px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #1e293b;
+            font-weight: 600;
             font-size: 1rem;
         }
 
-        /* Chat Container */
-        .chat-container {
-            flex: 1;
+        .user-info i {
+            font-size: 1.3rem;
+            color: #0D9488;
+        }
+
+        .user-actions {
             display: flex;
-            flex-direction: column;
-            background: var(--light-gray);
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: var(--border-radius-lg);
+            width: 90%;
+            max-width: 400px;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-header h3 {
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-gray);
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: var(--primary-blue);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--medium-gray);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0D9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0D9488, #1E40AF);
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 0.75rem 2rem;
+            border: 2px solid var(--medium-gray);
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--secondary-blue);
+            color: var(--secondary-blue);
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #dc2626;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            color: #065f46;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Enhanced Chat History Styles */
+        .history-controls {
+            background: var(--platinum);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--soft-gray);
+        }
+
+        #historySearch {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid var(--border-light);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--pure-white);
+        }
+
+        #historySearch:focus {
+            outline: none;
+            border-color: var(--steel-blue);
+            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-light);
+            background: var(--pure-white);
+            color: var(--charcoal);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--steel-blue);
+            color: var(--steel-blue);
+        }
+
+        .filter-btn.active {
+            background: var(--gradient-professional);
+            color: var(--pure-white);
+            border-color: var(--primary-navy);
+        }
+
+        .history-content {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        .history-session {
+            background: var(--pure-white);
+            border: 2px solid var(--border-light);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
             position: relative;
         }
 
+        .history-session:hover {
+            border-color: var(--steel-blue);
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-2px);
+        }
+
+        .history-session.selected {
+            border-color: var(--primary-navy);
+            background: linear-gradient(135deg, var(--pure-white) 0%, var(--platinum) 100%);
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .session-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--charcoal);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .session-date {
+            font-size: 0.85rem;
+            color: var(--soft-gray);
+            white-space: nowrap;
+        }
+
+        .session-preview {
+            color: var(--soft-gray);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .session-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--soft-gray);
+        }
+
+        .session-stats {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: none;
+            border: 1px solid var(--border-light);
+            color: var(--soft-gray);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--steel-blue);
+            color: var(--pure-white);
+            border-color: var(--steel-blue);
+        }
+
+        .action-btn.danger:hover {
+            background: var(--alert-red);
+            border-color: var(--alert-red);
+        }
+
+        .history-stats {
+            background: var(--gradient-professional);
+            color: var(--pure-white);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--soft-gray);
+        }
+
+        .empty-history i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-history h4 {
+            margin-bottom: 0.5rem;
+            color: var(--charcoal);
+        }
+
+        /* Modern Messages Area */
         .messages {
             flex: 1;
             padding: 2rem;
             overflow-y: auto;
             scroll-behavior: smooth;
-            min-height: 500px;
+            min-height: 400px;
+            background: transparent;
+            border-radius: 0;
+            margin: 0;
+            border: none;
+            position: relative;
         }
 
         .messages::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         .messages::-webkit-scrollbar-track {
-            background: var(--medium-gray);
-            border-radius: 3px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 4px;
         }
 
         .messages::-webkit-scrollbar-thumb {
-            background: var(--dark-gray);
-            border-radius: 3px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
         }
 
-        /* Welcome Message */
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,0,0,0.5);
+        }
+
+        /* Modern Landing Page Design */
         .welcome-message {
             text-align: center;
-            padding: 3rem 2rem;
-            color: var(--text-secondary);
+            padding: 0;
+            color: #1e293b;
+            animation: fadeIn 1s ease-out;
+            background: #ffffff;
+            margin: 0;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+            max-width: none;
+            position: relative;
         }
 
-        .welcome-message h2 {
-            color: var(--primary-blue);
-            font-size: 1.5rem;
+        /* Chat History Button in Welcome Message */
+        .welcome-chat-history-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #0D9488;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
             font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(13, 148, 136, 0.15);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .welcome-chat-history-btn:hover {
+            background: #0f766e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(13, 148, 136, 0.25);
+        }
+
+        .welcome-chat-history-btn i {
+            font-size: 0.9rem;
+        }
+
+        .hero-section {
+            padding: 4rem 2rem 3rem 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* Core Features Section */
+        .core-features {
+            padding: 3rem 2rem;
+            background: #ffffff;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .features-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 3rem;
+        }
+
+        .core-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            margin-bottom: 0;
+        }
+
+        .core-feature-card {
+            background: #ffffff;
+            padding: 2rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .core-feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .core-feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .core-feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(13, 148, 136, 0.1);
+            border-color: #0D9488;
+        }
+
+        .core-feature-icon {
+            font-size: 2.5rem;
+            color: #0D9488;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .core-feature-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .core-feature-desc {
+            font-size: 0.95rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* Practice Areas Section */
+        .practice-areas {
+            padding: 3rem 2rem;
+            background: #f8fafc;
+        }
+
+        .practice-areas-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .practice-areas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .practice-area-card {
+            background: #ffffff;
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .practice-area-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+        }
+
+        .practice-area-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 35px rgba(13, 148, 136, 0.15);
+            border-color: #0D9488;
+        }
+
+        .practice-area-icon {
+            font-size: 3rem;
+            color: #0D9488;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .practice-area-card:hover .practice-area-icon {
+            transform: scale(1.1);
+        }
+
+        .practice-area-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
             margin-bottom: 1rem;
         }
 
-        .quick-topics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
+        .practice-area-desc {
+            font-size: 1.05rem;
+            color: #64748b;
+            line-height: 1.6;
         }
 
-        .topic-card {
-            background: var(--white);
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid var(--medium-gray);
+        /* Call to Action Section */
+        .cta-section {
+            padding: 3rem 2rem;
+            background: #ffffff;
+            text-align: center;
         }
 
-        .topic-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--secondary-blue);
+        .cta-content {
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .topic-card i {
-            color: var(--secondary-blue);
+        .cta-title {
             font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
         }
 
-        .topic-card h4 {
-            color: var(--primary-blue);
-            font-weight: 600;
-            margin-bottom: 0.25rem;
+        .cta-subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 2rem;
         }
 
-        .topic-card p {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
+        .welcome-message h2 {
+            color: #1e293b;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .welcome-message p {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            color: var(--charcoal);
+            line-height: 1.7;
+        }
+
+        /* Enhanced Topic Cards */
         /* Message Styling */
         .message {
             margin-bottom: 2rem;
@@ -277,18 +1033,19 @@
         }
 
         .message.user .message-content {
-            background: var(--secondary-blue);
-            color: var(--white);
+            background: var(--gradient-professional);
+            color: var(--pure-white);
             border-bottom-right-radius: 0.5rem;
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--steel-blue);
         }
 
         .message.assistant .message-content {
-            background: var(--white);
-            color: var(--text-primary);
-            border: 1px solid var(--medium-gray);
+            background: var(--pure-white);
+            color: var(--charcoal);
+            border: 2px solid var(--border-light);
             border-bottom-left-radius: 0.5rem;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-medium);
         }
 
         .message-content p {
@@ -344,19 +1101,22 @@
             font-style: italic;
         }
 
-        /* Input Area */
+        /* Refined Input Area */
         .input-container {
-            background: var(--white);
-            padding: 1.5rem 2rem;
-            border-top: 1px solid var(--medium-gray);
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: #ffffff;
+            padding: 2rem;
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 -4px 15px rgba(13, 148, 136, 0.05);
+            margin: 0;
+            border-radius: 0;
+            backdrop-filter: none;
         }
 
         .input-form {
             display: flex;
             gap: 1rem;
             align-items: flex-end;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -368,8 +1128,8 @@
         .message-input {
             width: 100%;
             padding: 1rem 1.25rem;
-            border: 2px solid var(--medium-gray);
-            border-radius: 1.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
             font-size: 1rem;
             font-family: inherit;
             outline: none;
@@ -377,23 +1137,25 @@
             resize: none;
             min-height: 50px;
             max-height: 150px;
+            background: white;
+            color: #334155;
         }
 
         .message-input:focus {
-            border-color: var(--secondary-blue);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #0D9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
         }
 
         .message-input::placeholder {
-            color: var(--dark-gray);
+            color: var(--soft-gray);
         }
 
         .send-button {
             padding: 1rem 1.5rem;
-            background: linear-gradient(135deg, var(--secondary-blue) 0%, var(--primary-blue) 100%);
-            color: var(--white);
+            background: linear-gradient(135deg, #0D9488 0%, #67E8F9 100%);
+            color: white;
             border: none;
-            border-radius: 1.25rem;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
             font-size: 0.95rem;
@@ -403,11 +1165,12 @@
             gap: 0.5rem;
             min-width: 120px;
             justify-content: center;
+            box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3);
         }
 
         .send-button:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4);
         }
 
         .send-button:disabled {
@@ -467,12 +1230,49 @@
 
         /* Professional Footer */
         .footer {
-            background: var(--primary-blue);
-            color: var(--white);
-            padding: 1rem 2rem;
-            text-align: center;
+            background: #f8fafc;
+            color: #64748b;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e2e8f0;
             font-size: 0.85rem;
-            opacity: 0.9;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 2rem;
+        }
+
+        .footer-disclaimer {
+            flex: 1;
+        }
+
+        .footer-actions {
+            flex-shrink: 0;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            border: 1px solid #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            transform: translateY(-1px);
         }
 
         /* Responsive Design */
@@ -490,13 +1290,17 @@
                 font-size: 2rem;
             }
 
-            .features-bar {
-                padding: 0.75rem 1rem;
-                gap: 1rem;
+            .app-container {
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            }
+
+            .chat-container {
+                margin: 0;
+                border-radius: 0;
             }
 
             .messages {
-                padding: 1rem;
+                padding: 1.5rem 1rem;
             }
 
             .message-content {
@@ -505,10 +1309,106 @@
 
             .input-container {
                 padding: 1rem;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .input-form {
+                max-width: 100%;
             }
 
             .quick-topics {
                 grid-template-columns: 1fr;
+                padding: 0 1rem;
+                gap: 1rem;
+            }
+
+            .core-features-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+
+            .practice-areas-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .hero-section {
+                padding: 3rem 1.5rem 2rem 1.5rem;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .core-features,
+            .practice-areas,
+            .cta-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .practice-area-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .topic-card {
+                padding: 1.5rem 1rem;
+                min-height: 120px;
+            }
+
+            .topic-card i {
+                font-size: 2rem;
+            }
+
+            .topic-card h4 {
+                font-size: 1.1rem;
+            }
+
+            .topic-card p {
+                font-size: 0.9rem;
+            }
+
+            .welcome-message {
+                padding: 2rem 1rem;
+                margin: 0.5rem;
+            }
+
+            .welcome-chat-history-btn {
+                top: 10px;
+                right: 10px;
+                padding: 10px 16px;
+                font-size: 0.8rem;
+            }
+
+            .welcome-chat-history-btn i {
+                font-size: 0.8rem;
+            }
+
+            .user-menu {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+                padding: 1rem;
+                min-width: auto;
+            }
+
+            .user-actions {
+                justify-content: center;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .footer {
+                padding: 1rem;
             }
         }
 
@@ -522,14 +1422,65 @@
                 font-size: 1.75rem;
             }
 
-            .features-bar {
-                flex-direction: column;
-                gap: 0.5rem;
-                align-items: center;
-            }
-
             .message-content {
                 max-width: 90%;
+            }
+
+            .user-menu {
+                padding: 0.75rem;
+                gap: 0.75rem;
+            }
+
+            .user-actions {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.5rem;
+            }
+
+            .auth-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .core-features-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .practice-areas-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .hero-title {
+                font-size: 1.8rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .hero-section,
+            .core-features,
+            .practice-areas,
+            .cta-section {
+                padding: 1.5rem 1rem;
+            }
+
+            .benefits-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+
+            .footer {
+                padding: 1rem 0.75rem;
+            }
+
+            .logout-btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -541,68 +1492,113 @@
             <div class="header-content">
                 <div class="logo">
                     <i class="fas fa-balance-scale logo-icon"></i>
-                    <h1 class="logo-text">LegalAssist Pro</h1>
+                    <h1 class="logo-text">LegalCounsel AI</h1>
                 </div>
-                <p class="tagline">Professional Legal Guidance & Information</p>
+                <p class="tagline">Professional Legal Information & Guidance System</p>
                 <div class="credentials">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Powered by Advanced AI • Available 24/7</span>
+                    <span>Advanced Legal AI Technology • Confidential & Secure</span>
+                </div>
+                
+                <!-- Authentication Section -->
+                <div class="auth-section" id="authSection">
+                    <div class="auth-buttons" id="authButtons">
+                        <button class="auth-btn login-btn" onclick="showLoginModal()">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                        <button class="auth-btn register-btn" onclick="showRegisterModal()">
+                            <i class="fas fa-user-plus"></i> Register
+                        </button>
+                    </div>
+                    
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <div class="user-info">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="userName">Welcome!</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <!-- Features Bar -->
-        <div class="features-bar">
-            <div class="feature">
-                <i class="fas fa-user-shield"></i>
-                <span>Confidential Consultation</span>
-            </div>
-            <div class="feature">
-                <i class="fas fa-clock"></i>
-                <span>Instant Response</span>
-            </div>
-            <div class="feature">
-                <i class="fas fa-gavel"></i>
-                <span>Multi-Practice Areas</span>
-            </div>
-            <div class="feature">
-                <i class="fas fa-certificate"></i>
-                <span>Expert Knowledge Base</span>
-            </div>
-        </div>
-
         <!-- Chat Container -->
         <div class="chat-container">
             <div class="messages" id="messages">
-                <!-- Welcome Message -->
+                <!-- Modern Landing Page -->
                 <div class="welcome-message" id="welcomeMessage">
-                    <h2>Welcome to LegalAssist Pro</h2>
-                    <p>Your trusted AI-powered legal assistant providing professional guidance on legal matters.</p>
+                    <!-- Chat History Button - Positioned at top right -->
+                    <button class="welcome-chat-history-btn" id="welcomeChatHistoryBtn" onclick="showChatHistory()" style="display: none;">
+                        <i class="fas fa-history"></i> Chat History
+                    </button>
                     
-                    <div class="quick-topics">
-                        <div class="topic-card" onclick="askQuestion('What are my rights if I\'m arrested?')">
-                            <i class="fas fa-handcuffs"></i>
-                            <h4>Criminal Rights</h4>
-                            <p>Understand your rights during arrest and criminal proceedings</p>
-                        </div>
-                        <div class="topic-card" onclick="askQuestion('How do I create a legally binding contract?')">
-                            <i class="fas fa-file-contract"></i>
-                            <h4>Contract Law</h4>
-                            <p>Learn about contracts, agreements, and legal obligations</p>
-                        </div>
-                        <div class="topic-card" onclick="askQuestion('What should I do after a car accident?')">
-                            <i class="fas fa-car-crash"></i>
-                            <h4>Personal Injury</h4>
-                            <p>Get guidance on accidents, insurance, and liability</p>
-                        </div>
-                        <div class="topic-card" onclick="askQuestion('How do I protect my intellectual property?')">
-                            <i class="fas fa-lightbulb"></i>
-                            <h4>IP Protection</h4>
-                            <p>Understand patents, trademarks, and copyrights</p>
+                    <!-- Hero Section -->
+                    <div class="hero-section">
+                        <div class="hero-content">
+                            <h1 class="hero-title">Your Legal Questions, Answered</h1>
+                            <p class="hero-subtitle">Professional legal information and guidance powered by advanced AI technology. Get instant, confidential responses to your legal questions.</p>
                         </div>
                     </div>
-                    
-                    <p><strong>Start by asking any legal question below.</strong></p>
+
+                    <!-- Core Features Section -->
+                    <div class="core-features">
+                        <div class="features-container">
+                            <h2 class="section-title">Why Choose LegalCounsel AI</h2>
+                            <div class="core-features-grid">
+                                <div class="core-feature-card">
+                                    <i class="fas fa-lock core-feature-icon"></i>
+                                    <h3 class="core-feature-title">Confidential</h3>
+                                    <p class="core-feature-desc">Your conversations are completely private and secure</p>
+                                </div>
+                                <div class="core-feature-card">
+                                    <i class="fas fa-clock core-feature-icon"></i>
+                                    <h3 class="core-feature-title">24/7 Available</h3>
+                                    <p class="core-feature-desc">Get legal guidance anytime, day or night</p>
+                                </div>
+                                <div class="core-feature-card">
+                                    <i class="fas fa-brain core-feature-icon"></i>
+                                    <h3 class="core-feature-title">AI-Powered</h3>
+                                    <p class="core-feature-desc">Advanced technology for accurate legal information</p>
+                                </div>
+                                <div class="core-feature-card">
+                                    <i class="fas fa-gavel core-feature-icon"></i>
+                                    <h3 class="core-feature-title">Expert Knowledge</h3>
+                                    <p class="core-feature-desc">Comprehensive legal database and expertise</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Practice Areas Section -->
+                    <div class="practice-areas">
+                        <div class="practice-areas-container">
+                            <h2 class="section-title">Practice Areas</h2>
+                            <div class="practice-areas-grid">
+                                <div class="practice-area-card" onclick="askQuestion('What are my constitutional rights during an arrest?')">
+                                    <i class="fas fa-balance-scale practice-area-icon"></i>
+                                    <h3 class="practice-area-title">Constitutional Rights</h3>
+                                    <p class="practice-area-desc">Learn about your fundamental rights and freedoms protected by the Constitution</p>
+                                </div>
+                                <div class="practice-area-card" onclick="askQuestion('How do I form a business and what laws apply?')">
+                                    <i class="fas fa-building practice-area-icon"></i>
+                                    <h3 class="practice-area-title">Business Law</h3>
+                                    <p class="practice-area-desc">Navigate business formation, compliance, contracts, and corporate regulations</p>
+                                </div>
+                                <div class="practice-area-card" onclick="askQuestion('What are my rights in divorce and custody matters?')">
+                                    <i class="fas fa-home practice-area-icon"></i>
+                                    <h3 class="practice-area-title">Family Law</h3>
+                                    <p class="practice-area-desc">Get guidance on divorce, custody, adoption, and family legal matters</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Call to Action Section -->
+                    <div class="cta-section">
+                        <div class="cta-content">
+                            <h2 class="cta-title">Ready to Get Started?</h2>
+                            <p class="cta-subtitle">Ask any legal question below and receive instant, professional guidance tailored to your situation.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -637,9 +1633,18 @@
 
         <!-- Professional Footer -->
         <footer class="footer">
-            <p><strong>Legal Disclaimer:</strong> This AI provides legal information only, not legal advice. 
-            For specific legal matters, consult with a qualified attorney. • 
-            <i class="fas fa-lock"></i> Your conversations are confidential</p>
+            <div class="footer-content">
+                <div class="footer-disclaimer">
+                    <p><strong>Legal Disclaimer:</strong> This AI provides legal information only, not legal advice. 
+                    For specific legal matters, consult with a qualified attorney. • 
+                    <i class="fas fa-lock"></i> Your conversations are confidential</p>
+                </div>
+                <div class="footer-actions" id="footerActions" style="display: none;">
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
         </footer>
     </div>
 
@@ -834,6 +1839,693 @@
                 document.querySelector('.app-container').style.opacity = '1';
             }, 100);
         });
+    </script>
+
+    <!-- Authentication Modals -->
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('loginModal')">&times;</span>
+            <div class="modal-header">
+                <h3>Welcome Back!</h3>
+                <p>Sign in to access your chat history and personalized experience</p>
+            </div>
+            <div id="loginError" class="error-message" style="display: none;"></div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginUsername">Username or Email</label>
+                    <input type="text" id="loginUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeModal('loginModal')">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+            <div style="text-align: center; margin-top: 1rem;">
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Don't have an account? 
+                    <a href="#" onclick="switchToRegister()" style="color: var(--secondary-blue); text-decoration: none;">
+                        Register here
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('registerModal')">&times;</span>
+            <div class="modal-header">
+                <h3>Create Account</h3>
+                <p>Join LegalCounsel AI to save your consultations and access personalized legal insights</p>
+            </div>
+            <div id="registerError" class="error-message" style="display: none;"></div>
+            <div id="registerSuccess" class="success-message" style="display: none;"></div>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="registerUsername">Username</label>
+                    <input type="text" id="registerUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerFullName">Full Name (Optional)</label>
+                    <input type="text" id="registerFullName" name="full_name">
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" name="password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">Confirm Password</label>
+                    <input type="password" id="registerConfirmPassword" name="confirm_password" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeModal('registerModal')">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+            <div style="text-align: center; margin-top: 1rem;">
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Already have an account? 
+                    <a href="#" onclick="switchToLogin()" style="color: var(--secondary-blue); text-decoration: none;">
+                        Sign in here
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Chat History Modal -->
+    <div id="chatHistoryModal" class="modal">
+        <div class="modal-content" style="max-width: 800px; max-height: 80vh;">
+            <span class="close" onclick="closeModal('chatHistoryModal')">&times;</span>
+            <div class="modal-header">
+                <h3><i class="fas fa-history"></i> Chat History</h3>
+                <p>View and manage your previous legal consultations</p>
+            </div>
+            
+            <!-- Search and Filter Controls -->
+            <div class="history-controls">
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="historySearch" placeholder="Search conversations..." onkeyup="filterChatHistory()">
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterByDate('all')" data-filter="all">All</button>
+                    <button class="filter-btn" onclick="filterByDate('today')" data-filter="today">Today</button>
+                    <button class="filter-btn" onclick="filterByDate('week')" data-filter="week">This Week</button>
+                    <button class="filter-btn" onclick="filterByDate('month')" data-filter="month">This Month</button>
+                </div>
+            </div>
+            
+            <!-- Chat History Content -->
+            <div id="chatHistoryContent" class="history-content">
+                <div class="loading-state" style="text-align: center; padding: 2rem; color: var(--soft-gray);">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem; color: var(--steel-blue);"></i>
+                    <p>Loading your chat history...</p>
+                </div>
+            </div>
+            
+            <!-- History Stats -->
+            <div id="historyStats" class="history-stats" style="display: none;">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalSessions">0</span>
+                    <span class="stat-label">Total Sessions</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="totalMessages">0</span>
+                    <span class="stat-label">Messages</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="thisMonth">0</span>
+                    <span class="stat-label">This Month</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication state
+        let currentUser = null;
+        let authToken = null;
+
+        // Check for existing authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+        });
+
+        // Authentication functions
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+
+        function showRegisterModal() {
+            document.getElementById('registerModal').style.display = 'block';
+        }
+
+        function showChatHistory() {
+            document.getElementById('chatHistoryModal').style.display = 'block';
+            loadChatHistory();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            clearFormErrors();
+        }
+
+        function switchToRegister() {
+            closeModal('loginModal');
+            showRegisterModal();
+        }
+
+        function switchToLogin() {
+            closeModal('registerModal');
+            showLoginModal();
+        }
+
+        function clearFormErrors() {
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('registerError').style.display = 'none';
+            document.getElementById('registerSuccess').style.display = 'none';
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function showSuccess(elementId, message) {
+            const successElement = document.getElementById(elementId);
+            successElement.textContent = message;
+            successElement.style.display = 'block';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            clearFormErrors();
+
+            const formData = new FormData(event.target);
+            const loginData = {
+                username: formData.get('username'),
+                password: formData.get('password')
+            };
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    authToken = result.access_token;
+                    currentUser = result.user;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    updateAuthUI();
+                    closeModal('loginModal');
+                } else {
+                    showError('loginError', result.error);
+                }
+            } catch (error) {
+                showError('loginError', 'Login failed. Please try again.');
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            clearFormErrors();
+
+            const formData = new FormData(event.target);
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirm_password');
+
+            if (password !== confirmPassword) {
+                showError('registerError', 'Passwords do not match');
+                return;
+            }
+
+            const registerData = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                full_name: formData.get('full_name'),
+                password: password
+            };
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(registerData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showSuccess('registerSuccess', 'Account created successfully! You can now sign in.');
+                    document.getElementById('registerForm').reset();
+                    setTimeout(() => {
+                        switchToLogin();
+                    }, 2000);
+                } else {
+                    showError('registerError', result.error);
+                }
+            } catch (error) {
+                showError('registerError', 'Registration failed. Please try again.');
+            }
+        }
+
+        async function logout() {
+            try {
+                if (authToken) {
+                    await fetch('/api/auth/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+
+            authToken = null;
+            currentUser = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            updateAuthUI();
+        }
+
+        function checkAuthStatus() {
+            const storedToken = localStorage.getItem('authToken');
+            const storedUser = localStorage.getItem('currentUser');
+
+            if (storedToken && storedUser) {
+                authToken = storedToken;
+                currentUser = JSON.parse(storedUser);
+                updateAuthUI();
+            }
+        }
+
+        function updateAuthUI() {
+            const authButtons = document.getElementById('authButtons');
+            const userMenu = document.getElementById('userMenu');
+            const userName = document.getElementById('userName');
+            const footerActions = document.getElementById('footerActions');
+            const welcomeChatHistoryBtn = document.getElementById('welcomeChatHistoryBtn');
+
+            if (currentUser) {
+                authButtons.style.display = 'none';
+                userMenu.style.display = 'block';
+                footerActions.style.display = 'block';
+                if (welcomeChatHistoryBtn) {
+                    welcomeChatHistoryBtn.style.display = 'flex';
+                }
+                userName.textContent = `Welcome, ${currentUser.full_name || currentUser.username}!`;
+            } else {
+                authButtons.style.display = 'flex';
+                userMenu.style.display = 'none';
+                footerActions.style.display = 'none';
+                if (welcomeChatHistoryBtn) {
+                    welcomeChatHistoryBtn.style.display = 'none';
+                }
+            }
+        }
+
+        // Global variables for chat history
+        let allChatSessions = [];
+        let filteredSessions = [];
+        let currentFilter = 'all';
+
+        async function loadChatHistory() {
+            if (!authToken) {
+                document.getElementById('chatHistoryContent').innerHTML = `
+                    <div class="empty-history">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <h4>Authentication Required</h4>
+                        <p>Please sign in to view your chat history.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('chatHistoryContent').innerHTML = `
+                <div class="loading-state" style="text-align: center; padding: 2rem; color: var(--soft-gray);">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem; color: var(--steel-blue);"></i>
+                    <p>Loading your chat history...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/chat/sessions', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    allChatSessions = result.sessions || [];
+                    filteredSessions = [...allChatSessions];
+                    displayChatHistory();
+                    updateHistoryStats();
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                document.getElementById('chatHistoryContent').innerHTML = `
+                    <div class="empty-history">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h4>Error Loading History</h4>
+                        <p>Failed to load chat history. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayChatHistory() {
+            const content = document.getElementById('chatHistoryContent');
+            
+            if (filteredSessions.length === 0) {
+                if (allChatSessions.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-history">
+                            <i class="fas fa-comments"></i>
+                            <h4>No Conversations Yet</h4>
+                            <p>Start a conversation to see your chat history here!</p>
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = `
+                        <div class="empty-history">
+                            <i class="fas fa-search"></i>
+                            <h4>No Results Found</h4>
+                            <p>Try adjusting your search or filter criteria.</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            const historyHTML = filteredSessions.map(session => {
+                const date = new Date(session.updated_at);
+                const formattedDate = formatRelativeTime(date);
+                const preview = session.preview || 'Legal consultation session';
+                
+                return `
+                    <div class="history-session" onclick="loadChatSession('${session.id}')" data-session-id="${session.id}">
+                        <div class="session-header">
+                            <h4 class="session-title">${session.title || 'Legal Consultation'}</h4>
+                            <span class="session-date">${formattedDate}</span>
+                        </div>
+                        <div class="session-preview">${preview}</div>
+                        <div class="session-meta">
+                            <div class="session-stats">
+                                <span><i class="fas fa-comments"></i> ${session.message_count || 0} messages</span>
+                                <span><i class="fas fa-clock"></i> ${formatDuration(session.created_at, session.updated_at)}</span>
+                            </div>
+                            <div class="session-actions" onclick="event.stopPropagation()">
+                                <button class="action-btn" onclick="resumeSession('${session.id}')" title="Resume Chat">
+                                    <i class="fas fa-play"></i> Resume
+                                </button>
+                                <button class="action-btn" onclick="exportSession('${session.id}')" title="Export">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                                <button class="action-btn danger" onclick="deleteSession('${session.id}')" title="Delete">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            content.innerHTML = historyHTML;
+        }
+
+        function updateHistoryStats() {
+            const statsDiv = document.getElementById('historyStats');
+            if (allChatSessions.length > 0) {
+                const totalMessages = allChatSessions.reduce((sum, session) => sum + (session.message_count || 0), 0);
+                const thisMonth = allChatSessions.filter(session => {
+                    const sessionDate = new Date(session.created_at);
+                    const now = new Date();
+                    return sessionDate.getMonth() === now.getMonth() && sessionDate.getFullYear() === now.getFullYear();
+                }).length;
+
+                document.getElementById('totalSessions').textContent = allChatSessions.length;
+                document.getElementById('totalMessages').textContent = totalMessages;
+                document.getElementById('thisMonth').textContent = thisMonth;
+                
+                statsDiv.style.display = 'flex';
+            } else {
+                statsDiv.style.display = 'none';
+            }
+        }
+
+        function formatRelativeTime(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+            if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+            
+            return date.toLocaleDateString();
+        }
+
+        function formatDuration(startTime, endTime) {
+            const start = new Date(startTime);
+            const end = new Date(endTime);
+            const diffInMinutes = Math.floor((end - start) / (1000 * 60));
+            
+            if (diffInMinutes < 1) return '< 1 min';
+            if (diffInMinutes < 60) return `${diffInMinutes} min`;
+            
+            const hours = Math.floor(diffInMinutes / 60);
+            const minutes = diffInMinutes % 60;
+            return `${hours}h ${minutes}m`;
+        }
+
+        function filterChatHistory() {
+            const searchTerm = document.getElementById('historySearch').value.toLowerCase();
+            
+            filteredSessions = allChatSessions.filter(session => {
+                const matchesSearch = !searchTerm || 
+                    (session.title && session.title.toLowerCase().includes(searchTerm)) ||
+                    (session.preview && session.preview.toLowerCase().includes(searchTerm));
+                
+                const matchesFilter = filterByDateRange(session, currentFilter);
+                
+                return matchesSearch && matchesFilter;
+            });
+            
+            displayChatHistory();
+        }
+
+        function filterByDate(filter) {
+            currentFilter = filter;
+            
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.filter === filter) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            filterChatHistory();
+        }
+
+        function filterByDateRange(session, filter) {
+            if (filter === 'all') return true;
+            
+            const sessionDate = new Date(session.updated_at);
+            const now = new Date();
+            
+            switch (filter) {
+                case 'today':
+                    return sessionDate.toDateString() === now.toDateString();
+                case 'week':
+                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    return sessionDate >= weekAgo;
+                case 'month':
+                    return sessionDate.getMonth() === now.getMonth() && 
+                           sessionDate.getFullYear() === now.getFullYear();
+                default:
+                    return true;
+            }
+        }
+
+        async function resumeSession(sessionId) {
+            try {
+                // Load the session messages and display them in the main chat
+                const response = await fetch(`/api/chat/sessions/${sessionId}/messages`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Clear current chat and load session messages
+                    const messagesContainer = document.getElementById('messages');
+                    messagesContainer.innerHTML = '';
+                    
+                    // Hide welcome message
+                    const welcomeMessage = document.getElementById('welcomeMessage');
+                    if (welcomeMessage) {
+                        welcomeMessage.style.display = 'none';
+                    }
+                    
+                    // Display session messages
+                    result.messages.forEach(message => {
+                        addMessage(message.role, message.content);
+                    });
+                    
+                    // Close modal
+                    closeModal('chatHistoryModal');
+                    
+                    // Scroll to latest message
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                } else {
+                    alert('Failed to load session messages');
+                }
+            } catch (error) {
+                alert('Error loading session: ' + error.message);
+            }
+        }
+
+        async function deleteSession(sessionId) {
+            if (!confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/chat/sessions/${sessionId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Remove from local arrays
+                    allChatSessions = allChatSessions.filter(session => session.id !== sessionId);
+                    filteredSessions = filteredSessions.filter(session => session.id !== sessionId);
+                    
+                    // Refresh display
+                    displayChatHistory();
+                    updateHistoryStats();
+                } else {
+                    alert('Failed to delete session');
+                }
+            } catch (error) {
+                alert('Error deleting session: ' + error.message);
+            }
+        }
+
+        function exportSession(sessionId) {
+            // TODO: Implement session export functionality
+            alert('Export functionality coming soon!');
+        }
+
+        async function loadChatSession(sessionId) {
+            // This is the same as resumeSession - redirect to it
+            await resumeSession(sessionId);
+        }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        // Enhanced sendMessage function to include authentication
+        async function sendMessageWithAuth(message, sessionId = null) {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            const requestBody = { message };
+            if (sessionId) {
+                requestBody.session_id = sessionId;
+            }
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    return data;
+                } else {
+                    throw new Error(data.error || 'Chat request failed');
+                }
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        // Update the existing sendMessage function
+        async function sendMessage(message) {
+            if (!message.trim()) return;
+
+            addMessage('user', message);
+            setLoading(true);
+
+            try {
+                const data = await sendMessageWithAuth(message);
+                addMessage('assistant', data.response);
+            } catch (error) {
+                addMessage('assistant', 'Error: Could not connect to the server. Please try again later.');
+                console.error('Error:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
     </script>
 </body>
 </html>

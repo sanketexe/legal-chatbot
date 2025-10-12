@@ -157,7 +157,9 @@ Make responses scannable and easy to read. Use emojis for section headers. Break
             return response
             
         except Exception as e:
-            return f"I apologize, but I encountered an error while processing your legal question. Error: {str(e)}\\n\\nFor urgent legal matters, please consult with a qualified attorney immediately."
+            error_msg = str(e)
+            print(f"🔴 Legal Engine Error: {error_msg}")  # Debug logging
+            return f"I apologize, but I encountered an error while processing your legal question.\n\n**Error details:** {error_msg}\n\nFor urgent legal matters, please consult with a qualified attorney immediately."
 
     def _get_gemini_response(self, messages: List[Dict]) -> str:
         """Get response from Google Gemini API"""
@@ -193,10 +195,18 @@ Make responses scannable and easy to read. Use emojis for section headers. Break
             
         except Exception as e:
             error_msg = str(e)
+            print(f"🔴 Gemini API Error: {error_msg}")  # Debug logging
+            
             if "404" in error_msg or "not found" in error_msg.lower():
                 return f"The Gemini AI model is currently unavailable. Please try again later."
+            elif "quota" in error_msg.lower() or "limit" in error_msg.lower():
+                return f"AI service quota has been exceeded. Please try again later or contact support."
+            elif "api key" in error_msg.lower() or "authentication" in error_msg.lower():
+                return f"AI service authentication issue. Please check configuration."
+            elif "network" in error_msg.lower() or "connection" in error_msg.lower():
+                return f"Network connectivity issue. Please check your internet connection and try again."
             else:
-                return f"I'm experiencing technical difficulties. Please try again later."
+                return f"I'm experiencing technical difficulties with the AI service. Please try again later.\n\nError details: {error_msg}"
 
     def _get_fallback_response(self, user_query: str) -> str:
         """Provide fallback response when AI is not available"""
