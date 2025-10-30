@@ -1,0 +1,69 @@
+{
+  "data_status": {
+    "data/legal_cases/indian_legal_cases_complete.json": 1422,
+    "data/chromadb": 2
+  },
+  "vector_db_passed": true,
+  "vector_db_results": 3,
+  "rag_system_passed": true,
+  "rag_system_results": 3,
+  "diverse_queries_passed": true,
+  "diverse_queries_results": [
+    {
+      "query": "What is the penalty for breach of contract in India?",
+      "domain": "Contract Law",
+      "success": true,
+      "answer_length": 26,
+      "sources_count": 3,
+      "keyword_matches": 0,
+      "relevance_score": 0.0
+    },
+    {
+      "query": "What are the grounds for divorce under Indian law?",
+      "domain": "Family Law",
+      "success": true,
+      "answer_length": 26,
+      "sources_count": 3,
+      "keyword_matches": 0,
+      "relevance_score": 0.0
+    },
+    {
+      "query": "What are the rights of a tenant regarding eviction?",
+      "domain": "Property Law",
+      "success": true,
+      "answer_length": 26,
+      "sources_count": 3,
+      "keyword_matches": 0,
+      "relevance_score": 0.0
+    },
+    {
+      "query": "What is the liability in motor accident cases?",
+      "domain": "Tort Law",
+      "success": true,
+      "answer_length": 26,
+      "sources_count": 3,
+      "keyword_matches": 0,
+      "relevance_score": 0.0
+    },
+    {
+      "query": "What are the fundamental rights under Indian Constitution?",
+      "domain": "Constitutional Law",
+      "success": true,
+      "answer_length": 26,
+      "sources_count": 3,
+      "keyword_matches": 0,
+      "relevance_score": 0.0
+    }
+  ],
+  "performance_passed": false,
+  "performance_results": {
+    "avg_response_time": 5.7070079644521075,
+    "max_response_time": 8.92201018333435,
+    "min_response_time": 4.0981974601745605,
+    "all_response_times": [
+      8.92201018333435,
+      4.100816249847412,
+      4.0981974601745605
+    ]
+  }
+}

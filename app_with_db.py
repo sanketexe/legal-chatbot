@@ -4,6 +4,14 @@ Enhanced LegalAssist Pro Application with Database and Authentication
 
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
+try:
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+    LIMITER_AVAILABLE = True
+except ImportError:
+    LIMITER_AVAILABLE = False
+    print("⚠️  flask-limiter not available, rate limiting disabled")
+from functools import wraps
 import os
 import sys
 import json
@@ -19,6 +27,68 @@ from simple_legal_engine import LegalReasoningEngine
 from models import db, init_db, User, ChatSession, Message, create_sample_data
 from auth import init_auth, auth_required, optional_auth, register_user, login_user, logout_user, get_current_user
 
+# Import ML-powered legal engine
+from legal_engine_ml import get_legal_engine
+
+# Import document analyzer (for in-memory document analysis)
+from document_analyzer import get_document_analyzer
+
+def get_basic_fallback_response(query: str) -> str:
+    """
+    Provide a basic fallback response when ML system is unavailable
+    """
+    query_lower = query.lower()
+    
+    if any(word in query_lower for word in ['contract', 'agreement', 'breach']):
+        return """**Contract Law Information:**
+
+I can provide general information about contract law in India. However, our advanced AI system is temporarily unavailable.
+
+**Basic Contract Principles:**
+- Valid contracts require offer, acceptance, and consideration
+- Breach of contract can lead to legal remedies
+- The Indian Contract Act, 1872 governs most contracts
+
+**For specific advice:** Please consult a qualified lawyer or try again in a few moments when our full system is back online.
+
+*This is general information only, not legal advice.*"""
+    
+    elif any(word in query_lower for word in ['divorce', 'marriage', 'custody']):
+        return """**Family Law Information:**
+
+Our advanced AI system is temporarily unavailable, but I can provide basic information.
+
+**Family Law in India:**
+- Divorce laws vary by religion (Hindu, Muslim, Christian, Parsi, Special Marriage Act)
+- Child custody decisions prioritize the child's best interests
+- Consult a family law specialist for your specific situation
+
+**Important:** Family law matters are complex and personal. Please consult a qualified family lawyer for proper guidance.
+
+*This is general information only, not legal advice.*"""
+    
+    else:
+        return """**Legal Information Service:**
+
+Thank you for your question. Our advanced AI system with case citations is temporarily unavailable, but we're here to help.
+
+**What You Can Do:**
+1. **Try again shortly:** Our system should be back online soon
+2. **Consult a lawyer:** For urgent matters, please contact a qualified attorney
+3. **Reformulate your question:** Try asking in simpler terms
+
+**Practice Areas We Cover:**
+- Contract Law
+- Property Law
+- Family Law
+- Criminal Law
+- Consumer Rights
+- Employment Law
+
+**Disclaimer:** This chatbot provides general legal information, not legal advice. For specific legal matters, always consult with a qualified attorney.
+
+*We apologize for the inconvenience and appreciate your patience.*"""
+
 def create_app():
     """Application factory pattern"""
     app = Flask(__name__)
@@ -28,10 +98,22 @@ def create_app():
     app.secret_key = config.SECRET_KEY
     
     # Database configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-        'DATABASE_URL', 
-        'sqlite:///legal_chatbot.db'
-    )
+    database_url = os.environ.get('DATABASE_URL', 'sqlite:///legal_chatbot.db')
+    
+    # Fix for Heroku/Vercel DATABASE_URL (they use 'postgres://' but SQLAlchemy needs 'postgresql://')
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    
+    # PostgreSQL Connection Pool Settings (optional but recommended)
+    app.config['SQLALCHEMY_POOL_SIZE'] = 10
+    app.config['SQLALCHEMY_MAX_OVERFLOW'] = 20
+    app.config['SQLALCHEMY_POOL_TIMEOUT'] = 30
+    app.config['SQLALCHEMY_POOL_RECYCLE'] = 1800  # Recycle connections after 30 minutes
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,  # Verify connections before using
+    }
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # JWT configuration for authentication
@@ -43,15 +125,128 @@ def create_app():
     # Enable CORS for browser extension and web access
     CORS(app, origins=['chrome-extension://*', 'moz-extension://*', '*'])
     
+    # Initialize rate limiter
+    if LIMITER_AVAILABLE:
+        limiter = Limiter(
+            app=app,
+            key_func=get_remote_address,
+            default_limits=["200 per day", "50 per hour"],
+            storage_uri="memory://"
+        )
+        print("✅ Rate limiting enabled")
+    else:
+        # Create a dummy decorator that does nothing
+        class DummyLimiter:
+            def limit(self, *args, **kwargs):
+                def decorator(f):
+                    return f
+                return decorator
+        limiter = DummyLimiter()
+        print("⚠️  Rate limiting disabled (flask-limiter not installed)")
+    
+    # API Key Authentication Middleware
+    def require_api_key(f):
+        """Decorator to require API key for protected endpoints"""
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            api_key = request.headers.get('X-API-Key')
+            expected_key = os.getenv('API_SECRET_KEY')
+            
+            # Skip API key check in development mode if not set
+            if not expected_key:
+                return f(*args, **kwargs)
+            
+            if not api_key:
+                return jsonify({
+                    'error': 'API key required',
+                    'message': 'Include X-API-Key header in your request'
+                }), 401
+            
+            if api_key != expected_key:
+                return jsonify({
+                    'error': 'Invalid API key',
+                    'message': 'The provided API key is not valid'
+                }), 403
+            
+            return f(*args, **kwargs)
+        return decorated_function
+    
+    # Store limiter and auth decorator in app for access in routes
+    app.limiter = limiter
+    app.require_api_key = require_api_key
+    
+    # Function to apply rate limits to routes after they're defined
+    def apply_rate_limits():
+        """Apply rate limiting decorators to existing routes"""
+        if LIMITER_AVAILABLE:
+            # Register endpoint - 3 per hour
+            app.view_functions['register'] = limiter.limit("3 per hour")(app.view_functions['register'])
+            # Login endpoint - 10 per hour
+            app.view_functions['login'] = limiter.limit("10 per hour")(app.view_functions['login'])
+            # Chat endpoint - 10 per minute + API key
+            app.view_functions['chat'] = require_api_key(limiter.limit("10 per minute")(app.view_functions['chat']))
+            # Document analysis endpoint - 5 per minute + API key
+            app.view_functions['analyze_document'] = require_api_key(limiter.limit("5 per minute")(app.view_functions['analyze_document']))
+            print("✅ Rate limits applied to endpoints")
+    
+    # Store the function for later use
+    app.apply_rate_limits = apply_rate_limits
+    
     # Initialize database and authentication
     init_db(app)
     init_auth(app)
     
-    # Initialize legal engine
-    legal_engine = LegalReasoningEngine()
+    # Initialize ML-powered legal engine (with fallback to basic)
+    try:
+        legal_engine = get_legal_engine()
+        print("✅ Legal engine initialized successfully")
+    except Exception as e:
+        print(f"⚠️  Warning: Could not initialize ML engine: {e}")
+        print("📝 System will use basic responses as fallback")
+        legal_engine = None
     
     # Store engine in app config for access in routes
     app.legal_engine = legal_engine
+    
+    # Initialize document analyzer
+    try:
+        app.document_analyzer = get_document_analyzer()
+        print("✅ Document analyzer initialized")
+    except Exception as e:
+        print(f"⚠️  Warning: Could not initialize document analyzer: {e}")
+        app.document_analyzer = None
+    
+    # Global error handler
+    @app.errorhandler(Exception)
+    def handle_error(error):
+        """Global error handler with graceful degradation"""
+        error_message = str(error)
+        error_type = type(error).__name__
+        
+        # Log the error (in production, use proper logging)
+        print(f"❌ Error [{error_type}]: {error_message}")
+        
+        # Provide user-friendly error messages
+        if isinstance(error, Exception):
+            if "database" in error_message.lower():
+                user_message = "We're experiencing database issues. Please try again shortly."
+            elif "gemini" in error_message.lower() or "api" in error_message.lower():
+                user_message = "AI service temporarily unavailable. Using backup system."
+            elif "timeout" in error_message.lower():
+                user_message = "Request timed out. Please try a simpler question."
+            else:
+                user_message = "An unexpected error occurred. Our team has been notified."
+        else:
+            user_message = "Something went wrong. Please refresh and try again."
+        
+        response = jsonify({
+            'success': False,
+            'error': user_message,
+            'error_type': error_type if app.debug else None
+        })
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        
+        return response, 500
     
     return app
 
@@ -207,12 +402,44 @@ def chat(current_user):
                 session['messages'] = []
             message_history = session['messages']
         
-        # Get legal response
-        response_content = app.legal_engine.get_legal_response(
-            user_message, 
-            message_history,
-            {}  # Empty context for simplified version
-        )
+        # Get ML-powered legal response with citations (with retry logic)
+        max_retries = 3
+        retry_count = 0
+        result = None
+        last_error = None
+        
+        while retry_count < max_retries and result is None:
+            try:
+                if app.legal_engine is None:
+                    # Fallback to basic response if engine not available
+                    result = {
+                        'response': get_basic_fallback_response(user_message),
+                        'sources': [],
+                        'type': 'fallback'
+                    }
+                else:
+                    result = app.legal_engine.get_legal_response(
+                        user_message,
+                        {'history': message_history}
+                    )
+                break  # Success, exit retry loop
+                
+            except Exception as e:
+                last_error = e
+                retry_count += 1
+                print(f"⚠️  Attempt {retry_count}/{max_retries} failed: {e}")
+                
+                if retry_count >= max_retries:
+                    # All retries exhausted, use fallback
+                    print("❌ All retries exhausted, using fallback response")
+                    result = {
+                        'response': get_basic_fallback_response(user_message),
+                        'sources': [],
+                        'type': 'fallback'
+                    }
+        
+        response_content = result['response']
+        sources = result.get('sources', [])
         
         # Save messages
         if current_user and chat_session:
@@ -242,6 +469,7 @@ def chat(current_user):
             response_data = {
                 'success': True,
                 'response': response_content,
+                'sources': sources,  # Add case citations
                 'timestamp': assistant_msg.timestamp.isoformat(),
                 'session_id': chat_session.id,
                 'authenticated': True
@@ -267,6 +495,7 @@ def chat(current_user):
             response_data = {
                 'success': True,
                 'response': response_content,
+                'sources': sources,  # Add case citations for anonymous users too
                 'timestamp': assistant_msg['timestamp'],
                 'authenticated': False
             }
@@ -420,22 +649,134 @@ def clear_chat(current_user):
 @app.route('/api/health')
 def health_check():
     """Health check endpoint"""
+    ml_status = app.legal_engine.get_system_status()
+    
     response = jsonify({
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
         'ai_provider': config.get_active_provider(),
         'available_providers': config.get_available_providers(),
         'database': 'connected',
+        'ml_system': ml_status,
+        'document_analyzer': app.document_analyzer is not None,
         'features': {
             'authentication': True,
             'chat_persistence': True,
-            'session_management': True
+            'session_management': True,
+            'case_search': ml_status['ml_available'],
+            'rag_responses': ml_status['rag_initialized'],
+            'citations': ml_status['ml_available'],
+            'document_analysis': app.document_analyzer is not None
         }
     })
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
+
+@app.route('/api/search-cases', methods=['POST'])
+@optional_auth
+def search_cases(current_user):
+    """Search legal cases in vector database"""
+    try:
+        data = request.get_json()
+        query = data.get('query', '').strip()
+        
+        if not query:
+            return jsonify({'error': 'Query is required'}), 400
+        
+        # Search cases
+        results = app.legal_engine.search_cases(query)
+        
+        response = jsonify({
+            'success': True,
+            'query': query,
+            'results': results,
+            'count': len(results)
+        })
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+        
+    except Exception as e:
+        response = jsonify({
+            'error': f'Search failed: {str(e)}'
+        })
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response, 500
+
+@app.route('/api/analyze-document', methods=['POST', 'OPTIONS'])
+@optional_auth
+def analyze_document(current_user):
+    """
+    Analyze uploaded legal document in-memory (NO STORAGE)
+    Supports: PDF, DOCX, TXT
+    Max size: 10 MB
+    """
+    # Handle preflight OPTIONS request
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
+    try:
+        # Check if file was uploaded
+        if 'file' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file uploaded. Please select a document.'
+            }), 400
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No file selected'
+            }), 400
+        
+        # Get optional specific questions
+        questions = request.form.get('questions', '')
+        question_list = []
+        if questions:
+            import json
+            try:
+                question_list = json.loads(questions)
+            except:
+                # If not JSON, treat as single question
+                question_list = [questions] if questions.strip() else []
+        
+        # Read file content (IN MEMORY ONLY - NOT STORED)
+        file_content = file.read()
+        
+        if not app.document_analyzer:
+            return jsonify({
+                'success': False,
+                'error': 'Document analyzer not available'
+            }), 503
+        
+        # Analyze document (in-memory only, no database storage)
+        result = app.document_analyzer.analyze_document(
+            file.filename,
+            file_content,
+            question_list
+        )
+        
+        # Clear file content from memory immediately after analysis
+        file_content = None
+        
+        response = jsonify(result)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+        
+    except Exception as e:
+        response = jsonify({
+            'success': False,
+            'error': f'Document analysis failed: {str(e)}'
+        })
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response, 500
 
 @app.route('/api/init-sample-data', methods=['POST'])
 def init_sample_data():
@@ -456,13 +797,8 @@ def init_sample_data():
         }), 500
 
 if __name__ == '__main__':
-    with app.app_context():
-        # Create database tables
-        db.create_all()
-        
-        # Create sample data in development
-        if os.environ.get('FLASK_ENV') != 'production':
-            create_sample_data()
+    # Apply rate limiting to routes
+    app.apply_rate_limits()
     
     print("⚖️ Legal Assistant Starting...")
     print(f"📡 AI Provider: {config.get_active_provider().upper()}")

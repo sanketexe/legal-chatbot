@@ -1,0 +1,22 @@
+{
+  "chromadb_settings": {
+    "chroma_db_impl": "duckdb+parquet",
+    "chroma_api_impl": "chromadb.api.fastapi.FastAPI",
+    "chroma_memory_limit_bytes": 2147483648,
+    "chroma_batch_size": 1000,
+    "chroma_num_threads": 4,
+    "persist_directory": "./data/chromadb",
+    "anonymized_telemetry": false
+  },
+  "search_parameters": {
+    "default_top_k": 5,
+    "max_top_k": 20,
+    "similarity_threshold": 0.3,
+    "batch_size_embedding": 50
+  },
+  "performance_targets": {
+    "max_query_time_seconds": 2.0,
+    "min_similarity_score": 0.25,
+    "target_results_per_query": 5
+  }
+}

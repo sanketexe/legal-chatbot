@@ -1,0 +1,49 @@
+# Environment variables - NEVER deploy these
+.env
+.env.local
+.env.production
+
+# Database files - Use cloud database for production
+*.db
+*.sqlite
+*.sqlite3
+legal_chatbot.db
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local data directories
+data/vector_db/
+data/cases/
+
+# Testing
+.pytest_cache/
+tests/
+
+# Git
+.git/
+.gitignore
+
+# Documentation (deploy separately if needed)
+deployment_guides/
+*.md
+!README.md
+
+# Logs
+*.log
+logs/

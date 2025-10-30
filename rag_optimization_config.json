@@ -1,0 +1,30 @@
+{
+  "rag_optimization": {
+    "similarity_threshold": -0.42641353607177734,
+    "default_top_k": 5,
+    "max_context_length": 2000,
+    "cache_size": 100,
+    "performance_target": {
+      "max_response_time": 2.0,
+      "min_success_rate": 0.8,
+      "min_relevance_score": 0.3
+    }
+  },
+  "optimization_results": {
+    "total_queries": 8,
+    "successful_queries": 7,
+    "success_rate": 0.875,
+    "avg_response_time": 3.5329829965318953,
+    "avg_sources_per_query": 5.0,
+    "avg_relevance_score": -0.16866796869269418,
+    "queries_under_2s": 0,
+    "performance_score": 0.0,
+    "optimized_threshold": -0.42641353607177734,
+    "total_test_time": 27.972383975982666
+  },
+  "recommendations": [
+    "Consider using smaller embedding models or implementing better caching",
+    "Improve embedding model or case preprocessing",
+    "Optimize vector database configuration and query processing"
+  ]
+}

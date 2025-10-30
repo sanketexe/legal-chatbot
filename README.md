@@ -1,12 +1,14 @@
-# LegalAssist Pro - Professional AI Legal Assistant
+# LegalAssist Pro - AI Legal Assistant with RAG System
 
 ## 🏛️ Overview
-LegalAssist Pro is a professional AI-powered legal assistant providing instant guidance on legal matters. Built with a clean, enterprise-grade interface suitable for legal professionals and individuals seeking legal information.
+LegalAssist Pro is an AI-powered legal assistant that provides instant guidance on legal matters using a trained Retrieval-Augmented Generation (RAG) system. The system is trained on 940+ Indian legal cases from Supreme Court and High Courts, providing accurate, citation-backed legal advice.
 
 ## ✨ Features
-- **🎯 Instant Legal Guidance**: Get immediate answers to legal questions
-- **⚖️ Multi-Practice Areas**: Criminal law, civil matters, contracts, personal injury, IP protection
-- **🛡️ Professional Interface**: Enterprise-grade design with trust indicators
+- **🎯 RAG-Powered Legal Guidance**: Get answers backed by actual Indian legal precedents
+- **⚖️ Comprehensive Case Database**: 940+ cases from Indian Supreme Court and High Courts
+- **🔍 Semantic Search**: Advanced vector search through legal cases
+- **📚 Citation-Backed Responses**: All answers include relevant case citations
+- **🛡️ Professional Interface**: Clean, enterprise-grade design
 - **📱 Responsive Design**: Works on desktop, tablet, and mobile
 - **🌐 Browser Extension**: Quick access via Chrome/Firefox extension
 - **🔒 Confidential**: Your conversations are private and secure
@@ -27,17 +29,29 @@ LegalAssist Pro is a professional AI-powered legal assistant providing instant g
    ```
    GEMINI_API_KEY=your_api_key_here
    ```
-4. **Run the Application**:
+4. **Initialize RAG System** (first time only):
+   ```bash
+   python ml_legal_system/load_cases.py
+   ```
+5. **Run the Application**:
    ```bash
    python simple_app.py
    ```
-5. **Open Browser**: Go to `http://localhost:5000`
+6. **Open Browser**: Go to `http://localhost:5000`
 
 ### Get Free Gemini API Key
 1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Sign in with Google account
 3. Create new API key
 4. Copy key to `.env` file
+
+### RAG System Setup
+The system comes with pre-trained embeddings for 940+ Indian legal cases. On first run, the system will:
+- Load case embeddings into ChromaDB
+- Initialize the vector database
+- Validate search functionality
+
+This process takes ~2-3 minutes and only needs to be done once.
 
 ## 📁 Project Structure
 ```
@@ -55,8 +69,14 @@ LegalChatbot/
 │   ├── simple_popup.html     # Extension popup interface
 │   ├── simple_popup.js       # Extension functionality
 │   └── icons/               # Extension icons
+├── ml_legal_system/          # RAG system implementation
+│   ├── legal_rag.py         # Main RAG system
+│   ├── vector_db.py         # Vector database management
+│   ├── load_cases.py        # Case loading script
+│   └── optimized_legal_rag.py # Optimized RAG implementation
 └── data/
-    └── constitution/         # Legal reference documents
+    ├── legal_cases/         # Indian legal cases dataset
+    └── chromadb/           # Vector database storage
 ```
 
 ## 🎨 Professional Design
@@ -80,40 +100,41 @@ Edit `config.py` to customize:
 - Server settings (host, port, debug mode)
 - Application behavior
 
-## 🔧 API Integration
-Uses Google Gemini 2.5 Flash model:
-- **Free Tier**: 1,500 requests per day
-- **Fast Response**: Optimized for legal queries
-- **Smart Formatting**: Auto-bold important legal terms
-- **Structured Responses**: Professional legal guidance format
+## 🔧 RAG System Integration
+The system uses a sophisticated RAG (Retrieval-Augmented Generation) pipeline:
+- **Vector Database**: ChromaDB with 940+ legal case embeddings
+- **Semantic Search**: sentence-transformers for case retrieval
+- **LLM Generation**: Google Gemini 2.5 Flash model (free tier)
+- **Citation System**: Automatic case citations with court details
+- **Performance**: ~3-7 seconds per query with relevant case context
 
-## 📱 Deployment Options
+## 📱 Local Development
 
-### Local Development
+### Running the Application
 ```bash
+# Start the RAG-powered legal assistant
 python simple_app.py
 ```
 
-### AWS Deployment
-**Option 1: Elastic Beanstalk (Recommended)**
-- Easy deployment with auto-scaling
-- Estimated cost: $10-30/month
+### Testing the RAG System
+```bash
+# Test RAG system directly
+python ml_legal_system/optimized_legal_rag.py
+```
 
-**Option 2: AWS Lambda (Serverless)**
-- Pay-per-use pricing
-- Estimated cost: $1-10/month
+### Performance Testing
+```bash
+# Run comprehensive RAG tests
+python test_rag_system.py
+```
 
-**Option 3: EC2 Instance**
-- Full control over environment
-- Estimated cost: $8-15/month
-
-### Production Deployment
-For production use:
-1. Use WSGI server (Gunicorn)
-2. Set up SSL certificate
-3. Configure proper logging
-4. Set up monitoring
-5. Use environment variables for API keys
+### Production Considerations
+For production deployment:
+1. Ensure ChromaDB data persistence
+2. Configure proper logging for RAG operations
+3. Set up monitoring for query performance
+4. Use environment variables for API keys
+5. Consider scaling vector database for high traffic
 
 ## 🔒 Security & Legal
 - **Confidentiality**: Conversations are not stored
@@ -132,14 +153,22 @@ For production use:
 ### Common Issues
 1. **"Technical difficulties" error**: Update Gemini model names in config
 2. **API Key issues**: Verify key is correct and has quota
-3. **Port conflicts**: Change port in `config.py`
-4. **Import errors**: Run `pip install -r requirements.txt`
+3. **RAG system not initialized**: Run `python ml_legal_system/load_cases.py`
+4. **ChromaDB errors**: Delete `data/chromadb` folder and reinitialize
+5. **Import errors**: Run `pip install -r requirements.txt`
+6. **Slow responses**: Check vector database is properly loaded
+
+### RAG System Issues
+- **No case results**: Verify ChromaDB contains embeddings
+- **Poor answer quality**: Check similarity thresholds in config
+- **Memory issues**: Reduce batch size in case loading
+- **Database corruption**: Reinitialize ChromaDB from scratch
 
 ### Getting Help
 - Check console for error messages
 - Verify API key is valid
-- Ensure internet connection
-- Review configuration settings
+- Ensure ChromaDB is properly initialized
+- Review RAG system logs for debugging
 
 ## 📄 License
 This project is for educational and informational purposes only. Not intended as a substitute for professional legal advice.
