@@ -36,3 +36,7 @@ dist/
 # Database files
 instance/
 *.db
+# Ignore large vector DB and data files
+*.sqlite3
+data/chromadb/
+data/vector_db/
