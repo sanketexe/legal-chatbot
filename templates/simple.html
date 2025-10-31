@@ -329,7 +329,7 @@
 
         .modal-content {
             background: white;
-            margin: 2% auto 0 auto; /* Move modal higher */
+            margin: 2% auto; /* Center modal vertically, but higher than before */
             padding: 2rem;
             border-radius: var(--border-radius-lg);
             width: 90%;
@@ -412,6 +412,10 @@
         .form-group input:hover {
             border-color: #0D9488;
             box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.10);
+        }
+        .form-group input:active {
+            border-color: #0D9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.18);
         }
         }
 
