@@ -329,7 +329,7 @@
 
         .modal-content {
             background: white;
-            margin: 5% auto;
+            margin: 2% auto 0 auto; /* Move modal higher */
             padding: 2rem;
             border-radius: var(--border-radius-lg);
             width: 90%;
@@ -397,17 +397,22 @@
             border: 2px solid var(--medium-gray);
             border-radius: 0.5rem;
             font-size: 1rem;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s, box-shadow 0.3s;
             background: white;
             color: var(--text-primary);
             opacity: 1;
             visibility: visible;
+            box-shadow: 0 0 0 0 rgba(13, 148, 136, 0);
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #0D9488;
-            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+        .form-group input:hover {
+            border-color: #0D9488;
+            box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.10);
+        }
         }
 
         .modal-actions {
