@@ -33,6 +33,9 @@ from legal_engine_ml import get_legal_engine
 # Import document analyzer (for in-memory document analysis)
 from document_analyzer import get_document_analyzer
 
+# Import translation service for Hindi support
+from ml_legal_system.translators import get_translation_service, create_bilingual_response
+
 def get_basic_fallback_response(query: str) -> str:
     """
     Provide a basic fallback response when ML system is unavailable
@@ -528,9 +531,31 @@ def chat(current_user):
         response_content = result['response']
         sources = result.get('sources', [])
         
+        # Check user language preference for translation
+        user_language = 'en'  # Default to English
+        translations = {}
+        
+        if current_user and chat_session:
+            user_prefs = current_user.preferences if hasattr(current_user, 'preferences') else None
+            if user_prefs:
+                user_language = user_prefs.preferred_language or 'en'
+        
+        # Apply translation if needed
+        if user_language == 'hi':
+            try:
+                translation_service = get_translation_service()
+                response_content = translation_service.translate_response(response_content)
+                translations = {'from': 'en', 'to': 'hi'}
+            except Exception as e:
+                print(f"⚠️  Translation to Hindi failed: {e}")
+                # Fallback to English if translation fails
+                translations = {'from': 'en', 'to': 'en', 'error': str(e)}
+        elif user_language != 'en':
+            print(f"⚠️  Language '{user_language}' not yet supported, using English")
+        
         # Save messages
         if current_user and chat_session:
-            # Save to database
+            # Save original English response to database for audit trail
             user_msg = Message(
                 session_id=chat_session.id,
                 role='user',
@@ -538,10 +563,16 @@ def chat(current_user):
                 model_used=config.get_active_provider()
             )
             
+            # Store the translated response if translation was applied
+            db_response_content = response_content
+            if user_language == 'hi':
+                # For database, store both English and Hindi versions in metadata
+                db_response_content = response_content
+            
             assistant_msg = Message(
                 session_id=chat_session.id,
                 role='assistant',
-                content=response_content,
+                content=db_response_content,
                 model_used=config.get_active_provider()
             )
             
@@ -559,7 +590,9 @@ def chat(current_user):
                 'sources': sources,  # Add case citations
                 'timestamp': assistant_msg.timestamp.isoformat(),
                 'session_id': chat_session.id,
-                'authenticated': True
+                'authenticated': True,
+                'language': user_language,
+                'translations': translations
             }
         else:
             # Save to session
@@ -584,7 +617,9 @@ def chat(current_user):
                 'response': response_content,
                 'sources': sources,  # Add case citations for anonymous users too
                 'timestamp': assistant_msg['timestamp'],
-                'authenticated': False
+                'authenticated': False,
+                'language': 'en',
+                'translations': {}
             }
         
         response = jsonify(response_data)
