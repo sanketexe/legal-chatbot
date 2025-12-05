@@ -339,6 +339,93 @@ def get_profile(current_user):
     })
 
 # ============================================================================
+# USER PREFERENCES ROUTES
+# ============================================================================
+
+@app.route('/api/user/preferences', methods=['GET', 'POST', 'PUT'])
+@auth_required
+def user_preferences(current_user):
+    """Get or update user preferences"""
+    from models import UserPreference
+    
+    if request.method == 'GET':
+        # Get preferences
+        pref = UserPreference.query.filter_by(user_id=current_user.id).first()
+        if not pref:
+            # Create default preferences if not exist
+            pref = UserPreference(user_id=current_user.id)
+            db.session.add(pref)
+            db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'data': pref.to_dict()
+        }), 200
+    
+    elif request.method in ['POST', 'PUT']:
+        # Update preferences
+        data = request.json or {}
+        pref = UserPreference.query.filter_by(user_id=current_user.id).first()
+        
+        if not pref:
+            pref = UserPreference(user_id=current_user.id)
+            db.session.add(pref)
+        
+        # Update only provided fields
+        if 'preferred_language' in data:
+            pref.preferred_language = data['preferred_language']
+            print(f"✅ Updated language to {data['preferred_language']}")
+        
+        if 'response_detail_level' in data:
+            pref.response_detail_level = int(data['response_detail_level'])
+            print(f"✅ Updated detail level to {data['response_detail_level']}")
+        
+        if 'jurisdiction_preference' in data:
+            pref.jurisdiction_preference = data['jurisdiction_preference']
+        
+        if 'legal_domains' in data:
+            pref.legal_domains = data['legal_domains']
+        
+        if 'include_case_summaries' in data:
+            pref.include_case_summaries = bool(data['include_case_summaries'])
+        
+        if 'include_act_references' in data:
+            pref.include_act_references = bool(data['include_act_references'])
+        
+        if 'notification_enabled' in data:
+            pref.notification_enabled = bool(data['notification_enabled'])
+        
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Preferences updated',
+            'data': pref.to_dict()
+        }), 200
+
+@app.route('/api/user/preferences/<field>', methods=['GET'])
+@auth_required
+def get_preference_field(current_user, field):
+    """Get specific preference field"""
+    from models import UserPreference
+    
+    pref = UserPreference.query.filter_by(user_id=current_user.id).first()
+    
+    if not pref:
+        return jsonify({'status': 'error', 'message': 'Preferences not found'}), 404
+    
+    pref_dict = pref.to_dict()
+    if field not in pref_dict:
+        return jsonify({'status': 'error', 'message': f'Unknown field: {field}'}), 400
+    
+    value = getattr(pref, field)
+    return jsonify({
+        'status': 'success',
+        'field': field,
+        'value': value
+    }), 200
+
+# ============================================================================
 # CHAT ROUTES
 # ============================================================================
 

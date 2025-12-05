@@ -123,6 +123,47 @@ class Message(db.Model):
             'model_used': self.model_used
         }
 
+
+class UserPreference(db.Model):
+    """Store user preferences for personalization"""
+    __tablename__ = 'user_preferences'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False, unique=True, index=True)
+    
+    # Language and presentation
+    preferred_language = db.Column(db.String(10), default='en')  # en, hi, ta, te
+    response_detail_level = db.Column(db.Integer, default=2)     # 1-5 (1=brief, 5=detailed)
+    
+    # Legal interests
+    legal_domains = db.Column(db.JSON, default=dict)  # {"family": 0.8, "property": 0.2}
+    jurisdiction_preference = db.Column(db.String(50), default='all')  # "delhi", "mumbai", "all"
+    
+    # Settings
+    include_case_summaries = db.Column(db.Boolean, default=True)
+    include_act_references = db.Column(db.Boolean, default=True)
+    notification_enabled = db.Column(db.Boolean, default=True)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship
+    user = db.relationship('User', backref='preferences', uselist=False)
+    
+    def to_dict(self):
+        """Convert to JSON-serializable dict"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'preferred_language': self.preferred_language,
+            'response_detail_level': self.response_detail_level,
+            'legal_domains': self.legal_domains,
+            'jurisdiction_preference': self.jurisdiction_preference,
+            'include_case_summaries': self.include_case_summaries,
+            'include_act_references': self.include_act_references,
+            'notification_enabled': self.notification_enabled,
+        }
+
 class UserSession(db.Model):
     """User session tracking for security"""
     __tablename__ = 'user_sessions'
