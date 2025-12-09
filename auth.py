@@ -4,7 +4,7 @@ Handles user registration, login, and JWT token management
 """
 
 from flask import request, jsonify, current_app
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, get_jwt
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, get_jwt, decode_token
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
 from functools import wraps
@@ -116,8 +116,17 @@ def login_user(username, password):
 
 def create_user_session(user_id, access_token):
     """Create a new user session record"""
-    # Hash the token for storage
-    token_hash = hashlib.sha256(access_token.encode()).hexdigest()
+    # Extract the token jti (unique id) and hash that for storage
+    try:
+        token_jti = decode_token(access_token).get('jti')
+    except Exception:
+        token_jti = None
+
+    if token_jti:
+        token_hash = hashlib.sha256(token_jti.encode()).hexdigest()
+    else:
+        # Fallback: hash the whole token (less ideal)
+        token_hash = hashlib.sha256(access_token.encode()).hexdigest()
     
     # Get client info
     ip_address = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
@@ -205,11 +214,10 @@ def cleanup_expired_sessions():
         ).delete()
         
         db.session.commit()
-        print(f"✅ Cleaned up {expired_count} expired sessions")
-        
+        print(f"OK: Cleaned up {expired_count} expired sessions")
     except Exception as e:
         db.session.rollback()
-        print(f"❌ Session cleanup failed: {e}")
+        print(f"ERROR: Session cleanup failed: {e}")
 
 def get_user_sessions(user_id):
     """Get all active sessions for a user"""

@@ -164,6 +164,34 @@ class UserPreference(db.Model):
             'notification_enabled': self.notification_enabled,
         }
 
+
+class ResponseRating(db.Model):
+    """Store user ratings for chat responses"""
+    __tablename__ = 'response_ratings'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False, index=True)
+    message_id = db.Column(db.String(36), db.ForeignKey('messages.id'), nullable=True, index=True)
+    rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
+    feedback = db.Column(db.Text, nullable=True)  # Optional feedback text
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    
+    # Relationships
+    user = db.relationship('User', backref='ratings')
+    message = db.relationship('Message', backref='ratings')
+    
+    def to_dict(self):
+        """Convert rating to dictionary for JSON response"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'message_id': self.message_id,
+            'rating': self.rating,
+            'feedback': self.feedback,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+
 class UserSession(db.Model):
     """User session tracking for security"""
     __tablename__ = 'user_sessions'
@@ -197,7 +225,7 @@ def init_db(app):
         # Create all tables
         db.create_all()
         
-        print("✅ Database tables created successfully")
+        print("OK: Database tables created successfully")
         
         # Create default admin user if doesn't exist
         admin_user = User.query.filter_by(username='admin').first()
@@ -210,7 +238,7 @@ def init_db(app):
             admin_user.set_password('admin123')  # Change this in production!
             db.session.add(admin_user)
             db.session.commit()
-            print("✅ Default admin user created (username: admin, password: admin123)")
+            print("OK: Default admin user created (username: admin, password: admin123)")
 
 def create_sample_data():
     """Create sample data for testing"""
@@ -251,4 +279,4 @@ def create_sample_data():
         db.session.commit()
         session.generate_title()
         
-        print("✅ Sample test data created")
+        print("OK: Sample test data created")

@@ -10,7 +10,7 @@ try:
     LIMITER_AVAILABLE = True
 except ImportError:
     LIMITER_AVAILABLE = False
-    print("⚠️  flask-limiter not available, rate limiting disabled")
+    print("WARN: flask-limiter not available, rate limiting disabled")
 from functools import wraps
 import os
 import sys
@@ -136,7 +136,7 @@ def create_app():
             default_limits=["200 per day", "50 per hour"],
             storage_uri="memory://"
         )
-        print("✅ Rate limiting enabled")
+        print("OK: Rate limiting enabled")
     else:
         # Create a dummy decorator that does nothing
         class DummyLimiter:
@@ -145,7 +145,7 @@ def create_app():
                     return f
                 return decorator
         limiter = DummyLimiter()
-        print("⚠️  Rate limiting disabled (flask-limiter not installed)")
+        print("WARN: Rate limiting disabled (flask-limiter not installed)")
     
     # API Key Authentication Middleware
     def require_api_key(f):
@@ -190,7 +190,7 @@ def create_app():
             app.view_functions['chat'] = require_api_key(limiter.limit("10 per minute")(app.view_functions['chat']))
             # Document analysis endpoint - 5 per minute + API key
             app.view_functions['analyze_document'] = require_api_key(limiter.limit("5 per minute")(app.view_functions['analyze_document']))
-            print("✅ Rate limits applied to endpoints")
+            print("OK: Rate limits applied to endpoints")
     
     # Store the function for later use
     app.apply_rate_limits = apply_rate_limits
@@ -202,10 +202,10 @@ def create_app():
     # Initialize ML-powered legal engine (with fallback to basic)
     try:
         legal_engine = get_legal_engine()
-        print("✅ Legal engine initialized successfully")
+        print("OK: Legal engine initialized successfully")
     except Exception as e:
-        print(f"⚠️  Warning: Could not initialize ML engine: {e}")
-        print("📝 System will use basic responses as fallback")
+        print(f"WARN: Could not initialize ML engine: {e}")
+        print("NOTE: System will use basic responses as fallback")
         legal_engine = None
     
     # Store engine in app config for access in routes
@@ -214,9 +214,9 @@ def create_app():
     # Initialize document analyzer
     try:
         app.document_analyzer = get_document_analyzer()
-        print("✅ Document analyzer initialized")
+        print("OK: Document analyzer initialized")
     except Exception as e:
-        print(f"⚠️  Warning: Could not initialize document analyzer: {e}")
+        print(f"WARN: Could not initialize document analyzer: {e}")
         app.document_analyzer = None
     
     # Global error handler
@@ -227,8 +227,8 @@ def create_app():
         error_type = type(error).__name__
         
         # Log the error (in production, use proper logging)
-        print(f"❌ Error [{error_type}]: {error_message}")
-        
+        print(f"ERROR [{error_type}]: {error_message}")
+
         # Provide user-friendly error messages
         if isinstance(error, Exception):
             if "database" in error_message.lower():
@@ -241,14 +241,14 @@ def create_app():
                 user_message = "An unexpected error occurred. Our team has been notified."
         else:
             user_message = "Something went wrong. Please refresh and try again."
-        
+
         response = jsonify({
             'success': False,
             'error': user_message,
             'error_type': error_type if app.debug else None
         })
         response.headers['Access-Control-Allow-Origin'] = '*'
-        
+
         return response, 500
     
     return app
@@ -257,10 +257,10 @@ app = create_app()
 
 # Print startup info
 config = Config()
-print(f"\n⚖️ Legal Assistant Starting...")
-print(f"📡 AI Provider: {config.get_active_provider().upper()}")
-print(f"🌐 Server: http://{config.HOST}:{config.PORT}")
-print(f"💾 Database: {app.config['SQLALCHEMY_DATABASE_URI']}")
+print("\nLegal Assistant Starting...")
+print(f"AI Provider: {config.get_active_provider().upper()}")
+print(f"Server: http://{config.HOST}:{config.PORT}")
+print(f"Database: {app.config['SQLALCHEMY_DATABASE_URI']}")
 print("-" * 40)
 
 # ============================================================================
@@ -377,11 +377,11 @@ def user_preferences(current_user):
         # Update only provided fields
         if 'preferred_language' in data:
             pref.preferred_language = data['preferred_language']
-            print(f"✅ Updated language to {data['preferred_language']}")
+            print(f"OK: Updated language to {data['preferred_language']}")
         
         if 'response_detail_level' in data:
             pref.response_detail_level = int(data['response_detail_level'])
-            print(f"✅ Updated detail level to {data['response_detail_level']}")
+            print(f"OK: Updated detail level to {data['response_detail_level']}")
         
         if 'jurisdiction_preference' in data:
             pref.jurisdiction_preference = data['jurisdiction_preference']
@@ -427,6 +427,151 @@ def get_preference_field(current_user, field):
         'field': field,
         'value': value
     }), 200
+
+
+# ============================================================================
+# RATING ROUTES
+# ============================================================================
+
+@app.route('/api/rate', methods=['POST'])
+@auth_required
+def rate_response(current_user):
+    """Rate a chat response with 1-5 stars"""
+    try:
+        data = request.get_json()
+        message_id = data.get('message_id')
+        rating = data.get('rating')
+        feedback = data.get('feedback', '')
+        
+        # Validate rating
+        if not isinstance(rating, int) or rating < 1 or rating > 5:
+            return jsonify({
+                'status': 'error',
+                'message': 'Rating must be an integer between 1 and 5'
+            }), 400
+        
+        if not message_id:
+            return jsonify({
+                'status': 'error',
+                'message': 'message_id is required'
+            }), 400
+        
+        # Verify message exists
+        from models import Message, ResponseRating
+        message = Message.query.filter_by(id=message_id).first()
+        if not message:
+            return jsonify({
+                'status': 'error',
+                'message': 'Message not found'
+            }), 404
+        
+        # Check if user already rated this message
+        existing_rating = ResponseRating.query.filter_by(
+            user_id=current_user.id,
+            message_id=message_id
+        ).first()
+        
+        if existing_rating:
+            # Update existing rating
+            existing_rating.rating = rating
+            existing_rating.feedback = feedback[:500] if feedback else None
+            db.session.commit()
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'Rating updated successfully',
+                'rating': existing_rating.to_dict()
+            }), 200
+        else:
+            # Create new rating
+            rating_obj = ResponseRating(
+                user_id=current_user.id,
+                message_id=message_id,
+                rating=rating,
+                feedback=feedback[:500] if feedback else None
+            )
+            
+            db.session.add(rating_obj)
+            db.session.commit()
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'Rating submitted successfully',
+                'rating': rating_obj.to_dict()
+            }), 201
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'An error occurred: {str(e)}'
+        }), 500
+
+
+@app.route('/api/ratings/stats', methods=['GET'])
+@auth_required
+def get_rating_stats(current_user):
+    """Get user's rating statistics"""
+    try:
+        from models import ResponseRating
+        ratings = ResponseRating.query.filter_by(user_id=current_user.id).all()
+        
+        if not ratings:
+            return jsonify({
+                'status': 'success',
+                'total_ratings': 0,
+                'average_rating': 0,
+                'distribution': {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+            }), 200
+        
+        # Calculate statistics
+        total = len(ratings)
+        total_score = sum(r.rating for r in ratings)
+        average = total_score / total
+        
+        # Distribution by star rating (return as list so JSON preserves numeric indices)
+        dist_list = [0] * 6  # index 0 unused; indices 1-5 correspond to star ratings
+        for r in ratings:
+            if 1 <= r.rating <= 5:
+                dist_list[r.rating] += 1
+        
+        return jsonify({
+            'status': 'success',
+            'total_ratings': total,
+            'average_rating': round(average, 2),
+            'distribution': dist_list,
+            'user_id': current_user.id
+        }), 200
+    
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'An error occurred: {str(e)}'
+        }), 500
+
+
+@app.route('/api/ratings', methods=['GET'])
+@auth_required
+def get_user_ratings(current_user):
+    """Get all ratings by the current user"""
+    try:
+        from models import ResponseRating
+        ratings = ResponseRating.query.filter_by(
+            user_id=current_user.id
+        ).order_by(ResponseRating.created_at.desc()).all()
+        
+        return jsonify({
+            'status': 'success',
+            'count': len(ratings),
+            'ratings': [r.to_dict() for r in ratings]
+        }), 200
+    
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'An error occurred: {str(e)}'
+        }), 500
+
 
 # ============================================================================
 # CHAT ROUTES
@@ -517,7 +662,7 @@ def chat(current_user):
             except Exception as e:
                 last_error = e
                 retry_count += 1
-                print(f"⚠️  Attempt {retry_count}/{max_retries} failed: {e}")
+                print(f"WARN: Attempt {retry_count}/{max_retries} failed: {e}")
                 
                 if retry_count >= max_retries:
                     # All retries exhausted, use fallback
@@ -547,11 +692,11 @@ def chat(current_user):
                 response_content = translation_service.translate_response(response_content)
                 translations = {'from': 'en', 'to': 'hi'}
             except Exception as e:
-                print(f"⚠️  Translation to Hindi failed: {e}")
+                print(f"WARN: Translation to Hindi failed: {e}")
                 # Fallback to English if translation fails
                 translations = {'from': 'en', 'to': 'en', 'error': str(e)}
         elif user_language != 'en':
-            print(f"⚠️  Language '{user_language}' not yet supported, using English")
+            print(f"WARN: Language '{user_language}' not yet supported, using English")
         
         # Save messages
         if current_user and chat_session:
@@ -922,9 +1067,9 @@ if __name__ == '__main__':
     # Apply rate limiting to routes
     app.apply_rate_limits()
     
-    print("⚖️ Legal Assistant Starting...")
-    print(f"📡 AI Provider: {config.get_active_provider().upper()}")
-    print("🌐 Server: http://0.0.0.0:5000")
+    print("Legal Assistant Starting...")
+    print(f"AI Provider: {config.get_active_provider().upper()}")
+    print("Server: http://0.0.0.0:5000")
     print("-" * 40)
     
     # Run the Flask app

@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
     from app_with_db import create_app, db
 except ImportError:
-    print("❌ Error: Could not import app_with_db")
+    print("ERROR: Could not import app_with_db")
     print("   Make sure you run this from the project root directory")
     sys.exit(1)
 
@@ -27,39 +27,39 @@ def run_migration():
             print("=" * 60)
             
             # Create table
-            print("\n📝 Creating user_preferences table...")
+            print("\nCreating user_preferences table...")
             db.create_all()
             
             # List all tables
             inspector = db.inspect(db.engine)
             tables = sorted(inspector.get_table_names())
             
-            print(f"\n✅ Migration successful!")
-            print(f"\n📊 Tables in database ({len(tables)} total):")
+            print(f"\nMigration successful!")
+            print(f"\nTables in database ({len(tables)} total):")
             for table in tables:
                 print(f"   • {table}")
             
             # Check if user_preferences table exists
             if 'user_preferences' in tables:
-                print("\n✅ user_preferences table created successfully")
+                print("\nuser_preferences table created successfully")
                 
                 # Get column info
                 columns = inspector.get_columns('user_preferences')
-                print(f"\n📋 user_preferences columns ({len(columns)} total):")
+                print(f"\nuser_preferences columns ({len(columns)} total):")
                 for col in columns:
                     nullable = "nullable" if col['nullable'] else "NOT NULL"
                     print(f"   • {col['name']:25s} {str(col['type']):15s} {nullable}")
             else:
-                print("\n⚠️ WARNING: user_preferences table not found")
+                print("\nWARNING: user_preferences table not found")
                 return False
             
             print("\n" + "=" * 60)
-            print("✅ MIGRATION COMPLETE")
+            print("MIGRATION COMPLETE")
             print("=" * 60)
             return True
             
         except Exception as e:
-            print(f"\n❌ Migration failed: {e}")
+            print(f"\nMigration failed: {e}")
             print(f"\nError type: {type(e).__name__}")
             import traceback
             traceback.print_exc()

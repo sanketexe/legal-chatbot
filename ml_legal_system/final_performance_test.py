@@ -6,7 +6,7 @@ Tests the optimized vector database with various queries
 
 import time
 import statistics
-from vector_db import LegalVectorDatabase
+from .vector_db import LegalVectorDatabase
 
 def run_final_performance_test():
     """Run comprehensive performance test"""
@@ -173,5 +173,5 @@ def run_final_performance_test():
 
 if __name__ == "__main__":
     results = run_final_performance_test()
-    print(f"\n🎉 Test completed successfully!")
+    print(f"\nTest completed successfully")
     print(f"Final metrics: {results}")
