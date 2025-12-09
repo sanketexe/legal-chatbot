@@ -6,13 +6,16 @@ Run: python migrations/001_add_user_preferences.py
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from logging_config import get_logger
+
+logger = get_logger(__name__)
 
 # Import app and db
 try:
     from app_with_db import create_app, db
 except ImportError:
-    print("ERROR: Could not import app_with_db")
-    print("   Make sure you run this from the project root directory")
+    logger.error("Could not import app_with_db")
+    logger.info("Make sure you run this from the project root directory")
     sys.exit(1)
 
 app = create_app()
@@ -22,45 +25,45 @@ def run_migration():
     """Run the migration"""
     with app.app_context():
         try:
-            print("=" * 60)
-            print("MIGRATION: Add UserPreference Table")
-            print("=" * 60)
+            logger.info("%s", "=" * 60)
+            logger.info("MIGRATION: Add UserPreference Table")
+            logger.info("%s", "=" * 60)
             
             # Create table
-            print("\nCreating user_preferences table...")
+            logger.info("Creating user_preferences table...")
             db.create_all()
             
             # List all tables
             inspector = db.inspect(db.engine)
             tables = sorted(inspector.get_table_names())
             
-            print(f"\nMigration successful!")
-            print(f"\nTables in database ({len(tables)} total):")
+            logger.info("Migration successful!")
+            logger.info("Tables in database (%d total):", len(tables))
             for table in tables:
-                print(f"   • {table}")
+                logger.info("   - %s", table)
             
             # Check if user_preferences table exists
             if 'user_preferences' in tables:
-                print("\nuser_preferences table created successfully")
+                logger.info("user_preferences table created successfully")
                 
                 # Get column info
                 columns = inspector.get_columns('user_preferences')
-                print(f"\nuser_preferences columns ({len(columns)} total):")
+                logger.info("user_preferences columns (%d total):", len(columns))
                 for col in columns:
                     nullable = "nullable" if col['nullable'] else "NOT NULL"
-                    print(f"   • {col['name']:25s} {str(col['type']):15s} {nullable}")
+                    logger.info("   - %s %s %s", col['name'], str(col['type']), nullable)
             else:
-                print("\nWARNING: user_preferences table not found")
+                logger.warning("user_preferences table not found")
                 return False
             
-            print("\n" + "=" * 60)
-            print("MIGRATION COMPLETE")
-            print("=" * 60)
+            logger.info("%s", "\n" + "=" * 60)
+            logger.info("MIGRATION COMPLETE")
+            logger.info("%s", "=" * 60)
             return True
             
         except Exception as e:
-            print(f"\nMigration failed: {e}")
-            print(f"\nError type: {type(e).__name__}")
+            logger.error("Migration failed: %s", e)
+            logger.error("Error type: %s", type(e).__name__)
             import traceback
             traceback.print_exc()
             return False

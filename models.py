@@ -7,6 +7,9 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
+from logging_config import get_logger
+
+logger = get_logger(__name__)
 
 db = SQLAlchemy()
 
@@ -225,7 +228,7 @@ def init_db(app):
         # Create all tables
         db.create_all()
         
-        print("OK: Database tables created successfully")
+        logger.info("Database tables created successfully")
         
         # Create default admin user if doesn't exist
         admin_user = User.query.filter_by(username='admin').first()
@@ -238,7 +241,7 @@ def init_db(app):
             admin_user.set_password('admin123')  # Change this in production!
             db.session.add(admin_user)
             db.session.commit()
-            print("OK: Default admin user created (username: admin, password: admin123)")
+            logger.info("Default admin user created (username: admin, password: admin123)")
 
 def create_sample_data():
     """Create sample data for testing"""
@@ -279,4 +282,4 @@ def create_sample_data():
         db.session.commit()
         session.generate_title()
         
-        print("OK: Sample test data created")
+    logger.info("Sample test data created")

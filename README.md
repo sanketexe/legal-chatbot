@@ -1,184 +1,282 @@
-# LegalAssist Pro - AI Legal Assistant with RAG System
+# LegalAssist Pro - AI-Powered Legal Consultation Platform
 
-## 🏛️ Overview
-LegalAssist Pro is an AI-powered legal assistant that provides instant guidance on legal matters using a trained Retrieval-Augmented Generation (RAG) system. The system is trained on 940+ Indian legal cases from Supreme Court and High Courts, providing accurate, citation-backed legal advice.
+An intelligent legal consultation platform that provides AI-powered legal guidance based on Indian law, featuring case law citations, document analysis, and multilingual support.
 
-## ✨ Features
-- **🎯 RAG-Powered Legal Guidance**: Get answers backed by actual Indian legal precedents
-- **⚖️ Comprehensive Case Database**: 940+ cases from Indian Supreme Court and High Courts
-- **🔍 Semantic Search**: Advanced vector search through legal cases
-- **📚 Citation-Backed Responses**: All answers include relevant case citations
-- **🛡️ Professional Interface**: Clean, enterprise-grade design
-- **📱 Responsive Design**: Works on desktop, tablet, and mobile
-- **🌐 Browser Extension**: Quick access via Chrome/Firefox extension
-- **🔒 Confidential**: Your conversations are private and secure
+## Features
 
-## 🚀 Quick Start
+### Core Functionality
+- **AI-Powered Legal Consultation**: Get instant legal guidance powered by Google Gemini AI
+- **Case Law Citations**: Responses include relevant Indian case law references and precedents
+- **RAG System**: Retrieval-Augmented Generation with 940+ Indian legal cases
+- **Document Analysis**: Upload and analyze legal documents (PDF, DOCX, TXT)
+- **Multilingual Support**: English and Hindi language support with automatic translation
+
+### User Features
+- **User Authentication**: Secure JWT-based authentication system
+- **Chat History**: Save and retrieve past consultations
+- **User Preferences**: Customize language, response detail level, and legal domains
+- **Response Rating**: Rate AI responses to improve service quality
+- **Session Management**: Organize consultations into sessions
+
+### Technical Features
+- **Vector Database**: ChromaDB for efficient semantic search
+- **Rate Limiting**: Protect API endpoints from abuse
+- **CORS Support**: Browser extension and web access enabled
+- **Database**: SQLite/PostgreSQL support with SQLAlchemy ORM
+- **Responsive UI**: Modern, mobile-friendly interface
+
+## Technology Stack
+
+- **Backend**: Flask (Python)
+- **AI/ML**: Google Gemini API, ChromaDB, Sentence Transformers
+- **Database**: SQLAlchemy (SQLite/PostgreSQL)
+- **Authentication**: Flask-JWT-Extended
+- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
+- **Document Processing**: PyPDF2, python-docx
+
+## Installation
 
 ### Prerequisites
-- Python 3.8+
-- Google Gemini API Key (free tier available)
+- Python 3.8 or higher
+- pip package manager
+- Google Gemini API key
 
-### Installation
-1. **Clone or Download** this repository
-2. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. **Set API Key** in `.env` file:
-   ```
-   GEMINI_API_KEY=your_api_key_here
-   ```
-4. **Initialize RAG System** (first time only):
-   ```bash
-   python ml_legal_system/load_cases.py
-   ```
-5. **Run the Application**:
-   ```bash
-   python simple_app.py
-   ```
-6. **Open Browser**: Go to `http://localhost:5000`
+### Setup Steps
 
-### Get Free Gemini API Key
-1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Sign in with Google account
-3. Create new API key
-4. Copy key to `.env` file
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd LegalChatbot
+```
 
-### RAG System Setup
-The system comes with pre-trained embeddings for 940+ Indian legal cases. On first run, the system will:
-- Load case embeddings into ChromaDB
-- Initialize the vector database
-- Validate search functionality
+2. **Create virtual environment**
+```bash
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Linux/Mac
+```
 
-This process takes ~2-3 minutes and only needs to be done once.
+3. **Install dependencies**
+```bash
+pip install -r requirements.txt
+```
 
-## 📁 Project Structure
+4. **Configure environment variables**
+
+Create a `.env` file in the root directory:
+```env
+# API Keys
+GEMINI_API_KEY=your_gemini_api_key_here
+GOOGLE_API_KEY=your_gemini_api_key_here
+
+# AI Configuration
+PREFERRED_AI_PROVIDER=gemini
+
+# Security
+SECRET_KEY=your_secret_key_here
+JWT_SECRET_KEY=your_jwt_secret_key_here
+
+# Database (optional - defaults to SQLite)
+DATABASE_URL=sqlite:///legal_chatbot.db
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=5000
+```
+
+5. **Initialize the database**
+```bash
+python -c "from app import app; from models import init_db; init_db(app)"
+```
+
+6. **Run the application**
+```bash
+python app.py
+```
+
+The application will be available at `http://localhost:5000`
+
+## Usage
+
+### Web Interface
+1. Open your browser and navigate to `http://localhost:5000`
+2. Register a new account or login
+3. Start asking legal questions in the chat interface
+4. Upload documents for analysis using the document upload feature
+
+### API Endpoints
+
+#### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/profile` - Get user profile
+
+#### Chat
+- `POST /api/chat` - Send message and get AI response
+- `GET /api/chat/sessions` - Get user's chat sessions
+- `GET /api/chat/sessions/<id>` - Get specific session with messages
+- `DELETE /api/chat/sessions/<id>` - Delete a session
+
+#### Document Analysis
+- `POST /api/analyze-document` - Upload and analyze legal document
+
+#### User Preferences
+- `GET /api/user/preferences` - Get user preferences
+- `POST /api/user/preferences` - Update user preferences
+
+#### Ratings
+- `POST /api/rate` - Rate an AI response
+- `GET /api/ratings` - Get user's ratings
+- `GET /api/ratings/stats` - Get rating statistics
+
+## Project Structure
+
 ```
 LegalChatbot/
-├── simple_app.py              # Main Flask application
-├── config.py                  # Configuration settings
-├── requirements.txt           # Python dependencies
-├── .env                       # Environment variables (API keys)
-├── src/
-│   └── simple_legal_engine.py # AI legal reasoning engine
+├── app.py                      # Main application file
+├── auth.py                     # Authentication logic
+├── models.py                   # Database models
+├── config.py                   # Configuration management
+├── logging_config.py           # Logging configuration
+├── document_analyzer.py        # Document analysis module
+├── legal_engine_ml.py          # ML-powered legal engine
+├── requirements.txt            # Python dependencies
+├── .env                        # Environment variables
 ├── templates/
-│   └── simple.html           # Professional web interface
-├── browser_extension/
-│   ├── manifest.json         # Extension configuration
-│   ├── simple_popup.html     # Extension popup interface
-│   ├── simple_popup.js       # Extension functionality
-│   └── icons/               # Extension icons
-├── ml_legal_system/          # RAG system implementation
-│   ├── legal_rag.py         # Main RAG system
-│   ├── vector_db.py         # Vector database management
-│   ├── load_cases.py        # Case loading script
-│   └── optimized_legal_rag.py # Optimized RAG implementation
-└── data/
-    ├── legal_cases/         # Indian legal cases dataset
-    └── chromadb/           # Vector database storage
+│   └── simple.html            # Main web interface
+├── ml_legal_system/
+│   ├── rag_system.py          # RAG implementation
+│   ├── translators.py         # Translation services
+│   └── embeddings.py          # Embedding models
+├── data/
+│   └── indian_legal_cases.json # Legal case database
+└── migrations/                 # Database migrations
 ```
 
-## 🎨 Professional Design
-- **Premium Branding**: "LegalAssist Pro" with scale of justice logo
-- **Professional Colors**: Deep blue, gold accents, clean design
-- **Typography**: Inter + Playfair Display fonts
-- **Interactive Elements**: Quick topic cards, smooth animations
-- **Trust Indicators**: Confidentiality badges, professional disclaimers
+## Default Credentials
 
-## 🌐 Browser Extension Setup
-1. Open Chrome/Firefox
-2. Go to Extensions page
-3. Enable "Developer mode"
-4. Click "Load unpacked"
-5. Select the `browser_extension` folder
-6. Pin the extension to toolbar
+After initialization, a default admin account is created:
+- **Username**: admin
+- **Password**: admin123
 
-## ⚙️ Configuration
-Edit `config.py` to customize:
-- API settings (Gemini model, temperature, max tokens)
-- Server settings (host, port, debug mode)
-- Application behavior
+**Important**: Change these credentials in production!
 
-## 🔧 RAG System Integration
-The system uses a sophisticated RAG (Retrieval-Augmented Generation) pipeline:
-- **Vector Database**: ChromaDB with 940+ legal case embeddings
-- **Semantic Search**: sentence-transformers for case retrieval
-- **LLM Generation**: Google Gemini 2.5 Flash model (free tier)
-- **Citation System**: Automatic case citations with court details
-- **Performance**: ~3-7 seconds per query with relevant case context
+## Features in Detail
 
-## 📱 Local Development
+### RAG System
+The Retrieval-Augmented Generation system uses:
+- 940+ Indian legal cases indexed in ChromaDB
+- Semantic search using sentence transformers
+- Context-aware response generation
+- Automatic case law citation
 
-### Running the Application
-```bash
-# Start the RAG-powered legal assistant
-python simple_app.py
-```
+### Document Analysis
+Supports multiple document formats:
+- PDF documents
+- Word documents (DOCX)
+- Plain text files
 
-### Testing the RAG System
-```bash
-# Test RAG system directly
-python ml_legal_system/optimized_legal_rag.py
-```
+Analysis includes:
+- Document summarization
+- Key point extraction
+- Legal issue identification
+- Relevant case law suggestions
 
-### Performance Testing
-```bash
-# Run comprehensive RAG tests
-python test_rag_system.py
-```
+### Multilingual Support
+- English (default)
+- Hindi (हिंदी)
+- Automatic translation of AI responses
+- Language preference saved per user
+
+## Security Features
+
+- JWT-based authentication
+- Password hashing with Werkzeug
+- Rate limiting on sensitive endpoints
+- CORS configuration for browser extensions
+- Session management and token revocation
+- SQL injection protection via SQLAlchemy ORM
+
+## Performance Optimization
+
+- Connection pooling for database
+- Vector database caching
+- Lazy loading of ML models
+- Response compression
+- Efficient query optimization
+
+## Browser Extension
+
+The platform includes a Chrome/Firefox browser extension for quick access to legal consultation while browsing.
+
+Extension features:
+- Quick legal queries from any webpage
+- Document analysis from browser
+- Saved consultation history
+- Seamless authentication
+
+## Deployment
 
 ### Production Considerations
-For production deployment:
-1. Ensure ChromaDB data persistence
-2. Configure proper logging for RAG operations
-3. Set up monitoring for query performance
-4. Use environment variables for API keys
-5. Consider scaling vector database for high traffic
 
-## 🔒 Security & Legal
-- **Confidentiality**: Conversations are not stored
-- **Legal Disclaimer**: Provides information, not legal advice
-- **Data Privacy**: No personal data collection
-- **Secure API**: HTTPS recommended for production
+1. **Use a production WSGI server**
+```bash
+pip install gunicorn
+gunicorn -w 4 -b 0.0.0.0:5000 app:app
+```
 
-## 🤝 Usage Guidelines
-- **Information Only**: This provides legal information, not legal advice
-- **Consult Attorneys**: For specific legal matters, consult qualified attorneys
-- **Educational Purpose**: Use for learning and general guidance
-- **No Liability**: AI responses should not replace professional legal counsel
+2. **Use PostgreSQL for production**
+```env
+DATABASE_URL=postgresql://user:password@localhost/legalassist
+```
 
-## 🛠️ Troubleshooting
+3. **Enable HTTPS**
+4. **Set strong secret keys**
+5. **Configure proper CORS origins**
+6. **Set up monitoring and logging**
 
-### Common Issues
-1. **"Technical difficulties" error**: Update Gemini model names in config
-2. **API Key issues**: Verify key is correct and has quota
-3. **RAG system not initialized**: Run `python ml_legal_system/load_cases.py`
-4. **ChromaDB errors**: Delete `data/chromadb` folder and reinitialize
-5. **Import errors**: Run `pip install -r requirements.txt`
-6. **Slow responses**: Check vector database is properly loaded
+### Environment Variables for Production
+```env
+FLASK_ENV=production
+DEBUG=False
+DATABASE_URL=postgresql://...
+GEMINI_API_KEY=...
+SECRET_KEY=<strong-random-key>
+JWT_SECRET_KEY=<strong-random-key>
+```
 
-### RAG System Issues
-- **No case results**: Verify ChromaDB contains embeddings
-- **Poor answer quality**: Check similarity thresholds in config
-- **Memory issues**: Reduce batch size in case loading
-- **Database corruption**: Reinitialize ChromaDB from scratch
+## Contributing
 
-### Getting Help
-- Check console for error messages
-- Verify API key is valid
-- Ensure ChromaDB is properly initialized
-- Review RAG system logs for debugging
+Contributions are welcome! Please follow these guidelines:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Write tests if applicable
+5. Submit a pull request
 
-## 📄 License
-This project is for educational and informational purposes only. Not intended as a substitute for professional legal advice.
+## License
 
-## 🙏 Acknowledgments
-- Google Gemini AI for natural language processing
-- Flask framework for web application
-- Font Awesome for professional icons
-- Google Fonts for typography
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Disclaimer
+
+This application provides general legal information based on Indian law. It is not a substitute for professional legal advice. Always consult with a qualified attorney for specific legal matters.
+
+## Support
+
+For issues, questions, or suggestions:
+- Open an issue on GitHub
+- Contact: [your-email@example.com]
+
+## Acknowledgments
+
+- Google Gemini AI for powering the legal consultation
+- ChromaDB for vector database capabilities
+- Indian legal case database contributors
+- Open source community
 
 ---
 
-**⚠️ Legal Disclaimer**: This AI provides legal information only, not legal advice. Laws vary by jurisdiction and circumstances. For specific legal matters, consult with a qualified attorney.
+**Version**: 1.0.0  
+**Last Updated**: December 2025

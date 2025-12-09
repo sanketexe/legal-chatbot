@@ -161,6 +161,26 @@ class PineconeVectorDB:
             print(f"❌ Error searching: {e}")
             return []
     
+    def search_similar_cases(
+        self,
+        query: str,
+        top_k: int = 5,
+        filters: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Search for similar legal cases (alias for search method)
+        This method provides compatibility with the LegalVectorDatabase interface
+        
+        Args:
+            query: Search query text
+            top_k: Number of results to return
+            filters: Optional metadata filter
+            
+        Returns:
+            List of matching cases with metadata
+        """
+        return self.search(query, top_k, filters)
+    
     def get_collection_count(self) -> int:
         """
         Get number of vectors in the index

@@ -7,15 +7,18 @@ Tests the optimized vector database with various queries
 import time
 import statistics
 from .vector_db import LegalVectorDatabase
+from logging_config import get_logger
+
+logger = get_logger(__name__)
 
 def run_final_performance_test():
     """Run comprehensive performance test"""
-    print("🎯 Final RAG Model Performance Test")
-    print("=" * 60)
-    
+    logger.info("Final RAG Model Performance Test")
+    logger.info("%s", "=" * 60)
+
     # Initialize database
     db = LegalVectorDatabase(use_cloud=False)
-    
+
     # Test queries covering different legal domains
     test_queries = [
         "contract breach damages compensation",
@@ -32,32 +35,32 @@ def run_final_performance_test():
         "banking fraud criminal charges",
         "medical negligence compensation",
         "environmental pollution damages",
-        "arbitration dispute resolution"
+        "arbitration dispute resolution",
     ]
-    
-    print(f"📋 Testing {len(test_queries)} diverse legal queries")
-    print("=" * 60)
-    
+
+    logger.info("Testing %d diverse legal queries", len(test_queries))
+    logger.info("%s", "=" * 60)
+
     # Performance metrics
     query_times = []
     similarity_scores = []
     results_counts = []
-    
+
     for i, query in enumerate(test_queries, 1):
-        print(f"\n🔍 Query {i}: {query}")
-        
+        logger.info("Query %d: %s", i, query)
+
         # Time the query
         start_time = time.time()
         results = db.search_similar_cases(query, top_k=5)
         end_time = time.time()
-        
+
         query_time = end_time - start_time
         query_times.append(query_time)
         results_counts.append(len(results))
-        
-        print(f"   ⚡ Query time: {query_time:.3f}s")
-        print(f"   📊 Results: {len(results)}")
-        
+
+        logger.info("   Query time: %.3fs", query_time)
+        logger.info("   Results: %d", len(results))
+
         # Calculate similarities
         if results:
             query_similarities = []
@@ -65,113 +68,114 @@ def run_final_performance_test():
                 distance = result.get('distance', 1)
                 similarity = max(0, min(1, (2 - distance) / 2))
                 query_similarities.append(similarity)
-                
+
                 # Get metadata
                 metadata = result.get('metadata', {})
                 search_query = metadata.get('search_query', 'N/A')
-                
-                print(f"   {j+1}. Similarity: {similarity:.1%} | Query: {search_query}")
-            
+
+                logger.info("   %d. Similarity: %.1f%% | Query: %s", j + 1, similarity * 100, search_query)
+
             avg_similarity = statistics.mean(query_similarities)
             similarity_scores.append(avg_similarity)
-            print(f"   📈 Average similarity: {avg_similarity:.1%}")
+            logger.info("   Average similarity: %.1f%%", avg_similarity * 100)
         else:
-            print("   ⚠️ No results found")
-    
+            logger.warning("No results found for query: %s", query)
+
     # Overall performance summary
-    print("\n" + "=" * 60)
-    print("📊 PERFORMANCE SUMMARY")
-    print("=" * 60)
-    
+    logger.info("%s", "\n" + "=" * 60)
+    logger.info("PERFORMANCE SUMMARY")
+    logger.info("%s", "=" * 60)
+
     if query_times:
         avg_time = statistics.mean(query_times)
         min_time = min(query_times)
         max_time = max(query_times)
-        
-        print(f"⚡ Query Performance:")
-        print(f"   Average time: {avg_time:.3f}s")
-        print(f"   Fastest query: {min_time:.3f}s")
-        print(f"   Slowest query: {max_time:.3f}s")
-        
+
+        logger.info("Query Performance:")
+        logger.info("   Average time: %.3fs", avg_time)
+        logger.info("   Fastest query: %.3fs", min_time)
+        logger.info("   Slowest query: %.3fs", max_time)
+
         # Performance rating
         if avg_time < 1.0:
-            print("   🟢 Excellent performance (< 1s)")
+            logger.info("   Excellent performance (< 1s)")
         elif avg_time < 2.0:
-            print("   🟡 Good performance (< 2s)")
+            logger.info("   Good performance (< 2s)")
         else:
-            print("   🔴 Needs optimization (> 2s)")
-    
+            logger.info("   Needs optimization (> 2s)")
+
     if similarity_scores:
         avg_similarity = statistics.mean(similarity_scores)
         min_similarity = min(similarity_scores)
         max_similarity = max(similarity_scores)
-        
-        print(f"\n🎯 Search Quality:")
-        print(f"   Average similarity: {avg_similarity:.1%}")
-        print(f"   Lowest similarity: {min_similarity:.1%}")
-        print(f"   Highest similarity: {max_similarity:.1%}")
-        
+
+        logger.info("\nSearch Quality:")
+        logger.info("   Average similarity: %.1f%%", avg_similarity * 100)
+        logger.info("   Lowest similarity: %.1f%%", min_similarity * 100)
+        logger.info("   Highest similarity: %.1f%%", max_similarity * 100)
+
         # Quality rating
         if avg_similarity > 0.7:
-            print("   🟢 Excellent search quality (> 70%)")
+            logger.info("   Excellent search quality (> 70%)")
         elif avg_similarity > 0.5:
-            print("   🟡 Good search quality (> 50%)")
+            logger.info("   Good search quality (> 50%)")
         elif avg_similarity > 0.3:
-            print("   🟠 Moderate search quality (> 30%)")
+            logger.info("   Moderate search quality (> 30%)")
         else:
-            print("   🔴 Poor search quality (< 30%)")
-    
+            logger.info("   Poor search quality (< 30%)")
+
     if results_counts:
         avg_results = statistics.mean(results_counts)
-        print(f"\n📋 Results Coverage:")
-        print(f"   Average results per query: {avg_results:.1f}")
-        
+        logger.info("\nResults Coverage:")
+        logger.info("   Average results per query: %.1f", avg_results)
+
         if avg_results >= 5:
-            print("   🟢 Good coverage (≥ 5 results per query)")
+            logger.info("   Good coverage (>= 5 results per query)")
         elif avg_results >= 3:
-            print("   🟡 Moderate coverage (≥ 3 results per query)")
+            logger.info("   Moderate coverage (>= 3 results per query)")
         else:
-            print("   🔴 Poor coverage (< 3 results per query)")
-    
+            logger.info("   Poor coverage (< 3 results per query)")
+
     # Database statistics
-    print(f"\n📚 Database Statistics:")
+    logger.info("\nDatabase Statistics:")
     try:
         import chromadb
         client = chromadb.PersistentClient(path="./data/chromadb")
         collection = client.get_collection("indian_legal_cases")
         total_cases = collection.count()
-        print(f"   Total cases indexed: {total_cases}")
-        print(f"   Queries tested: {len(test_queries)}")
-        print(f"   Coverage: {(len(test_queries) / total_cases * 100):.2f}% of database tested")
+
+        logger.info("   Total cases indexed: %d", total_cases)
+        logger.info("   Queries tested: %d", len(test_queries))
+        logger.info("   Coverage: %.2f%% of database tested", (len(test_queries) / total_cases * 100))
     except Exception as e:
-        print(f"   Error getting database stats: {e}")
-    
+        logger.error("Error getting database stats: %s", e)
+
     # Final recommendations
-    print(f"\n💡 FINAL RECOMMENDATIONS:")
-    print("=" * 60)
-    
+    logger.info("\nFINAL RECOMMENDATIONS:")
+    logger.info("%s", "=" * 60)
+
     if query_times and statistics.mean(query_times) < 2.0:
-        print("✅ Query performance meets requirements (< 2s average)")
+        logger.info("Query performance meets requirements (< 2s average)")
     else:
-        print("⚠️ Consider optimizing query performance")
-    
+        logger.info("Consider optimizing query performance")
+
     if similarity_scores and statistics.mean(similarity_scores) > 0.25:
-        print("✅ Search quality is acceptable (> 25% average similarity)")
+        logger.info("Search quality is acceptable (> 25% average similarity)")
     else:
-        print("⚠️ Consider improving embedding model or data preprocessing")
-    
-    print("✅ Use top_k=5 for optimal balance of speed and coverage")
-    print("✅ Set similarity threshold to 0.3 for filtering results")
-    print("✅ RAG model training validation complete!")
-    
+        logger.info("Consider improving embedding model or data preprocessing")
+
+    logger.info("Use top_k=5 for optimal balance of speed and coverage")
+    logger.info("Set similarity threshold to 0.3 for filtering results")
+    logger.info("RAG model training validation complete")
+
     return {
         'avg_query_time': statistics.mean(query_times) if query_times else 0,
         'avg_similarity': statistics.mean(similarity_scores) if similarity_scores else 0,
         'avg_results': statistics.mean(results_counts) if results_counts else 0,
-        'total_queries': len(test_queries)
+        'total_queries': len(test_queries),
     }
 
 if __name__ == "__main__":
     results = run_final_performance_test()
-    print(f"\nTest completed successfully")
-    print(f"Final metrics: {results}")
+    logger.info("\nTest completed successfully")
+    logger.info("Final metrics: %s", results)

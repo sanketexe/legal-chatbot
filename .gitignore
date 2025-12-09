@@ -25,18 +25,36 @@ dist/
 # Deployment
 .vercel/
 
-# AWS Development Files (uncomment when ready to deploy AWS)
-# AWS_DATABASE_SETUP.md
-# AWS_QUICK_START.md
-# migrate_to_aws.py
-# requirements-aws.txt
-# setup_aws_database.ps1
-# setup_aws_database.sh
-
 # Database files
 instance/
 *.db
-# Ignore large vector DB and data files
 *.sqlite3
 data/chromadb/
 data/vector_db/
+
+# Test files
+test_*.py
+*_test.py
+test_*.ps1
+test_output.txt
+
+# Documentation and status files
+*_SUMMARY.md
+*_REPORT.md
+*_STATUS.md
+*_GUIDE.md
+*_CHECKLIST.md
+*_DASHBOARD.md
+*_TRACKER.md
+*_FIXES.md
+QUICK_START*.md
+DAY*.md
+WEEK*.md
+STATUS_*.md
+*_COMPLETION_*.md
+
+# Debug and diagnostic files
+debug_*.py
+diagnose_*.py
+fix_*.py
+quick_*.py

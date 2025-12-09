@@ -31,17 +31,14 @@ class LegalEngine:
         """Initialize legal engine"""
         self.ml_available = ML_SYSTEM_AVAILABLE
         self.rag = None
-        self.use_pinecone = os.getenv('PINECONE_API_KEY') is not None
+        # Force use of ChromaDB for now since Pinecone index appears empty
+        self.use_pinecone = False  # Temporarily disabled
         
         if self.ml_available:
             try:
-                # Use Pinecone in production, ChromaDB for local dev
-                if self.use_pinecone:
-                    print("🌐 Using Pinecone cloud vector database")
-                    vector_db = PineconeVectorDB()
-                else:
-                    print("💻 Using ChromaDB local vector database")
-                    vector_db = LegalVectorDatabase()
+                # Use ChromaDB local vector database (has data)
+                print("💻 Using ChromaDB local vector database")
+                vector_db = LegalVectorDatabase()
                 
                 self.rag = LegalRAG(use_openai=False, vector_db=vector_db)
                 print("✅ ML-powered Legal Engine initialized")

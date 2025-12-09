@@ -89,12 +89,13 @@ class LegalRAG:
             # Format results
             relevant_cases = []
             for case in results:
+                metadata = case.get('metadata', {})
                 relevant_cases.append({
-                    'title': case['metadata']['title'],
-                    'court': case['metadata']['court'],
-                    'date': case['metadata']['date'],
-                    'judges': case['metadata']['judges'],
-                    'url': case['metadata'].get('url', ''),
+                    'title': metadata.get('title', 'Untitled Case'),
+                    'court': metadata.get('court', 'Unknown Court'),
+                    'date': metadata.get('date', 'Date not available'),
+                    'judges': metadata.get('judges', 'Judges not listed'),
+                    'url': metadata.get('url', ''),
                     'relevance_score': 1 - case.get('distance', 0),
                     'excerpt': case.get('document', '')[:500]
                 })
@@ -103,6 +104,8 @@ class LegalRAG:
             
         except Exception as e:
             print(f"❌ Error retrieving cases: {e}")
+            import traceback
+            traceback.print_exc()
             return []
     
     def format_context(self, cases: List[Dict]) -> str:

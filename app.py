@@ -35,6 +35,9 @@ from document_analyzer import get_document_analyzer
 
 # Import translation service for Hindi support
 from ml_legal_system.translators import get_translation_service, create_bilingual_response
+from logging_config import get_logger
+
+logger = get_logger(__name__)
 
 def get_basic_fallback_response(query: str) -> str:
     """
@@ -136,7 +139,7 @@ def create_app():
             default_limits=["200 per day", "50 per hour"],
             storage_uri="memory://"
         )
-        print("OK: Rate limiting enabled")
+        logger.info("Rate limiting enabled")
     else:
         # Create a dummy decorator that does nothing
         class DummyLimiter:
@@ -145,7 +148,7 @@ def create_app():
                     return f
                 return decorator
         limiter = DummyLimiter()
-        print("WARN: Rate limiting disabled (flask-limiter not installed)")
+    logger.warning("Rate limiting disabled (flask-limiter not installed)")
     
     # API Key Authentication Middleware
     def require_api_key(f):
@@ -186,11 +189,11 @@ def create_app():
             app.view_functions['register'] = limiter.limit("3 per hour")(app.view_functions['register'])
             # Login endpoint - 10 per hour
             app.view_functions['login'] = limiter.limit("10 per hour")(app.view_functions['login'])
-            # Chat endpoint - 10 per minute + API key
-            app.view_functions['chat'] = require_api_key(limiter.limit("10 per minute")(app.view_functions['chat']))
-            # Document analysis endpoint - 5 per minute + API key
-            app.view_functions['analyze_document'] = require_api_key(limiter.limit("5 per minute")(app.view_functions['analyze_document']))
-            print("OK: Rate limits applied to endpoints")
+            # Chat endpoint - 10 per minute (NO API key required for better UX)
+            app.view_functions['chat'] = limiter.limit("10 per minute")(app.view_functions['chat'])
+            # Document analysis endpoint - 5 per minute (NO API key required for better UX)
+            app.view_functions['analyze_document'] = limiter.limit("5 per minute")(app.view_functions['analyze_document'])
+            logger.info("Rate limits applied to endpoints")
     
     # Store the function for later use
     app.apply_rate_limits = apply_rate_limits
@@ -202,10 +205,10 @@ def create_app():
     # Initialize ML-powered legal engine (with fallback to basic)
     try:
         legal_engine = get_legal_engine()
-        print("OK: Legal engine initialized successfully")
+        logger.info("Legal engine initialized successfully")
     except Exception as e:
-        print(f"WARN: Could not initialize ML engine: {e}")
-        print("NOTE: System will use basic responses as fallback")
+        logger.warning(f"Could not initialize ML engine: {e}")
+        logger.info("System will use basic responses as fallback")
         legal_engine = None
     
     # Store engine in app config for access in routes
@@ -214,9 +217,9 @@ def create_app():
     # Initialize document analyzer
     try:
         app.document_analyzer = get_document_analyzer()
-        print("OK: Document analyzer initialized")
+        logger.info("Document analyzer initialized")
     except Exception as e:
-        print(f"WARN: Could not initialize document analyzer: {e}")
+        logger.warning(f"Could not initialize document analyzer: {e}")
         app.document_analyzer = None
     
     # Global error handler
@@ -225,9 +228,8 @@ def create_app():
         """Global error handler with graceful degradation"""
         error_message = str(error)
         error_type = type(error).__name__
-        
         # Log the error (in production, use proper logging)
-        print(f"ERROR [{error_type}]: {error_message}")
+        logger.error(f"{error_type}: {error_message}")
 
         # Provide user-friendly error messages
         if isinstance(error, Exception):
@@ -255,13 +257,13 @@ def create_app():
 
 app = create_app()
 
-# Print startup info
+# Startup info
 config = Config()
-print("\nLegal Assistant Starting...")
-print(f"AI Provider: {config.get_active_provider().upper()}")
-print(f"Server: http://{config.HOST}:{config.PORT}")
-print(f"Database: {app.config['SQLALCHEMY_DATABASE_URI']}")
-print("-" * 40)
+logger.info("Legal Assistant Starting...")
+logger.info(f"AI Provider: {config.get_active_provider().upper()}")
+logger.info(f"Server: http://{config.HOST}:{config.PORT}")
+logger.info(f"Database: {app.config['SQLALCHEMY_DATABASE_URI']}")
+logger.info("-" * 40)
 
 # ============================================================================
 # AUTHENTICATION ROUTES
@@ -273,25 +275,43 @@ def register():
     try:
         data = request.get_json()
         
-        username = data.get('username', '').strip()
-        email = data.get('email', '').strip()
-        password = data.get('password', '')
-        full_name = data.get('full_name', '').strip()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
         
+        # Safely extract and clean input data
+        username = (data.get('username') or '').strip()
+        email = (data.get('email') or '').strip()
+        password = data.get('password') or ''
+        full_name = (data.get('full_name') or '').strip()
+        
+        # Convert empty string to None for optional full_name
+        if not full_name:
+            full_name = None
+        
+        # Validate required fields
         if not username or not email or not password:
             return jsonify({
                 'success': False, 
                 'error': 'Username, email, and password are required'
             }), 400
         
+        # Log for debugging
+        logger.info(f"Registration attempt - username: {username}, email: {email}")
+        
         result = register_user(username, email, password, full_name)
         
         if result['success']:
+            logger.info(f"User registered successfully: {username}")
             return jsonify(result), 201
         else:
+            logger.warning(f"Registration failed: {result.get('error')}")
             return jsonify(result), 400
             
     except Exception as e:
+        logger.error(f"Registration error: {str(e)}", exc_info=True)
         return jsonify({
             'success': False, 
             'error': f'Registration failed: {str(e)}'
@@ -303,8 +323,14 @@ def login():
     try:
         data = request.get_json()
         
-        username = data.get('username', '').strip()
-        password = data.get('password', '')
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+        
+        username = (data.get('username') or '').strip()
+        password = data.get('password') or ''
         
         if not username or not password:
             return jsonify({

@@ -11,6 +11,9 @@ from functools import wraps
 import hashlib
 
 from models import db, User, UserSession
+from logging_config import get_logger
+
+logger = get_logger(__name__)
 
 jwt = JWTManager()
 
@@ -214,10 +217,10 @@ def cleanup_expired_sessions():
         ).delete()
         
         db.session.commit()
-        print(f"OK: Cleaned up {expired_count} expired sessions")
+        logger.info("Cleaned up %d expired sessions", expired_count)
     except Exception as e:
         db.session.rollback()
-        print(f"ERROR: Session cleanup failed: {e}")
+        logger.error("Session cleanup failed: %s", e)
 
 def get_user_sessions(user_id):
     """Get all active sessions for a user"""
