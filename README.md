@@ -96,6 +96,31 @@ python app.py
 
 The application will be available at `http://localhost:5000`
 
+## Screenshots
+
+### Application Interface
+
+![Homepage](images/Screenshot%202025-12-10%20075108.png)
+*Main landing page with legal consultation features*
+
+![Chat Interface](images/Screenshot%202025-12-10%20075117.png)
+*AI-powered legal chat interface*
+
+![Document Analysis](images/Screenshot%202025-12-10%20075149.png)
+*Document upload and analysis feature*
+
+![Legal Results](images/Screenshot%202025-12-10%20075201.png)
+*Legal consultation results with case law citations*
+
+![User Dashboard](images/Screenshot%202025-12-10%20075219.png)
+*User dashboard and chat history*
+
+![Mobile View](images/Screenshot%202025-12-10%20075231.png)
+*Mobile-responsive interface*
+
+![Settings Panel](images/Screenshot%202025-12-10%20075238.png)
+*Application settings and preferences*
+
 ## Usage
 
 ### Web Interface
