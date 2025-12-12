@@ -29,10 +29,31 @@ An intelligent legal consultation platform that provides AI-powered legal guidan
 
 - **Backend**: Flask (Python)
 - **AI/ML**: Google Gemini API, ChromaDB, Sentence Transformers
+- **Enhanced AI**: LangChain framework for advanced document processing and RAG
 - **Database**: SQLAlchemy (SQLite/PostgreSQL)
 - **Authentication**: Flask-JWT-Extended
 - **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
-- **Document Processing**: PyPDF2, python-docx
+- **Document Processing**: PyPDF2, python-docx, LangChain document loaders
+
+## LangChain Integration 🔗
+
+This project now supports **LangChain** for enhanced AI capabilities:
+
+### Enhanced Features:
+- **Advanced RAG System**: Sophisticated document retrieval and generation
+- **Memory Management**: Conversation context across multiple interactions
+- **Document Processing**: Better PDF and document analysis with chunking
+- **Chain of Thought**: Multi-step legal reasoning
+- **Source Attribution**: Responses include relevant document sources
+- **Specialized Prompts**: Legal-specific prompt templates
+
+### LangChain Endpoints:
+- `POST /api/langchain/chat` - Enhanced AI chat with memory
+- `POST /api/langchain/document/upload` - Process documents into vector store
+- `POST /api/langchain/document/analyze` - Analyze document content
+- `POST /api/langchain/research/case-law` - Research legal precedents
+- `POST /api/langchain/advice` - Comprehensive legal guidance
+- `GET /api/langchain/status` - Check LangChain integration status
 
 ## Installation
 
@@ -94,7 +115,24 @@ python -c "from app import app; from models import init_db; init_db(app)"
 python app.py
 ```
 
+### LangChain Enhanced Setup (Optional but Recommended)
+
+7. **Install LangChain dependencies**
+```bash
+python setup_langchain.py
+```
+
+8. **Test LangChain integration**
+```bash
+python langchain_demo.py
+```
+
 The application will be available at `http://localhost:5000`
+
+**LangChain Features Available at:**
+- Enhanced chat: `/api/langchain/chat`
+- Document analysis: `/api/langchain/document/analyze`
+- Case law research: `/api/langchain/research/case-law`
 
 ## Screenshots
 

@@ -1,0 +1,20 @@
+# LangChain Integration Requirements
+
+# Core LangChain packages
+langchain==0.1.0
+langchain-community==0.0.13
+langchain-core==0.1.10
+langchain-google-genai==0.0.6
+
+# Document processing
+langchain-text-splitters==0.0.1
+pypdf==3.17.4
+python-docx==1.1.0
+
+# Vector stores
+langchain-chroma==0.1.0
+chromadb==0.4.22
+
+# Additional utilities
+tiktoken==0.5.2
+faiss-cpu==1.7.4

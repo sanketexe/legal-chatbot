@@ -33,6 +33,14 @@ from legal_engine_ml import get_legal_engine
 # Import document analyzer (for in-memory document analysis)
 from document_analyzer import get_document_analyzer
 
+# Import LangChain integration
+try:
+    from langchain_integration import init_langchain_blueprint
+    LANGCHAIN_AVAILABLE = True
+except ImportError:
+    LANGCHAIN_AVAILABLE = False
+    print("WARN: LangChain not available, enhanced features disabled")
+
 # Import translation service for Hindi support
 from ml_legal_system.translators import get_translation_service, create_bilingual_response
 from logging_config import get_logger
@@ -221,6 +229,16 @@ def create_app():
     except Exception as e:
         logger.warning(f"Could not initialize document analyzer: {e}")
         app.document_analyzer = None
+    
+    # Initialize LangChain integration
+    if LANGCHAIN_AVAILABLE:
+        try:
+            init_langchain_blueprint(app)
+            logger.info("✅ LangChain integration enabled")
+        except Exception as e:
+            logger.warning(f"Could not initialize LangChain: {e}")
+    else:
+        logger.info("⚠️ LangChain not available - install with: pip install -r langchain_requirements.txt")
     
     # Global error handler
     @app.errorhandler(Exception)
