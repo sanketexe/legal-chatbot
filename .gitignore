@@ -8,6 +8,7 @@ __pycache__/
 .venv/
 venv/
 env/
+legal_chatbot_env/
 
 # IDE
 .vscode/
@@ -31,6 +32,8 @@ instance/
 *.sqlite3
 data/chromadb/
 data/vector_db/
+all_users_data.json
+logs/
 
 # Test files
 test_*.py

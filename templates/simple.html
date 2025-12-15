@@ -734,6 +734,8 @@
             border: none;
             max-width: none;
             position: relative;
+            transition: all 0.5s ease-out;
+            max-height: 5000px; /* Large initial height */
         }
 
         /* Chat History Button in Welcome Message */
@@ -2014,10 +2016,22 @@
         let isFirstMessage = true;
 
         function addMessage(role, content, sources = null) {
-            // Hide welcome message on first interaction
+            // On first message, smoothly minimize welcome content
             if (isFirstMessage && welcomeMessage) {
-                welcomeMessage.style.display = 'none';
+                // Instead of hiding completely, collapse it smoothly
+                welcomeMessage.style.maxHeight = '0';
+                welcomeMessage.style.opacity = '0';
+                welcomeMessage.style.overflow = 'hidden';
+                welcomeMessage.style.transition = 'all 0.5s ease-out';
+                welcomeMessage.style.marginBottom = '0';
+                welcomeMessage.style.paddingTop = '0';
+                welcomeMessage.style.paddingBottom = '0';
                 isFirstMessage = false;
+                
+                // Scroll to show chat after animation
+                setTimeout(() => {
+                    messages.scrollTop = messages.scrollHeight;
+                }, 600);
             }
 
             const messageDiv = document.createElement('div');

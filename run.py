@@ -17,5 +17,6 @@ if __name__ == '__main__':
     app.run(
         host=config.HOST,
         port=config.PORT,
-        debug=config.DEBUG
+        debug=config.DEBUG,
+        use_reloader=False  # Disable auto-reload to prevent request interruption
     )

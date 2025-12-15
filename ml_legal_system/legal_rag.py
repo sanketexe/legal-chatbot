@@ -62,10 +62,34 @@ class LegalRAG:
             
             genai.configure(api_key=api_key)
             
-            # Use the latest Gemini model
-            self.model = genai.GenerativeModel('models/gemini-2.5-flash')
-            self.llm = 'gemini'
-            print("✅ Google Gemini initialized")
+            # List available models to debug
+            try:
+                import google.generativeai as genai_check
+                models = genai_check.list_models()
+                print(f"📋 Available models: {[m.name for m in models if 'generateContent' in m.supported_generation_methods][:5]}")
+            except Exception as e:
+                print(f"⚠️  Could not list models: {e}")
+            
+            # Try different model names (updated for 2025 - gemini-pro is deprecated)
+            model_names = [
+                'gemini-2.0-flash-exp',  # Latest experimental model
+                'gemini-2.0-flash',       # Stable 2.0 flash
+                'gemini-1.5-flash',       # Fallback to 1.5
+                'models/gemini-2.0-flash-exp',
+                'models/gemini-1.5-flash'
+            ]
+            
+            for model_name in model_names:
+                try:
+                    self.model = genai.GenerativeModel(model_name)
+                    self.llm = 'gemini'
+                    print(f"✅ Google Gemini initialized with model: {model_name}")
+                    break
+                except Exception as e:
+                    print(f"⚠️  Failed with {model_name}: {e}")
+                    continue
+            else:
+                raise Exception("No working Gemini model found")
             
         except Exception as e:
             print(f"❌ Gemini initialization error: {e}")
@@ -185,12 +209,145 @@ Instructions:
 
 Provide your expert legal analysis:"""
             
-            response = self.model.generate_content(prompt)
+            # Configure safety settings to be more permissive for legal content
+            safety_settings = [
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+            ]
+            
+            response = self.model.generate_content(prompt, safety_settings=safety_settings)
+            
+            # Check if response was blocked or empty
+            if not response.text or response.text.strip() == "":
+                print(f"⚠️  Gemini returned empty response")
+                return "I apologize, but I couldn't generate a proper response. This may be due to content filtering. Please try rephrasing your query."
+            
             return response.text
             
         except Exception as e:
+            import traceback
             print(f"❌ Gemini generation error: {e}")
-            return "Error generating response."
+            print(f"📋 Full traceback: {traceback.format_exc()}")
+            return "Error generating response. Please check the logs for details."
+    
+    def _generate_general_legal_response(self, query: str) -> str:
+        """Generate response using Gemini's general knowledge when no precedents found"""
+        try:
+            import google.generativeai as genai
+            
+            prompt = f"""You are an expert Indian legal assistant with deep knowledge of Indian law, including the Constitution of India, Indian Penal Code, Civil Procedure Code, and various special laws.
+
+Query: {query}
+
+NOTE: I could not find specific legal precedents in my database for this query. However, please provide a helpful legal response based on your general knowledge of Indian law.
+
+Instructions:
+1. Provide accurate information about relevant Indian laws, acts, and sections
+2. Explain general legal principles that apply to this situation
+3. Mention the legal framework and procedures if applicable
+4. Be clear that this is general legal information, not specific case law
+5. Suggest what type of legal professional they should consult if needed
+6. Include a disclaimer that this is general information only
+
+Provide your expert legal guidance:"""
+            
+            # Configure safety settings to be more permissive for legal content
+            safety_settings = [
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+            ]
+            
+            response = self.model.generate_content(prompt, safety_settings=safety_settings)
+            
+            # Check if response was blocked
+            if not response.text or response.text.strip() == "":
+                print(f"⚠️  Gemini returned empty response. Prompt feedback: {response.prompt_feedback if hasattr(response, 'prompt_feedback') else 'N/A'}")
+                return f"""**General Legal Information:**
+
+While I couldn't retrieve specific precedents from our database, I can provide general guidance:
+
+For questions regarding "{query}", I recommend:
+
+1. **Consult a Legal Professional**: For specific legal advice tailored to your situation, please consult a qualified lawyer specializing in the relevant area of law.
+
+2. **Research Applicable Laws**: Look into relevant sections of:
+   - The Indian Constitution
+   - Indian Penal Code (IPC)
+   - Code of Criminal Procedure (CrPC)
+   - Code of Civil Procedure (CPC)
+   - Specific laws applicable to your situation
+
+3. **Legal Aid**: If cost is a concern, consider reaching out to legal aid services or pro bono legal clinics.
+
+*Disclaimer: This is general information only and not legal advice. Please consult a qualified legal professional for advice specific to your situation.*"""
+            
+            return response.text
+            
+        except Exception as e:
+            import traceback
+            print(f"❌ Gemini generation error: {e}")
+            print(f"📋 Full traceback: {traceback.format_exc()}")
+            
+            # Provide a helpful fallback response instead of generic error
+            return f"""**Legal Information Request:**
+
+I encountered a technical issue while generating a detailed response for your query: "{query}"
+
+However, I can provide general guidance:
+
+**Recommended Steps:**
+1. **Consult a Qualified Lawyer**: For specific legal advice, please consult a lawyer who specializes in the relevant area of Indian law.
+
+2. **Legal Resources**: You may want to research:
+   - Relevant provisions of the Indian Constitution
+   - Applicable acts and statutes
+   - Rules and regulations specific to your concern
+
+3. **Legal Aid Services**: Free or low-cost legal assistance may be available through:
+   - District Legal Services Authority
+   - State Legal Services Authority
+   - National Legal Services Authority (NALSA)
+
+*Disclaimer: This is general information only, not legal advice. For advice specific to your situation, please consult a qualified legal professional.*
+
+*Technical Note: Please try rephrasing your query or contact support if the issue persists.*"""
+    
+    def _generate_general_legal_response_openai(self, query: str) -> str:
+        """Generate response using OpenAI's general knowledge when no precedents found"""
+        try:
+            messages = [
+                {"role": "system", "content": "You are an expert Indian legal assistant with deep knowledge of Indian law."},
+                {"role": "user", "content": f"""Query: {query}
+
+NOTE: No specific legal precedents were found in the database for this query. Please provide a helpful legal response based on your general knowledge of Indian law.
+
+Instructions:
+1. Provide accurate information about relevant Indian laws, acts, and sections
+2. Explain general legal principles that apply
+3. Mention the legal framework and procedures if applicable
+4. Be clear this is general legal information
+5. Suggest consulting appropriate legal professionals
+6. Include a disclaimer
+
+Provide your expert legal guidance:"""}
+            ]
+            
+            response = self.openai_client.chat.completions.create(
+                model="gpt-4",
+                messages=messages,
+                temperature=0.7,
+                max_tokens=1000
+            )
+            
+            return response.choices[0].message.content
+            
+        except Exception as e:
+            print(f"❌ OpenAI generation error: {e}")
+            return "I apologize, but I'm having trouble generating a response. Please try again."
     
     def answer_legal_query(self, query: str, top_k: int = 5) -> Dict:
         """
@@ -209,8 +366,17 @@ Provide your expert legal analysis:"""
         relevant_cases = self.retrieve_relevant_cases(query, top_k=top_k)
         
         if not relevant_cases:
+            print("⚠️  No relevant cases found, generating response without precedents")
+            # Still generate a response using Gemini's general knowledge
+            if self.llm == 'gemini':
+                answer = self._generate_general_legal_response(query)
+            elif self.llm == 'openai':
+                answer = self._generate_general_legal_response_openai(query)
+            else:
+                answer = "I couldn't find relevant legal precedents in our database for your query. Please try rephrasing or provide more context."
+            
             return {
-                'answer': "I couldn't find relevant legal precedents for your query. Please try rephrasing or provide more context.",
+                'answer': answer,
                 'sources': [],
                 'timestamp': datetime.now().isoformat()
             }

@@ -264,11 +264,26 @@ Instructions:
 
 Provide your expert legal analysis with proper citations:"""
             
-            response = self.model.generate_content(prompt)
+            # Configure safety settings to be more permissive for legal content
+            safety_settings = [
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+            ]
+            
+            response = self.model.generate_content(prompt, safety_settings=safety_settings)
+            
+            if not response.text or response.text.strip() == "":
+                print(f"⚠️  Gemini returned empty response")
+                return self.generate_fallback_response(query, context)
+            
             return response.text
             
         except Exception as e:
+            import traceback
             print(f"❌ Gemini generation error: {e}")
+            print(f"📋 Full traceback: {traceback.format_exc()}")
             return self.generate_fallback_response(query, context)
     
     def generate_response_openai(self, query: str, context: str) -> str:
@@ -305,6 +320,69 @@ Based on the above precedents, provide a comprehensive legal answer with proper 
             print(f"❌ OpenAI generation error: {e}")
             return self.generate_fallback_response(query, context)
     
+    def _generate_general_legal_response(self, query: str) -> str:
+        """Generate response using Gemini's general knowledge when no precedents found"""
+        try:
+            prompt = f"""You are an expert Indian legal assistant with deep knowledge of Indian law, including the Constitution of India, Indian Penal Code, Civil Procedure Code, and various special laws.
+
+Query: {query}
+
+NOTE: I could not find specific legal precedents in my database for this query. However, please provide a helpful legal response based on your general knowledge of Indian law.
+
+Instructions:
+1. Provide accurate information about relevant Indian laws, acts, and sections
+2. Explain general legal principles that apply to this situation
+3. Mention the legal framework and procedures if applicable
+4. Be clear that this is general legal information, not specific case law
+5. Suggest what type of legal professional they should consult if needed
+6. Include a disclaimer that this is general information only
+
+Provide your expert legal guidance:"""
+            
+            response = self.model.generate_content(prompt)
+            return response.text
+            
+        except Exception as e:
+            print(f"❌ Gemini generation error: {e}")
+            return "I apologize, but I'm having trouble generating a response. Please try again."
+    
+    def _generate_general_legal_response_openai(self, query: str) -> str:
+        """Generate response using OpenAI's general knowledge when no precedents found"""
+        try:
+            import openai
+            
+            system_prompt = """You are an expert Indian legal assistant with deep knowledge of Indian law."""
+            
+            user_prompt = f"""Query: {query}
+
+NOTE: No specific legal precedents were found in the database for this query. Please provide a helpful legal response based on your general knowledge of Indian law.
+
+Instructions:
+1. Provide accurate information about relevant Indian laws, acts, and sections
+2. Explain general legal principles that apply
+3. Mention the legal framework and procedures if applicable
+4. Be clear this is general legal information
+5. Suggest consulting appropriate legal professionals
+6. Include a disclaimer
+
+Provide your expert legal guidance:"""
+            
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.7,
+                max_tokens=1000
+            )
+            
+            return response.choices[0].message.content
+            
+        except Exception as e:
+            print(f"❌ OpenAI generation error: {e}")
+            return "I apologize, but I'm having trouble generating a response. Please try again."
+    
     def answer_legal_query(self, query: str, top_k: int = None) -> Dict:
         """
         Optimized RAG pipeline with performance monitoring
@@ -328,14 +406,27 @@ Based on the above precedents, provide a comprehensive legal answer with proper 
         retrieval_time = time.time() - retrieval_start
         
         if not relevant_cases:
+            print("⚠️  No relevant cases found, generating response without precedents")
+            generation_start = time.time()
+            
+            # Still generate a response using LLM's general knowledge
+            if self.llm == 'gemini':
+                answer = self._generate_general_legal_response(query)
+            elif self.llm == 'openai':
+                answer = self._generate_general_legal_response_openai(query)
+            else:
+                answer = "I couldn't find relevant legal precedents in our database for your query. Please try rephrasing or provide more context."
+            
+            generation_time = time.time() - generation_start
+            
             return {
-                'answer': "I couldn't find relevant legal precedents for your query. Please try rephrasing or provide more context.",
+                'answer': answer,
                 'sources': [],
                 'timestamp': datetime.now().isoformat(),
                 'performance': {
                     'total_time': time.time() - start_time,
                     'retrieval_time': retrieval_time,
-                    'generation_time': 0
+                    'generation_time': generation_time
                 }
             }
         

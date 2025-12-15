@@ -13,9 +13,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'ml_legal_system'))
 try:
     from ml_legal_system.legal_rag import LegalRAG
     from ml_legal_system.vector_db import LegalVectorDatabase
-    from ml_legal_system.pinecone_vector_db import PineconeVectorDB
     from ml_legal_system.config import get_config
     ML_SYSTEM_AVAILABLE = True
+        
 except ImportError as e:
     print(f"⚠️  ML system not available: {e}")
     ML_SYSTEM_AVAILABLE = False

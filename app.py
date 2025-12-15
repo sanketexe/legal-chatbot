@@ -23,26 +23,44 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 # Import modules
 from config import Config
-from simple_legal_engine import LegalReasoningEngine
+try:
+    from src.simple_legal_engine import LegalReasoningEngine
+    LEGAL_ENGINE_AVAILABLE = True
+except ImportError:
+    print("WARN: LegalReasoningEngine not available, using fallback")
+    LEGAL_ENGINE_AVAILABLE = False
+    LegalReasoningEngine = None
 from models import db, init_db, User, ChatSession, Message, create_sample_data
-from auth import init_auth, auth_required, optional_auth, register_user, login_user, logout_user, get_current_user
+try:
+    from auth import init_auth, auth_required, optional_auth, register_user, login_user, logout_user, get_current_user
+    AUTH_AVAILABLE = True
+except ImportError:
+    print("WARN: Auth module not fully available")
+    AUTH_AVAILABLE = False
 
 # Import ML-powered legal engine
-from legal_engine_ml import get_legal_engine
+try:
+    from legal_engine_ml import get_legal_engine
+    ML_ENGINE_AVAILABLE = True
+except ImportError:
+    print("WARN: ML legal engine not available")
+    ML_ENGINE_AVAILABLE = False
 
 # Import document analyzer (for in-memory document analysis)
-from document_analyzer import get_document_analyzer
-
-# Import LangChain integration
 try:
-    from langchain_integration import init_langchain_blueprint
-    LANGCHAIN_AVAILABLE = True
+    from document_analyzer import get_document_analyzer
+    DOCUMENT_ANALYZER_AVAILABLE = True
 except ImportError:
-    LANGCHAIN_AVAILABLE = False
-    print("WARN: LangChain not available, enhanced features disabled")
+    print("WARN: Document analyzer not available")
+    DOCUMENT_ANALYZER_AVAILABLE = False
 
 # Import translation service for Hindi support
-from ml_legal_system.translators import get_translation_service, create_bilingual_response
+try:
+    from ml_legal_system.translators import get_translation_service, create_bilingual_response
+    TRANSLATION_AVAILABLE = True
+except ImportError:
+    print("WARN: Translation service not available")
+    TRANSLATION_AVAILABLE = False
 from logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -229,16 +247,6 @@ def create_app():
     except Exception as e:
         logger.warning(f"Could not initialize document analyzer: {e}")
         app.document_analyzer = None
-    
-    # Initialize LangChain integration
-    if LANGCHAIN_AVAILABLE:
-        try:
-            init_langchain_blueprint(app)
-            logger.info("✅ LangChain integration enabled")
-        except Exception as e:
-            logger.warning(f"Could not initialize LangChain: {e}")
-    else:
-        logger.info("⚠️ LangChain not available - install with: pip install -r langchain_requirements.txt")
     
     # Global error handler
     @app.errorhandler(Exception)
