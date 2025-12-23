@@ -237,84 +237,200 @@ Provide your expert legal analysis:"""
         try:
             import google.generativeai as genai
             
-            prompt = f"""You are an expert Indian legal assistant with deep knowledge of Indian law, including the Constitution of India, Indian Penal Code, Civil Procedure Code, and various special laws.
+            prompt = f"""You are an expert Indian legal assistant with comprehensive knowledge of Indian law, current legal developments, and constitutional provisions. You should be helpful and informative while being accurate.
 
 Query: {query}
 
-NOTE: I could not find specific legal precedents in my database for this query. However, please provide a helpful legal response based on your general knowledge of Indian law.
-
 Instructions:
-1. Provide accurate information about relevant Indian laws, acts, and sections
-2. Explain general legal principles that apply to this situation
-3. Mention the legal framework and procedures if applicable
-4. Be clear that this is general legal information, not specific case law
-5. Suggest what type of legal professional they should consult if needed
-6. Include a disclaimer that this is general information only
+1. Provide detailed, helpful information about the legal query, even if no specific precedents are available in the database
+2. For current events/cases (like arrests, detentions, protests), explain the likely legal provisions that may apply
+3. Reference relevant Indian laws, constitutional articles, acts, and sections that are applicable
+4. Explain legal concepts in simple terms that a layperson can understand
+5. Provide context about legal procedures and rights
+6. If it's about a specific person or current event, explain the general legal framework that would apply to such situations
+7. Be educational and informative - help the user understand the broader legal landscape
+8. Always include appropriate disclaimers
+9. Don't be overly rigid - provide substantive helpful information
 
-Provide your expert legal guidance:"""
+For detention/arrest cases specifically:
+- Explain preventive detention laws (like NSA, PSA)
+- Constitutional provisions (Article 19, 21, 22)
+- Fundamental rights and their limitations
+- Legal remedies available (habeas corpus, bail, etc.)
+- Due process requirements
+
+Respond in a helpful, educational manner while maintaining accuracy. Don't give generic responses - provide real legal insight."""
             
             # Configure safety settings to be more permissive for legal content
             safety_settings = [
-                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_ONLY_HIGH"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_ONLY_HIGH"},
             ]
             
             response = self.model.generate_content(prompt, safety_settings=safety_settings)
             
             # Check if response was blocked
             if not response.text or response.text.strip() == "":
-                print(f"⚠️  Gemini returned empty response. Prompt feedback: {response.prompt_feedback if hasattr(response, 'prompt_feedback') else 'N/A'}")
-                return f"""**General Legal Information:**
-
-While I couldn't retrieve specific precedents from our database, I can provide general guidance:
-
-For questions regarding "{query}", I recommend:
-
-1. **Consult a Legal Professional**: For specific legal advice tailored to your situation, please consult a qualified lawyer specializing in the relevant area of law.
-
-2. **Research Applicable Laws**: Look into relevant sections of:
-   - The Indian Constitution
-   - Indian Penal Code (IPC)
-   - Code of Criminal Procedure (CrPC)
-   - Code of Civil Procedure (CPC)
-   - Specific laws applicable to your situation
-
-3. **Legal Aid**: If cost is a concern, consider reaching out to legal aid services or pro bono legal clinics.
-
-*Disclaimer: This is general information only and not legal advice. Please consult a qualified legal professional for advice specific to your situation.*"""
+                print(f"⚠️  Gemini returned empty response. Attempting with simplified prompt.")
+                
+                # Try with a simpler, more direct prompt
+                simple_prompt = f"""As an Indian legal expert, please explain the legal aspects of: {query}
+                
+Include relevant laws, constitutional provisions, and legal procedures that apply. Be helpful and educational."""
+                
+                response = self.model.generate_content(simple_prompt, safety_settings=safety_settings)
+                
+                if not response.text or response.text.strip() == "":
+                    # Final fallback - but much more comprehensive
+                    return self._get_comprehensive_fallback_response(query)
             
-            return response.text
+            return response.text + "\n\n*Disclaimer: This information is for educational purposes only and does not constitute legal advice. For specific legal guidance, please consult a qualified legal professional.*"
             
         except Exception as e:
             import traceback
             print(f"❌ Gemini generation error: {e}")
             print(f"📋 Full traceback: {traceback.format_exc()}")
-            
-            # Provide a helpful fallback response instead of generic error
-            return f"""**Legal Information Request:**
+            return self._get_comprehensive_fallback_response(query)
+    
+    def _get_comprehensive_fallback_response(self, query: str) -> str:
+        """Provide a comprehensive fallback response when AI fails"""
+        query_lower = query.lower()
+        
+        # Check for specific topics and provide relevant information
+        if any(word in query_lower for word in ['arrest', 'detention', 'jail', 'custody', 'police']):
+            return f"""**Legal Framework for Arrests and Detention in India**
 
-I encountered a technical issue while generating a detailed response for your query: "{query}"
+Regarding your query about "{query}", here's the relevant legal framework:
 
-However, I can provide general guidance:
+**Constitutional Provisions:**
+- **Article 21**: Right to Life and Personal Liberty
+- **Article 22**: Right against arbitrary arrest and detention
+- **Article 19**: Fundamental freedoms (subject to reasonable restrictions)
 
-**Recommended Steps:**
-1. **Consult a Qualified Lawyer**: For specific legal advice, please consult a lawyer who specializes in the relevant area of Indian law.
+**Key Legal Provisions:**
+1. **Code of Criminal Procedure (CrPC), 1973**: Governs arrest procedures
+2. **Preventive Detention Laws**: 
+   - National Security Act (NSA)
+   - Public Safety Act (PSA) - in J&K and other states
+   - Unlawful Activities (Prevention) Act (UAPA)
 
-2. **Legal Resources**: You may want to research:
-   - Relevant provisions of the Indian Constitution
-   - Applicable acts and statutes
-   - Rules and regulations specific to your concern
+**Legal Rights During Arrest:**
+- Right to know grounds of arrest (Article 22(1))
+- Right to legal representation
+- Right to be produced before magistrate within 24 hours
+- Right to bail (except in specific circumstances)
 
-3. **Legal Aid Services**: Free or low-cost legal assistance may be available through:
-   - District Legal Services Authority
-   - State Legal Services Authority
-   - National Legal Services Authority (NALSA)
+**Remedies Available:**
+- **Habeas Corpus Petition**: Challenge illegal detention
+- **Bail Application**: Seek release pending trial
+- **Quashing Petition**: Challenge FIR validity
 
-*Disclaimer: This is general information only, not legal advice. For advice specific to your situation, please consult a qualified legal professional.*
+**Legal Procedures:**
+- Police must follow due process
+- Medical examination mandatory
+- Family notification required
+- Detention beyond limits requires judicial approval
 
-*Technical Note: Please try rephrasing your query or contact support if the issue persists.*"""
+*For specific cases involving political activists or protesters, courts often examine whether detention is based on legitimate grounds or if fundamental rights are being violated.*
+
+**Important Note:** This is general legal information. For specific advice about any individual case, please consult a qualified criminal lawyer.
+
+**Legal Aid Resources:**
+- District Legal Services Authority
+- State Legal Services Authority  
+- National Legal Services Authority (NALSA)
+"""
+        
+        elif any(word in query_lower for word in ['protest', 'demonstration', 'strike', 'rally']):
+            return f"""**Right to Protest in India - Legal Framework**
+
+Regarding "{query}":
+
+**Constitutional Rights:**
+- **Article 19(1)(a)**: Freedom of speech and expression
+- **Article 19(1)(b)**: Right to assemble peacefully and without arms
+- **Article 19(1)(c)**: Right to form associations or unions
+
+**Legal Restrictions (Article 19(2) & 19(3)):**
+- Sovereignty and integrity of India
+- Security of the State
+- Friendly relations with foreign States
+- Public order, decency, or morality
+
+**Applicable Laws:**
+1. **Police Act provisions** in various states
+2. **Section 144 CrPC**: Prohibitory orders
+3. **Indian Penal Code Sections**:
+   - Section 141-149: Unlawful assembly
+   - Section 153A: Promoting enmity
+   - Section 124A: Sedition (under review by Supreme Court)
+
+**Legal Requirements for Peaceful Protests:**
+- Prior permission may be required in certain areas
+- Must remain peaceful and non-violent
+- Cannot block essential services
+- Cannot incite violence or hatred
+
+**When Protests Become Illegal:**
+- Use of violence or force
+- Damage to property
+- Blocking essential services
+- Hate speech or incitement
+
+**Legal Remedies:**
+- Challenge prohibitory orders in High Court
+- Seek protection through fundamental rights petitions
+- Approach Human Rights Commission
+
+*Recent judicial trends favor protecting peaceful dissent while maintaining public order.*
+
+**Disclaimer:** This is educational information only. For specific legal advice, consult a constitutional lawyer or civil rights advocate.
+"""
+        
+        else:
+            return f"""**Legal Guidance for Your Query**
+
+While I couldn't access specific case precedents for "{query}", I can provide relevant legal guidance:
+
+**General Legal Framework:**
+The Indian legal system provides comprehensive coverage through:
+- **The Constitution of India**: Fundamental rights and duties
+- **Civil and Criminal Laws**: IPC, CrPC, CPC, and special acts
+- **Personal Laws**: Based on religion and community
+- **Commercial Laws**: For business and trade matters
+
+**Common Legal Areas:**
+1. **Constitutional Law**: Fundamental rights, state duties, judicial review
+2. **Criminal Law**: Offenses, procedures, evidence, bail
+3. **Civil Law**: Contracts, property, torts, family matters
+4. **Administrative Law**: Government actions, public services
+5. **Commercial Law**: Business, taxation, intellectual property
+
+**Legal Remedies Available:**
+- **High Courts**: Constitutional and civil matters
+- **Supreme Court**: Final appellate authority
+- **District Courts**: Trial courts for most matters
+- **Special Tribunals**: Specific subject matters
+- **Alternative Dispute Resolution**: Mediation, arbitration
+
+**How to Proceed:**
+1. **Identify the Legal Area**: Constitutional, criminal, civil, commercial
+2. **Research Applicable Laws**: Specific acts and sections
+3. **Consult Legal Experts**: Lawyers specializing in relevant area
+4. **Understand Procedures**: Filing requirements, timelines, costs
+5. **Know Your Rights**: Constitutional and statutory protections
+
+**Legal Aid Resources:**
+- **National Legal Services Authority (NALSA)**
+- **State Legal Services Authority**
+- **District Legal Services Authority**
+- **Law University Legal Aid Clinics**
+- **Bar Association Pro Bono Services**
+
+*This is educational information to help you understand the legal framework. For specific advice about your situation, please consult a qualified lawyer who can analyze your case details.*
+"""
     
     def _generate_general_legal_response_openai(self, query: str) -> str:
         """Generate response using OpenAI's general knowledge when no precedents found"""

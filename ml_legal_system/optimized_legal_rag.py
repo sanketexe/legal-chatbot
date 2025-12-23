@@ -323,28 +323,119 @@ Based on the above precedents, provide a comprehensive legal answer with proper 
     def _generate_general_legal_response(self, query: str) -> str:
         """Generate response using Gemini's general knowledge when no precedents found"""
         try:
-            prompt = f"""You are an expert Indian legal assistant with deep knowledge of Indian law, including the Constitution of India, Indian Penal Code, Civil Procedure Code, and various special laws.
+            prompt = f"""You are an expert Indian legal assistant with comprehensive knowledge of Indian law, current legal developments, and constitutional provisions. You should be helpful and informative while being accurate.
 
 Query: {query}
 
-NOTE: I could not find specific legal precedents in my database for this query. However, please provide a helpful legal response based on your general knowledge of Indian law.
-
 Instructions:
-1. Provide accurate information about relevant Indian laws, acts, and sections
-2. Explain general legal principles that apply to this situation
-3. Mention the legal framework and procedures if applicable
-4. Be clear that this is general legal information, not specific case law
-5. Suggest what type of legal professional they should consult if needed
-6. Include a disclaimer that this is general information only
+1. Provide detailed, helpful information about the legal query, even if no specific precedents are available in the database
+2. For current events/cases (like arrests, detentions, protests), explain the likely legal provisions that may apply
+3. Reference relevant Indian laws, constitutional articles, acts, and sections that are applicable
+4. Explain legal concepts in simple terms that a layperson can understand
+5. Provide context about legal procedures and rights
+6. If it's about a specific person or current event, explain the general legal framework that would apply to such situations
+7. Be educational and informative - help the user understand the broader legal landscape
+8. Always include appropriate disclaimers
+9. Don't be overly rigid - provide substantive helpful information
 
-Provide your expert legal guidance:"""
+For detention/arrest cases specifically:
+- Explain preventive detention laws (like NSA, PSA)
+- Constitutional provisions (Article 19, 21, 22)
+- Fundamental rights and their limitations
+- Legal remedies available (habeas corpus, bail, etc.)
+- Due process requirements
+
+Respond in a helpful, educational manner while maintaining accuracy. Don't give generic responses - provide real legal insight."""
             
-            response = self.model.generate_content(prompt)
-            return response.text
+            # Configure safety settings to be more permissive for legal content
+            safety_settings = [
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_ONLY_HIGH"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_ONLY_HIGH"},
+            ]
+            
+            response = self.model.generate_content(prompt, safety_settings=safety_settings)
+            
+            if not response.text or response.text.strip() == "":
+                print(f"⚠️  Gemini returned empty response. Attempting with simplified prompt.")
+                simple_prompt = f"""As an Indian legal expert, please explain the legal aspects of: {query}
+                
+Include relevant laws, constitutional provisions, and legal procedures that apply. Be helpful and educational."""
+                
+                response = self.model.generate_content(simple_prompt, safety_settings=safety_settings)
+                
+                if not response.text or response.text.strip() == "":
+                    return self._get_comprehensive_fallback_response(query)
+            
+            return response.text + "\n\n*Disclaimer: This information is for educational purposes only and does not constitute legal advice. For specific legal guidance, please consult a qualified legal professional.*"
             
         except Exception as e:
+            import traceback
             print(f"❌ Gemini generation error: {e}")
-            return "I apologize, but I'm having trouble generating a response. Please try again."
+            print(f"📋 Full traceback: {traceback.format_exc()}")
+            return self._get_comprehensive_fallback_response(query)
+    
+    def _get_comprehensive_fallback_response(self, query: str) -> str:
+        """Provide a comprehensive fallback response when AI fails"""
+        query_lower = query.lower()
+        
+        if any(word in query_lower for word in ['arrest', 'detention', 'jail', 'custody', 'police']):
+            return f"""**Legal Framework for Arrests and Detention in India**
+
+Regarding your query about "{query}", here's the relevant legal framework:
+
+**Constitutional Provisions:**
+- **Article 21**: Right to Life and Personal Liberty
+- **Article 22**: Right against arbitrary arrest and detention
+- **Article 19**: Fundamental freedoms (subject to reasonable restrictions)
+
+**Key Legal Provisions:**
+1. **Code of Criminal Procedure (CrPC), 1973**: Governs arrest procedures
+2. **Preventive Detention Laws**: 
+   - National Security Act (NSA)
+   - Public Safety Act (PSA) - in J&K and other states
+   - Unlawful Activities (Prevention) Act (UAPA)
+
+**Legal Rights During Arrest:**
+- Right to know grounds of arrest (Article 22(1))
+- Right to legal representation
+- Right to be produced before magistrate within 24 hours
+- Right to bail (except in specific circumstances)
+
+**Remedies Available:**
+- **Habeas Corpus Petition**: Challenge illegal detention
+- **Bail Application**: Seek release pending trial
+- **Quashing Petition**: Challenge FIR validity
+
+*For specific cases involving political activists or protesters, courts often examine whether detention is based on legitimate grounds or if fundamental rights are being violated.*
+
+**Disclaimer:** This is general legal information. For specific advice, consult a qualified criminal lawyer.
+"""
+        
+        return f"""**Legal Guidance for Your Query**
+
+While I couldn't access specific precedents for "{query}", here's relevant legal guidance:
+
+**Indian Legal Framework:**
+- **Constitution**: Fundamental rights and duties
+- **Criminal Laws**: IPC, CrPC, special acts
+- **Civil Laws**: Contracts, property, family matters
+- **Administrative Law**: Government actions and procedures
+
+**Legal Remedies:**
+- **Constitutional Remedies**: High Courts, Supreme Court
+- **Statutory Remedies**: Special tribunals, courts
+- **Alternative Dispute Resolution**: Mediation, arbitration
+
+**How to Proceed:**
+1. Identify applicable laws and procedures
+2. Consult specialized legal experts
+3. Understand your rights and remedies
+4. Consider legal aid if needed
+
+**Disclaimer:** This is educational information only. Consult a qualified lawyer for specific advice.
+"""
     
     def _generate_general_legal_response_openai(self, query: str) -> str:
         """Generate response using OpenAI's general knowledge when no precedents found"""
