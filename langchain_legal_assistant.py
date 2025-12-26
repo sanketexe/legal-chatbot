@@ -10,20 +10,20 @@ from typing import Dict, List, Optional, Iterator
 import asyncio
 from datetime import datetime
 
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
 # Try to import LangChain pieces lazily. If imports fail, we set HAS_LANGCHAIN=False
 HAS_LANGCHAIN = True
 try:
-    from langchain.chat_models import ChatOpenAI  # type: ignore
+    from langchain_openai import ChatOpenAI  # type: ignore
     from langchain_google_genai import ChatGoogleGenerativeAI  # type: ignore
-    from langchain.memory import ConversationBufferWindowMemory  # type: ignore
-    from langchain.schema import HumanMessage, AIMessage, SystemMessage  # type: ignore
-    from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler  # type: ignore
-    from langchain.tools import Tool  # type: ignore
-    from langchain.agents import initialize_agent, AgentType  # type: ignore
-    from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder  # type: ignore
-    from langchain.schema.runnable import RunnableLambda, RunnablePassthrough  # type: ignore
-    from langchain.memory.chat_message_histories import ChatMessageHistory  # type: ignore
-except Exception:
+    from langchain_core.messages import HumanMessage, AIMessage, SystemMessage  # type: ignore
+    from langchain_core.prompts import ChatPromptTemplate  # type: ignore
+    print("✅ LangChain core imports successful")
+except Exception as e:
+    print(f"DEBUG: LangChain import failed: {e}")
     HAS_LANGCHAIN = False
 
 class ModernLegalAssistant:
@@ -60,62 +60,41 @@ class ModernLegalAssistant:
         self.prompt_template = None
         
     def setup_llm(self):
-        """Initialize chat models with streaming"""
+        """Initialize chat models - simplified version"""
         if not HAS_LANGCHAIN:
             raise RuntimeError("LangChain not available")
 
         # Primary: Gemini (cost-effective)
-        if os.getenv('GEMINI_API_KEY'):
+        if os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY'):
+            api_key = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
             self.llm = ChatGoogleGenerativeAI(
                 model="gemini-2.0-flash-exp",
-                google_api_key=os.getenv('GEMINI_API_KEY'),
-                temperature=0.7,
-                streaming=True,
-                callbacks=[StreamingStdOutCallbackHandler()]
+                google_api_key=api_key,
+                temperature=0.7
             )
-            print("✅ Using Gemini Chat Model")
+            print("✅ Using Gemini Chat Model (LangChain)")
 
         # Fallback: OpenAI
         elif os.getenv('OPENAI_API_KEY'):
             self.llm = ChatOpenAI(
                 model="gpt-4",
                 openai_api_key=os.getenv('OPENAI_API_KEY'),
-                temperature=0.7,
-                streaming=True,
-                callbacks=[StreamingStdOutCallbackHandler()]
+                temperature=0.7
             )
-            print("✅ Using OpenAI Chat Model")
+            print("✅ Using OpenAI Chat Model (LangChain)")
         else:
             raise ValueError("No API keys found for LLM")
     
     def setup_memory(self):
-        """Setup conversation memory"""
-        self.memory = ConversationBufferWindowMemory(
-            k=10,  # Remember last 10 exchanges
-            memory_key="chat_history",
-            return_messages=True,
-            output_key="answer"
-        )
+        """Setup conversation memory - simplified"""
+        # For now, we'll store conversation history as a simple list
+        self.conversation_history = []
         
     def setup_tools(self):
-        """Setup legal tools"""
-        self.tools = [
-            Tool(
-                name="legal_database_search",
-                description="Search legal cases and precedents in the database",
-                func=self._search_legal_database
-            ),
-            Tool(
-                name="legal_framework_lookup", 
-                description="Look up legal acts, sections, and constitutional provisions",
-                func=self._lookup_legal_framework
-            ),
-            Tool(
-                name="current_legal_news",
-                description="Get information about current legal events and cases",
-                func=self._get_current_legal_info
-            )
-        ]
+        """Setup legal tools - simplified approach for now"""
+        # For now, we'll use these as helper methods rather than LangChain tools
+        # This can be enhanced later when we need full agent functionality
+        self.tools = []
     
     def setup_prompts(self):
         """Setup sophisticated prompts"""
@@ -153,7 +132,6 @@ Always include appropriate legal disclaimers."""
 
         self.prompt_template = ChatPromptTemplate.from_messages([
             ("system", self.system_prompt),
-            MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{input}")
         ])
     
@@ -205,52 +183,10 @@ Always include appropriate legal disclaimers."""
         return "For current legal developments, please check recent Supreme Court and High Court judgments, or consult legal news sources."
     
     async def chat_stream(self, message: str, session_id: str = "default"):
-        """Stream response with conversation memory"""
-        # If LangChain streaming is not available, fall back to a single non-streaming reply
-        if not HAS_LANGCHAIN:
-            try:
-                from ml_legal_system.legal_rag import answer_legal_query
-                out = answer_legal_query(message)
-                if isinstance(out, dict):
-                    text = out.get('response') or out.get('answer') or str(out)
-                else:
-                    text = str(out)
-                yield text
-            except Exception as e:
-                # Try basic fallback
-                try:
-                    import sys
-                    import os
-                    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-                    from app import get_basic_fallback_response
-                    yield get_basic_fallback_response(message)
-                except Exception:
-                    yield f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
-            return
-
+        """Stream response - simplified fallback"""
         try:
-            # Build conversation chain
-            chain = (
-                RunnablePassthrough.assign(
-                    chat_history=lambda x: self.memory.chat_memory.messages
-                )
-                | self.prompt_template
-                | self.llm
-            )
-
-            # Stream response
-            full_response = ""
-            async for chunk in chain.astream({"input": message}):
-                if hasattr(chunk, 'content'):
-                    content = chunk.content
-                    full_response += content
-                    yield content
-
-            # Save to memory
-            if hasattr(self.memory, 'chat_memory'):
-                self.memory.chat_memory.add_user_message(message)
-                self.memory.chat_memory.add_ai_message(full_response)
-
+            response = self.chat(message, session_id)
+            yield response
         except Exception as e:
             error_msg = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
             yield error_msg
@@ -278,18 +214,23 @@ Always include appropriate legal disclaimers."""
                     return f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
 
         try:
-            # Use the prompt template with memory
+            # Use LangChain with simplified approach
             messages = [
                 SystemMessage(content=self.system_prompt),
-                *self.memory.chat_memory.messages,
                 HumanMessage(content=message)
             ]
 
-            response = self.llm(messages)
-
-            # Save to memory
-            self.memory.chat_memory.add_user_message(message)
-            self.memory.chat_memory.add_ai_message(response.content)
+            response = self.llm.invoke(messages)
+            
+            # Add to conversation history for context
+            self.conversation_history.append({
+                'role': 'user',
+                'content': message
+            })
+            self.conversation_history.append({
+                'role': 'assistant', 
+                'content': response.content
+            })
 
             return response.content
 
@@ -327,15 +268,15 @@ Always include appropriate legal disclaimers."""
     
     def clear_memory(self, session_id: str = "default"):
         """Clear conversation memory"""
-        if self.memory:
-            self.memory.clear()
+        if self.conversation_history:
+            self.conversation_history.clear()
     
     def get_conversation_summary(self) -> str:
         """Get summary of current conversation"""
-        if not self.memory.chat_memory.messages:
+        if not self.conversation_history:
             return "No conversation history."
         
-        return f"Conversation has {len(self.memory.chat_memory.messages)} messages."
+        return f"Conversation has {len(self.conversation_history)} messages."
 
 # Usage example
 if __name__ == "__main__":
