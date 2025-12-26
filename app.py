@@ -2,7 +2,7 @@
 Enhanced LegalAssist Pro Application with Database and Authentication
 """
 
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, Response
 from flask_cors import CORS
 try:
     from flask_limiter import Limiter
@@ -900,6 +900,93 @@ def chat_modern():
 
     except Exception as e:
         return jsonify({'success': False, 'error': f'An error occurred: {str(e)}'}), 500
+
+@app.route('/api/chat_modern/stream', methods=['POST'])
+def chat_modern_stream():
+    """Streaming chat endpoint using Server-Sent Events"""
+    try:
+        data = request.get_json() or {}
+        user_message = data.get('message') or data.get('query') or ''
+        session_id = data.get('session_id') or "default"
+
+        if not user_message:
+            return jsonify({'success': False, 'error': 'No message provided'}), 400
+
+        def generate():
+            try:
+                from langchain_legal_assistant import ModernLegalAssistant
+                assistant = ModernLegalAssistant()
+                
+                # Stream response
+                for response_chunk in assistant._generate_streaming_answer(user_message, session_id):
+                    yield f"data: {json.dumps(response_chunk)}\n\n"
+                
+            except Exception as e:
+                error_response = {
+                    'chunk': f"Error: {str(e)}",
+                    'type': 'error',
+                    'session_id': session_id
+                }
+                yield f"data: {json.dumps(error_response)}\n\n"
+
+        return Response(
+            generate(),
+            mimetype='text/event-stream',
+            headers={
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Cache-Control'
+            }
+        )
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Streaming error: {str(e)}'}), 500
+
+@app.route('/api/chat_modern_ws', methods=['POST']) 
+def chat_modern_websocket():
+    """WebSocket-style streaming (using chunked responses)"""
+    try:
+        data = request.get_json() or {}
+        user_message = data.get('message') or data.get('query') or ''
+        session_id = data.get('session_id') or "default"
+
+        if not user_message:
+            return jsonify({'success': False, 'error': 'No message provided'}), 400
+
+        try:
+            from langchain_legal_assistant import ModernLegalAssistant
+            assistant = ModernLegalAssistant()
+            
+            # Collect streaming response
+            chunks = []
+            full_response = ""
+            for response_chunk in assistant._generate_streaming_answer(user_message, session_id):
+                chunks.append(response_chunk)
+                if response_chunk.get('type') == 'content':
+                    full_response += response_chunk.get('chunk', '')
+
+            return jsonify({
+                'success': True,
+                'chunks': chunks,
+                'full_response': full_response,
+                'session_id': session_id,
+                'type': 'streaming'
+            })
+
+        except Exception as inner_err:
+            print(f"WARN: Streaming assistant failed: {inner_err}")
+            fallback = get_basic_fallback_response(user_message)
+            return jsonify({
+                'success': True,
+                'response': fallback,
+                'sources': [],
+                'session_id': session_id,
+                'type': 'fallback'
+            })
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'WebSocket-style error: {str(e)}'}), 500
 
 @app.route('/api/chat/sessions/<session_id>', methods=['GET'])
 @auth_required

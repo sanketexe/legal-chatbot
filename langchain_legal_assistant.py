@@ -253,12 +253,81 @@ Always include appropriate legal disclaimers."""
         messages.append(HumanMessage(content=current_message))
         
         return messages
-        """Stream response - simplified fallback"""
+    
+    async def chat_stream(self, message: str, session_id: str = "default"):
+        """Enhanced streaming chat with session-based conversation memory"""
+        # If LangChain isn't available, fallback to non-streaming
+        if not HAS_LANGCHAIN:
+            try:
+                from ml_legal_system.legal_rag import answer_legal_query
+                out = answer_legal_query(message)
+                response = out.get('response') or out.get('answer') or str(out) if isinstance(out, dict) else str(out)
+                yield response
+                return
+            except Exception as e:
+                yield f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
+                return
+
         try:
-            response = self.chat(message, session_id)
-            yield response
+            # Build conversation context with session memory
+            messages = self.build_conversation_context(session_id, message)
+            
+            # Add user message to memory before streaming
+            self.add_to_session_memory(session_id, 'user', message)
+            
+            # Stream response from LLM
+            full_response = ""
+            async for chunk in self.llm.astream(messages):
+                if chunk.content:
+                    full_response += chunk.content
+                    yield chunk.content
+            
+            # Add complete assistant response to memory
+            if full_response:
+                self.add_to_session_memory(session_id, 'assistant', full_response)
+
         except Exception as e:
             error_msg = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
+            self.add_to_session_memory(session_id, 'user', message)
+            self.add_to_session_memory(session_id, 'assistant', error_msg)
+            yield error_msg
+    
+    def chat_stream_sync(self, message: str, session_id: str = "default"):
+        """Synchronous streaming chat (for Flask Server-Sent Events)"""
+        # If LangChain isn't available, fallback to non-streaming
+        if not HAS_LANGCHAIN:
+            try:
+                from ml_legal_system.legal_rag import answer_legal_query
+                out = answer_legal_query(message)
+                response = out.get('response') or out.get('answer') or str(out) if isinstance(out, dict) else str(out)
+                yield response
+                return
+            except Exception as e:
+                yield f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
+                return
+
+        try:
+            # Build conversation context with session memory
+            messages = self.build_conversation_context(session_id, message)
+            
+            # Add user message to memory before streaming
+            self.add_to_session_memory(session_id, 'user', message)
+            
+            # Stream response from LLM (synchronous)
+            full_response = ""
+            for chunk in self.llm.stream(messages):
+                if chunk.content:
+                    full_response += chunk.content
+                    yield chunk.content
+            
+            # Add complete assistant response to memory
+            if full_response:
+                self.add_to_session_memory(session_id, 'assistant', full_response)
+
+        except Exception as e:
+            error_msg = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
+            self.add_to_session_memory(session_id, 'user', message)
+            self.add_to_session_memory(session_id, 'assistant', error_msg)
             yield error_msg
     
     def chat(self, message: str, session_id: str = "default") -> str:
@@ -306,12 +375,17 @@ Always include appropriate legal disclaimers."""
     
     def generate_answer(self, query: str, user_id: str = None, conversation: list = None, stream: bool = False, session_id: str = None) -> Dict[str, any]:
         """Main interface method expected by Flask endpoint with enhanced memory support.
-        Returns a dict: { 'response': str, 'sources': list }
+        Returns a dict: { 'response': str, 'sources': list } or generator if stream=True
         """
         try:
             # Use provided session_id or generate from user_id
             effective_session_id = session_id or user_id or "default"
             
+            # Handle streaming mode
+            if stream:
+                return self._generate_streaming_answer(query, effective_session_id)
+            
+            # Non-streaming mode
             response_text = self.chat(query, session_id=effective_session_id)
             
             # Try to extract sources if we used the RAG fallback path
@@ -336,6 +410,37 @@ Always include appropriate legal disclaimers."""
                 'response': f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question.",
                 'sources': [],
                 'session_id': session_id or user_id or "default"
+            }
+    
+    def _generate_streaming_answer(self, query: str, session_id: str):
+        """Generator function for streaming responses"""
+        try:
+            full_response = ""
+            sources = []
+            
+            # Stream the response
+            for chunk in self.chat_stream_sync(query, session_id):
+                full_response += chunk
+                yield {
+                    'chunk': chunk,
+                    'type': 'content',
+                    'session_id': session_id
+                }
+            
+            # Send final completion signal
+            yield {
+                'chunk': '',
+                'type': 'complete',
+                'session_id': session_id,
+                'full_response': full_response,
+                'sources': sources
+            }
+            
+        except Exception as e:
+            yield {
+                'chunk': f"I apologize, but I encountered an error: {str(e)}",
+                'type': 'error',
+                'session_id': session_id
             }
     
     def clear_memory(self, session_id: str = "default"):
