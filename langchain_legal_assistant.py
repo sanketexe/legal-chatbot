@@ -1,359 +1,350 @@
-"""
-LangChain-Enhanced Legal Assistant
-Integrates LangChain for improved document processing and RAG capabilities
+"""Modern LangChain-based Legal Assistant
+This module supports a LangChain-powered assistant when the langchain
+packages are installed. If langchain (or related providers) are not
+available, the class will fall back to the repository's existing RAG
+functions (so importing this module won't crash the app).
 """
 
 import os
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
-
-# LangChain imports
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.documents import Document
-from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferWindowMemory
-from langchain.schema import BaseRetriever
-
-# Standard imports
-import logging
+from typing import Dict, List, Optional, Iterator
+import asyncio
 from datetime import datetime
-import json
 
-logger = logging.getLogger(__name__)
+# Try to import LangChain pieces lazily. If imports fail, we set HAS_LANGCHAIN=False
+HAS_LANGCHAIN = True
+try:
+    from langchain.chat_models import ChatOpenAI  # type: ignore
+    from langchain_google_genai import ChatGoogleGenerativeAI  # type: ignore
+    from langchain.memory import ConversationBufferWindowMemory  # type: ignore
+    from langchain.schema import HumanMessage, AIMessage, SystemMessage  # type: ignore
+    from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler  # type: ignore
+    from langchain.tools import Tool  # type: ignore
+    from langchain.agents import initialize_agent, AgentType  # type: ignore
+    from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder  # type: ignore
+    from langchain.schema.runnable import RunnableLambda, RunnablePassthrough  # type: ignore
+    from langchain.memory.chat_message_histories import ChatMessageHistory  # type: ignore
+except Exception:
+    HAS_LANGCHAIN = False
 
-@dataclass
-class LegalChatConfig:
-    """Configuration for LangChain legal chat system"""
-    model_name: str = "gemini-pro"
-    temperature: float = 0.7
-    max_tokens: int = 1000
-    chunk_size: int = 1000
-    chunk_overlap: int = 200
-    memory_window: int = 10
-    vector_db_path: str = "./data/langchain_vectordb"
-
-class LegalPromptTemplates:
-    """Standardized prompt templates for legal queries"""
-    
-    LEGAL_ANALYSIS = """
-    You are an expert legal advisor specializing in Indian law. Analyze the following legal query and provide comprehensive guidance.
-    
-    Context from Legal Database:
-    {context}
-    
-    Chat History:
-    {chat_history}
-    
-    Current Question: {question}
-    
-    Please provide:
-    1. **Legal Analysis**: Detailed explanation of the legal issue
-    2. **Relevant Laws**: Applicable statutes, regulations, and case law
-    3. **Precedents**: Relevant legal precedents and court decisions
-    4. **Practical Advice**: Step-by-step guidance
-    5. **Disclaimers**: Important legal disclaimers
-    
-    Response:
+class ModernLegalAssistant:
+    """
+    Advanced Legal Assistant using LangChain with:
+    - Conversation memory
+    - Streaming responses  
+    - Tool integration
+    - Error recovery
+    - Context awareness
     """
     
-    DOCUMENT_ANALYSIS = """
-    You are a legal document analyst. Analyze the following document content and provide insights.
-    
-    Document Content:
-    {document_content}
-    
-    User Query: {query}
-    
-    Please provide:
-    1. **Document Summary**: Key points and clauses
-    2. **Legal Issues**: Potential legal concerns or risks
-    3. **Recommendations**: Suggested actions or modifications
-    4. **Compliance**: Regulatory compliance aspects
-    
-    Analysis:
-    """
-    
-    CASE_RESEARCH = """
-    You are a legal researcher. Based on the provided case law and legal precedents, answer the following query.
-    
-    Relevant Cases:
-    {cases}
-    
-    Query: {query}
-    
-    Provide:
-    1. **Case Summary**: Key findings from relevant cases
-    2. **Legal Principles**: Established legal principles
-    3. **Application**: How these apply to the current situation
-    4. **Citations**: Proper legal citations
-    
-    Research Results:
-    """
-
-class LangChainLegalAssistant:
-    """Enhanced Legal Assistant using LangChain"""
-    
-    def __init__(self, config: LegalChatConfig, api_key: str):
-        self.config = config
-        self.api_key = api_key
-        
-        # Initialize LLM
-        self.llm = self._setup_llm()
-        
-        # Initialize embeddings
-        self.embeddings = self._setup_embeddings()
-        
-        # Initialize vector store
-        self.vectorstore = self._setup_vectorstore()
-        
-        # Initialize memory
-        self.memory = self._setup_memory()
-        
-        # Initialize chains
-        self.qa_chain = self._setup_qa_chain()
-        
-        logger.info("🔗 LangChain Legal Assistant initialized successfully")
-    
-    def _setup_llm(self) -> ChatGoogleGenerativeAI:
-        """Setup Google Gemini LLM"""
-        return ChatGoogleGenerativeAI(
-            model=self.config.model_name,
-            google_api_key=self.api_key,
-            temperature=self.config.temperature,
-            max_output_tokens=self.config.max_tokens
-        )
-    
-    def _setup_embeddings(self) -> HuggingFaceEmbeddings:
-        """Setup embeddings for vector store"""
-        return HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
-        )
-    
-    def _setup_vectorstore(self) -> Chroma:
-        """Setup ChromaDB vector store"""
-        return Chroma(
-            persist_directory=self.config.vector_db_path,
-            embedding_function=self.embeddings
-        )
-    
-    def _setup_memory(self) -> ConversationBufferWindowMemory:
-        """Setup conversation memory"""
-        return ConversationBufferWindowMemory(
-            k=self.config.memory_window,
-            memory_key="chat_history",
-            return_messages=True
-        )
-    
-    def _setup_qa_chain(self) -> ConversationalRetrievalChain:
-        """Setup the main QA chain"""
-        return ConversationalRetrievalChain.from_llm(
-            llm=self.llm,
-            retriever=self.vectorstore.as_retriever(search_kwargs={"k": 5}),
-            memory=self.memory,
-            return_source_documents=True
-        )
-    
-    def process_documents(self, file_paths: List[str]) -> List[Document]:
-        """Process and add documents to vector store"""
-        documents = []
-        
-        for file_path in file_paths:
+    def __init__(self):
+        if HAS_LANGCHAIN:
             try:
-                # Load document based on file type
-                if file_path.endswith('.pdf'):
-                    loader = PyPDFLoader(file_path)
-                elif file_path.endswith('.docx'):
-                    loader = Docx2txtLoader(file_path)
-                else:
-                    logger.warning(f"Unsupported file type: {file_path}")
-                    continue
-                
-                # Load and split documents
-                docs = loader.load()
-                
-                # Split documents into chunks
-                text_splitter = RecursiveCharacterTextSplitter(
-                    chunk_size=self.config.chunk_size,
-                    chunk_overlap=self.config.chunk_overlap
-                )
-                
-                split_docs = text_splitter.split_documents(docs)
-                
-                # Add metadata
-                for doc in split_docs:
-                    doc.metadata.update({
-                        'source_file': file_path,
-                        'processed_date': datetime.now().isoformat(),
-                        'document_type': 'legal_document'
-                    })
-                
-                documents.extend(split_docs)
-                
+                self.setup_llm()
+                self.setup_memory()
+                self.setup_tools()
+                self.setup_prompts()
             except Exception as e:
-                logger.error(f"Error processing document {file_path}: {e}")
-        
-        # Add to vector store
-        if documents:
-            self.vectorstore.add_documents(documents)
-            logger.info(f"Added {len(documents)} document chunks to vector store")
-        
-        return documents
-    
-    def legal_chat(self, query: str, session_id: str = None) -> Dict[str, Any]:
-        """Main legal chat interface"""
-        try:
-            # Run the conversational chain
-            result = self.qa_chain({
-                "question": query,
-                "chat_history": self.memory.chat_memory.messages
-            })
-            
-            response = {
-                "answer": result["answer"],
-                "source_documents": [
-                    {
-                        "content": doc.page_content[:200] + "...",
-                        "source": doc.metadata.get("source", "Unknown"),
-                        "page": doc.metadata.get("page", "N/A")
-                    }
-                    for doc in result.get("source_documents", [])
-                ],
-                "session_id": session_id,
-                "timestamp": datetime.now().isoformat()
-            }
-            
-            return response
-            
-        except Exception as e:
-            logger.error(f"Error in legal chat: {e}")
-            return {
-                "answer": "I apologize, but I'm having trouble processing your request. Please try again.",
-                "error": str(e),
-                "session_id": session_id,
-                "timestamp": datetime.now().isoformat()
-            }
-    
-    def analyze_document(self, document_content: str, query: str = "Analyze this document") -> str:
-        """Analyze a specific document"""
-        prompt = PromptTemplate(
-            template=LegalPromptTemplates.DOCUMENT_ANALYSIS,
-            input_variables=["document_content", "query"]
-        )
-        
-        chain = prompt | self.llm | StrOutputParser()
-        
-        return chain.invoke({
-            "document_content": document_content,
-            "query": query
-        })
-    
-    def research_case_law(self, query: str) -> str:
-        """Research relevant case law"""
-        # Retrieve relevant cases
-        retriever = self.vectorstore.as_retriever(
-            search_kwargs={"k": 10, "filter": {"document_type": "case_law"}}
-        )
-        
-        relevant_docs = retriever.get_relevant_documents(query)
-        cases = "\n\n".join([doc.page_content for doc in relevant_docs])
-        
-        prompt = PromptTemplate(
-            template=LegalPromptTemplates.CASE_RESEARCH,
-            input_variables=["cases", "query"]
-        )
-        
-        chain = prompt | self.llm | StrOutputParser()
-        
-        return chain.invoke({
-            "cases": cases,
-            "query": query
-        })
-    
-    def get_legal_advice(self, query: str, context_docs: List[str] = None) -> str:
-        """Get comprehensive legal advice"""
-        # Get context from vector store if not provided
-        if not context_docs:
-            retriever = self.vectorstore.as_retriever(search_kwargs={"k": 5})
-            relevant_docs = retriever.get_relevant_documents(query)
-            context = "\n\n".join([doc.page_content for doc in relevant_docs])
+                # If any LangChain setup step fails, fall back to non-langchain mode
+                print(f"WARN: LangChain setup failed: {e}")
+                self._set_fallback_state()
         else:
-            context = "\n\n".join(context_docs)
+            print("WARN: LangChain packages not available. Running in fallback mode.")
+            self._set_fallback_state()
+
+    def _set_fallback_state(self):
+        """Set attributes for safe fallback operation when LangChain isn't present."""
+        self.llm = None
+        self.memory = None
+        self.tools = []
+        self.system_prompt = ""
+        self.prompt_template = None
         
-        chat_history = "\n".join([
-            f"{msg.type}: {msg.content}"
-            for msg in self.memory.chat_memory.messages[-6:]  # Last 3 exchanges
-        ])
-        
-        prompt = PromptTemplate(
-            template=LegalPromptTemplates.LEGAL_ANALYSIS,
-            input_variables=["context", "chat_history", "question"]
+    def setup_llm(self):
+        """Initialize chat models with streaming"""
+        if not HAS_LANGCHAIN:
+            raise RuntimeError("LangChain not available")
+
+        # Primary: Gemini (cost-effective)
+        if os.getenv('GEMINI_API_KEY'):
+            self.llm = ChatGoogleGenerativeAI(
+                model="gemini-2.0-flash-exp",
+                google_api_key=os.getenv('GEMINI_API_KEY'),
+                temperature=0.7,
+                streaming=True,
+                callbacks=[StreamingStdOutCallbackHandler()]
+            )
+            print("✅ Using Gemini Chat Model")
+
+        # Fallback: OpenAI
+        elif os.getenv('OPENAI_API_KEY'):
+            self.llm = ChatOpenAI(
+                model="gpt-4",
+                openai_api_key=os.getenv('OPENAI_API_KEY'),
+                temperature=0.7,
+                streaming=True,
+                callbacks=[StreamingStdOutCallbackHandler()]
+            )
+            print("✅ Using OpenAI Chat Model")
+        else:
+            raise ValueError("No API keys found for LLM")
+    
+    def setup_memory(self):
+        """Setup conversation memory"""
+        self.memory = ConversationBufferWindowMemory(
+            k=10,  # Remember last 10 exchanges
+            memory_key="chat_history",
+            return_messages=True,
+            output_key="answer"
         )
         
-        chain = prompt | self.llm | StrOutputParser()
-        
-        return chain.invoke({
-            "context": context,
-            "chat_history": chat_history,
-            "question": query
-        })
+    def setup_tools(self):
+        """Setup legal tools"""
+        self.tools = [
+            Tool(
+                name="legal_database_search",
+                description="Search legal cases and precedents in the database",
+                func=self._search_legal_database
+            ),
+            Tool(
+                name="legal_framework_lookup", 
+                description="Look up legal acts, sections, and constitutional provisions",
+                func=self._lookup_legal_framework
+            ),
+            Tool(
+                name="current_legal_news",
+                description="Get information about current legal events and cases",
+                func=self._get_current_legal_info
+            )
+        ]
     
-    def clear_memory(self):
-        """Clear conversation memory"""
-        self.memory.clear()
-        logger.info("Conversation memory cleared")
+    def setup_prompts(self):
+        """Setup sophisticated prompts"""
+        self.system_prompt = """You are an expert Indian Legal Assistant with comprehensive knowledge of:
+
+**Core Expertise:**
+- Indian Constitution (Articles, Fundamental Rights, DPSPs)
+- Indian Penal Code (IPC), Criminal Procedure Code (CrPC)
+- Civil Procedure Code (CPC), Evidence Act
+- Preventive detention laws (NSA, PSA, UAPA)
+- Commercial laws, Family laws, Property laws
+- Current legal developments and landmark judgments
+
+**Response Guidelines:**
+1. **Be Conversational**: Maintain context from previous messages
+2. **Be Educational**: Explain legal concepts clearly
+3. **Be Current**: Address contemporary legal issues
+4. **Be Practical**: Provide actionable legal guidance
+5. **Be Comprehensive**: Cover relevant laws, procedures, and remedies
+6. **Be Accurate**: Cite specific legal provisions when applicable
+
+**For Detention/Arrest Cases:**
+- Explain applicable laws (NSA, PSA, UAPA, CrPC)
+- Constitutional provisions (Articles 19, 21, 22)
+- Legal remedies (habeas corpus, bail, legal aid)
+- Rights of the accused and due process
+
+**Conversation Style:**
+- Remember previous context
+- Ask clarifying questions when needed
+- Provide step-by-step guidance
+- Suggest next steps or follow-up questions
+
+Always include appropriate legal disclaimers."""
+
+        self.prompt_template = ChatPromptTemplate.from_messages([
+            ("system", self.system_prompt),
+            MessagesPlaceholder(variable_name="chat_history"),
+            ("human", "{input}")
+        ])
     
-    def save_session(self, session_id: str, filename: str = None):
-        """Save conversation session"""
-        if not filename:
-            filename = f"legal_session_{session_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        
-        session_data = {
-            "session_id": session_id,
-            "messages": [
-                {
-                    "type": msg.type,
-                    "content": msg.content,
-                    "timestamp": getattr(msg, 'timestamp', datetime.now().isoformat())
-                }
-                for msg in self.memory.chat_memory.messages
-            ],
-            "saved_at": datetime.now().isoformat()
+    def _search_legal_database(self, query: str) -> str:
+        """Search legal database (integrate with existing RAG)"""
+        try:
+            # Import and use existing RAG system
+            from ml_legal_system.legal_rag import answer_legal_query
+            result = answer_legal_query(query)
+
+            # Normalize various return shapes
+            if isinstance(result, dict):
+                sources = result.get('sources', [])
+                answer_text = result.get('response') or result.get('answer') or ''
+            else:
+                sources = []
+                answer_text = str(result)
+
+            if sources:
+                return f"Found {len(sources)} relevant cases:\n{answer_text}"
+            else:
+                return "No specific precedents found in database."
+        except Exception as e:
+            return f"Database search unavailable: {str(e)}"
+    
+    def _lookup_legal_framework(self, query: str) -> str:
+        """Look up legal acts and provisions"""
+        # This could be enhanced with a comprehensive legal database
+        frameworks = {
+            'constitution': 'Indian Constitution - Fundamental Rights, DPSPs, Emergency provisions',
+            'ipc': 'Indian Penal Code - Criminal offenses and punishments',
+            'crpc': 'Criminal Procedure Code - Criminal trial procedures',
+            'cpc': 'Civil Procedure Code - Civil litigation procedures',
+            'nsa': 'National Security Act - Preventive detention for national security',
+            'psa': 'Public Safety Act - Preventive detention in J&K and other states',
+            'uapa': 'Unlawful Activities Prevention Act - Anti-terrorism law'
         }
         
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(session_data, f, indent=2, ensure_ascii=False)
+        query_lower = query.lower()
+        relevant = [f"**{k.upper()}**: {v}" for k, v in frameworks.items() if k in query_lower]
         
-        logger.info(f"Session saved to {filename}")
-        return filename
-
-# Factory function
-def create_langchain_legal_assistant(api_key: str, config: LegalChatConfig = None) -> LangChainLegalAssistant:
-    """Create and initialize LangChain Legal Assistant"""
-    if not config:
-        config = LegalChatConfig()
+        if relevant:
+            return "Relevant Legal Framework:\n" + "\n".join(relevant)
+        else:
+            return "Please specify which legal framework you're interested in (Constitution, IPC, CrPC, etc.)"
     
-    return LangChainLegalAssistant(config, api_key)
+    def _get_current_legal_info(self, query: str) -> str:
+        """Get current legal information (could integrate with news APIs)"""
+        return "For current legal developments, please check recent Supreme Court and High Court judgments, or consult legal news sources."
+    
+    async def chat_stream(self, message: str, session_id: str = "default"):
+        """Stream response with conversation memory"""
+        # If LangChain streaming is not available, fall back to a single non-streaming reply
+        if not HAS_LANGCHAIN:
+            try:
+                from ml_legal_system.legal_rag import answer_legal_query
+                out = answer_legal_query(message)
+                if isinstance(out, dict):
+                    text = out.get('response') or out.get('answer') or str(out)
+                else:
+                    text = str(out)
+                yield text
+            except Exception as e:
+                # Try basic fallback
+                try:
+                    import sys
+                    import os
+                    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+                    from app import get_basic_fallback_response
+                    yield get_basic_fallback_response(message)
+                except Exception:
+                    yield f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
+            return
 
-# Example usage
+        try:
+            # Build conversation chain
+            chain = (
+                RunnablePassthrough.assign(
+                    chat_history=lambda x: self.memory.chat_memory.messages
+                )
+                | self.prompt_template
+                | self.llm
+            )
+
+            # Stream response
+            full_response = ""
+            async for chunk in chain.astream({"input": message}):
+                if hasattr(chunk, 'content'):
+                    content = chunk.content
+                    full_response += content
+                    yield content
+
+            # Save to memory
+            if hasattr(self.memory, 'chat_memory'):
+                self.memory.chat_memory.add_user_message(message)
+                self.memory.chat_memory.add_ai_message(full_response)
+
+        except Exception as e:
+            error_msg = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
+            yield error_msg
+    
+    def chat(self, message: str, session_id: str = "default") -> str:
+        """Non-streaming chat for compatibility"""
+        # If LangChain isn't available, route to existing RAG implementation
+        if not HAS_LANGCHAIN:
+            try:
+                from ml_legal_system.legal_rag import answer_legal_query
+                out = answer_legal_query(message)
+                if isinstance(out, dict):
+                    return out.get('response') or out.get('answer') or str(out)
+                return str(out)
+            except Exception as e:
+                # If RAG fails, try a simpler fallback
+                try:
+                    # Import basic fallback function from app
+                    import sys
+                    import os
+                    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+                    from app import get_basic_fallback_response
+                    return get_basic_fallback_response(message)
+                except Exception:
+                    return f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
+
+        try:
+            # Use the prompt template with memory
+            messages = [
+                SystemMessage(content=self.system_prompt),
+                *self.memory.chat_memory.messages,
+                HumanMessage(content=message)
+            ]
+
+            response = self.llm(messages)
+
+            # Save to memory
+            self.memory.chat_memory.add_user_message(message)
+            self.memory.chat_memory.add_ai_message(response.content)
+
+            return response.content
+
+        except Exception as e:
+            return f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
+    
+    def generate_answer(self, query: str, user_id: str = None, conversation: list = None, stream: bool = False) -> Dict[str, any]:
+        """Main interface method expected by Flask endpoint. 
+        Returns a dict: { 'response': str, 'sources': list }
+        """
+        try:
+            response_text = self.chat(query, session_id=user_id or "default")
+            
+            # Try to extract sources if we used the RAG fallback path
+            sources = []
+            if not HAS_LANGCHAIN:
+                # When falling back to RAG, try to get sources from the last call
+                try:
+                    from ml_legal_system.legal_rag import answer_legal_query
+                    result = answer_legal_query(query)
+                    if isinstance(result, dict):
+                        sources = result.get('sources', [])
+                except Exception:
+                    pass
+            
+            return {
+                'response': response_text,
+                'sources': sources
+            }
+        except Exception as e:
+            return {
+                'response': f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question.",
+                'sources': []
+            }
+    
+    def clear_memory(self, session_id: str = "default"):
+        """Clear conversation memory"""
+        if self.memory:
+            self.memory.clear()
+    
+    def get_conversation_summary(self) -> str:
+        """Get summary of current conversation"""
+        if not self.memory.chat_memory.messages:
+            return "No conversation history."
+        
+        return f"Conversation has {len(self.memory.chat_memory.messages)} messages."
+
+# Usage example
 if __name__ == "__main__":
-    # Example configuration
-    config = LegalChatConfig(
-        model_name="gemini-pro",
-        temperature=0.7,
-        chunk_size=1000,
-        memory_window=10
-    )
+    assistant = ModernLegalAssistant()
     
-    # Initialize assistant (replace with your API key)
-    assistant = create_langchain_legal_assistant("your_api_key_here", config)
+    # Test conversation
+    response1 = assistant.chat("What are the legal provisions for detention in India?")
+    print("Response 1:", response1[:200] + "...")
     
-    # Example legal consultation
-    response = assistant.legal_chat("What are the requirements for a valid contract in Indian law?")
-    print(response["answer"])
+    # Follow-up with context
+    response2 = assistant.chat("Can you explain more about Article 22?")
+    print("Response 2:", response2[:200] + "...")

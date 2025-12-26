@@ -851,6 +851,49 @@ def get_chat_sessions(current_user):
             'error': f'Failed to fetch sessions: {str(e)}'
         }), 500
 
+
+@app.route('/api/chat_modern', methods=['POST'])
+def chat_modern():
+    """Modern chat endpoint that uses a LangChain-style assistant if available.
+    This imports the helper lazily so the app still runs when langchain is not installed.
+    """
+    try:
+        data = request.get_json() or {}
+        user_message = data.get('message') or data.get('query') or ''
+
+        if not user_message:
+            return jsonify({'success': False, 'error': 'No message provided'}), 400
+
+        # Try to use the LangChain-style assistant, but import lazily to avoid hard dependency
+        try:
+            from langchain_legal_assistant import ModernLegalAssistant
+            assistant = ModernLegalAssistant(config=config)
+            result = assistant.generate_answer(user_message)
+
+            response_text = result.get('response') if isinstance(result, dict) else str(result)
+            sources = result.get('sources', []) if isinstance(result, dict) else []
+
+            return jsonify({
+                'success': True,
+                'response': response_text,
+                'sources': sources,
+                'type': 'modern'
+            })
+
+        except Exception as inner_err:
+            # If ModernLegalAssistant isn't available or failed, return a helpful fallback
+            print(f"WARN: Modern assistant failed or not available: {inner_err}")
+            fallback = get_basic_fallback_response(user_message)
+            return jsonify({
+                'success': True,
+                'response': fallback,
+                'sources': [],
+                'type': 'fallback'
+            })
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'An error occurred: {str(e)}'}), 500
+
 @app.route('/api/chat/sessions/<session_id>', methods=['GET'])
 @auth_required
 def get_chat_session(current_user, session_id):
