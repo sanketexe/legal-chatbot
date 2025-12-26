@@ -9,6 +9,10 @@ import os
 from typing import Dict, List, Optional, Iterator
 import asyncio
 from datetime import datetime
+import logging
+
+# Setup logger
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -86,9 +90,18 @@ class ModernLegalAssistant:
             raise ValueError("No API keys found for LLM")
     
     def setup_memory(self):
-        """Setup conversation memory - simplified"""
-        # For now, we'll store conversation history as a simple list
-        self.conversation_history = []
+        """Setup conversation memory with session-based storage"""
+        # Session-based memory storage for multi-user support
+        self.session_memories = {}  # session_id -> conversation history
+        self.max_memory_messages = 20  # Limit memory to prevent token overflow
+        
+        # Import database models for persistent storage
+        try:
+            from models import ChatSession, Message, db
+            self.db_available = True
+        except ImportError:
+            self.db_available = False
+            logger.info("Database models not available, using in-memory storage only")
         
     def setup_tools(self):
         """Setup legal tools - simplified approach for now"""
@@ -182,7 +195,64 @@ Always include appropriate legal disclaimers."""
         """Get current legal information (could integrate with news APIs)"""
         return "For current legal developments, please check recent Supreme Court and High Court judgments, or consult legal news sources."
     
-    async def chat_stream(self, message: str, session_id: str = "default"):
+    def get_session_memory(self, session_id: str) -> List[Dict]:
+        """Get conversation memory for a specific session"""
+        if self.db_available:
+            return self._get_db_memory(session_id)
+        else:
+            return self.session_memories.get(session_id, [])
+    
+    def _get_db_memory(self, session_id: str) -> List[Dict]:
+        """Retrieve conversation history from database"""
+        try:
+            from models import Message
+            messages = Message.query.filter_by(
+                session_id=session_id
+            ).order_by(Message.timestamp.asc()).limit(self.max_memory_messages).all()
+            
+            return [{'role': msg.role, 'content': msg.content} for msg in messages]
+        except Exception as e:
+            logger.warning(f"Could not retrieve DB memory: {e}")
+            return self.session_memories.get(session_id, [])
+    
+    def add_to_session_memory(self, session_id: str, role: str, content: str):
+        """Add message to session memory"""
+        message = {'role': role, 'content': content}
+        
+        # Add to in-memory store
+        if session_id not in self.session_memories:
+            self.session_memories[session_id] = []
+        
+        self.session_memories[session_id].append(message)
+        
+        # Keep only recent messages to prevent memory overflow
+        if len(self.session_memories[session_id]) > self.max_memory_messages:
+            self.session_memories[session_id] = self.session_memories[session_id][-self.max_memory_messages:]
+    
+    def clear_session_memory(self, session_id: str):
+        """Clear memory for a specific session"""
+        if session_id in self.session_memories:
+            del self.session_memories[session_id]
+    
+    def build_conversation_context(self, session_id: str, current_message: str) -> List:
+        """Build conversation context with memory for LangChain"""
+        if not HAS_LANGCHAIN:
+            return []
+            
+        messages = [SystemMessage(content=self.system_prompt)]
+        
+        # Add conversation history
+        history = self.get_session_memory(session_id)
+        for msg in history[-10:]:  # Use only last 10 messages for context
+            if msg['role'] == 'user':
+                messages.append(HumanMessage(content=msg['content']))
+            elif msg['role'] == 'assistant':
+                messages.append(AIMessage(content=msg['content']))
+        
+        # Add current message
+        messages.append(HumanMessage(content=current_message))
+        
+        return messages
         """Stream response - simplified fallback"""
         try:
             response = self.chat(message, session_id)
@@ -192,7 +262,7 @@ Always include appropriate legal disclaimers."""
             yield error_msg
     
     def chat(self, message: str, session_id: str = "default") -> str:
-        """Non-streaming chat for compatibility"""
+        """Enhanced chat with session-based conversation memory"""
         # If LangChain isn't available, route to existing RAG implementation
         if not HAS_LANGCHAIN:
             try:
@@ -214,35 +284,35 @@ Always include appropriate legal disclaimers."""
                     return f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
 
         try:
-            # Use LangChain with simplified approach
-            messages = [
-                SystemMessage(content=self.system_prompt),
-                HumanMessage(content=message)
-            ]
-
-            response = self.llm.invoke(messages)
+            # Build conversation context with session memory
+            messages = self.build_conversation_context(session_id, message)
             
-            # Add to conversation history for context
-            self.conversation_history.append({
-                'role': 'user',
-                'content': message
-            })
-            self.conversation_history.append({
-                'role': 'assistant', 
-                'content': response.content
-            })
-
-            return response.content
+            # Get response from LLM
+            response = self.llm.invoke(messages)
+            response_content = response.content
+            
+            # Add to conversation memory
+            self.add_to_session_memory(session_id, 'user', message)
+            self.add_to_session_memory(session_id, 'assistant', response_content)
+            
+            return response_content
 
         except Exception as e:
-            return f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
+            error_msg = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
+            # Still add the user message to memory for context
+            self.add_to_session_memory(session_id, 'user', message)
+            self.add_to_session_memory(session_id, 'assistant', error_msg)
+            return error_msg
     
-    def generate_answer(self, query: str, user_id: str = None, conversation: list = None, stream: bool = False) -> Dict[str, any]:
-        """Main interface method expected by Flask endpoint. 
+    def generate_answer(self, query: str, user_id: str = None, conversation: list = None, stream: bool = False, session_id: str = None) -> Dict[str, any]:
+        """Main interface method expected by Flask endpoint with enhanced memory support.
         Returns a dict: { 'response': str, 'sources': list }
         """
         try:
-            response_text = self.chat(query, session_id=user_id or "default")
+            # Use provided session_id or generate from user_id
+            effective_session_id = session_id or user_id or "default"
+            
+            response_text = self.chat(query, session_id=effective_session_id)
             
             # Try to extract sources if we used the RAG fallback path
             sources = []
@@ -258,25 +328,55 @@ Always include appropriate legal disclaimers."""
             
             return {
                 'response': response_text,
-                'sources': sources
+                'sources': sources,
+                'session_id': effective_session_id
             }
         except Exception as e:
             return {
                 'response': f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question.",
-                'sources': []
+                'sources': [],
+                'session_id': session_id or user_id or "default"
             }
     
     def clear_memory(self, session_id: str = "default"):
-        """Clear conversation memory"""
-        if self.conversation_history:
-            self.conversation_history.clear()
+        """Clear conversation memory for backward compatibility"""
+        self.clear_session_memory(session_id)
     
-    def get_conversation_summary(self) -> str:
-        """Get summary of current conversation"""
-        if not self.conversation_history:
+    def get_conversation_summary(self, session_id: str = "default") -> str:
+        """Get summary of conversation for a specific session"""
+        history = self.get_session_memory(session_id)
+        if not history:
             return "No conversation history."
         
-        return f"Conversation has {len(self.conversation_history)} messages."
+        user_messages = len([msg for msg in history if msg['role'] == 'user'])
+        assistant_messages = len([msg for msg in history if msg['role'] == 'assistant'])
+        
+        return f"Session {session_id}: {user_messages} user messages, {assistant_messages} assistant responses."
+    
+    def get_session_stats(self, session_id: str = "default") -> Dict:
+        """Get detailed statistics for a session"""
+        history = self.get_session_memory(session_id)
+        
+        if not history:
+            return {
+                'session_id': session_id,
+                'total_messages': 0,
+                'user_messages': 0,
+                'assistant_messages': 0,
+                'last_activity': None
+            }
+        
+        user_messages = [msg for msg in history if msg['role'] == 'user']
+        assistant_messages = [msg for msg in history if msg['role'] == 'assistant']
+        
+        return {
+            'session_id': session_id,
+            'total_messages': len(history),
+            'user_messages': len(user_messages),
+            'assistant_messages': len(assistant_messages),
+            'last_user_message': user_messages[-1]['content'][:100] + "..." if user_messages else None,
+            'conversation_active': len(history) > 0
+        }
 
 # Usage example
 if __name__ == "__main__":

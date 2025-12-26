@@ -854,12 +854,13 @@ def get_chat_sessions(current_user):
 
 @app.route('/api/chat_modern', methods=['POST'])
 def chat_modern():
-    """Modern chat endpoint that uses a LangChain-style assistant if available.
+    """Modern chat endpoint that uses a LangChain-style assistant with session memory.
     This imports the helper lazily so the app still runs when langchain is not installed.
     """
     try:
         data = request.get_json() or {}
         user_message = data.get('message') or data.get('query') or ''
+        session_id = data.get('session_id')  # Optional session ID from client
 
         if not user_message:
             return jsonify({'success': False, 'error': 'No message provided'}), 400
@@ -867,16 +868,21 @@ def chat_modern():
         # Try to use the LangChain-style assistant, but import lazily to avoid hard dependency
         try:
             from langchain_legal_assistant import ModernLegalAssistant
-            assistant = ModernLegalAssistant(config=config)
-            result = assistant.generate_answer(user_message)
+            assistant = ModernLegalAssistant()
+            result = assistant.generate_answer(
+                user_message, 
+                session_id=session_id or "default"
+            )
 
             response_text = result.get('response') if isinstance(result, dict) else str(result)
             sources = result.get('sources', []) if isinstance(result, dict) else []
+            used_session_id = result.get('session_id', session_id or "default")
 
             return jsonify({
                 'success': True,
                 'response': response_text,
                 'sources': sources,
+                'session_id': used_session_id,
                 'type': 'modern'
             })
 
@@ -888,6 +894,7 @@ def chat_modern():
                 'success': True,
                 'response': fallback,
                 'sources': [],
+                'session_id': session_id or "default",
                 'type': 'fallback'
             })
 
@@ -1003,6 +1010,72 @@ def clear_chat(current_user):
             'success': True,
             'message': 'Chat history cleared'
         })
+
+# ============================================================================
+# MEMORY MANAGEMENT ROUTES (For LangChain Assistant)
+# ============================================================================
+
+@app.route('/api/chat/memory/<session_id>', methods=['GET'])
+def get_session_memory(session_id):
+    """Get conversation memory statistics for a session"""
+    try:
+        from langchain_legal_assistant import ModernLegalAssistant
+        assistant = ModernLegalAssistant()
+        stats = assistant.get_session_stats(session_id)
+        
+        return jsonify({
+            'success': True,
+            'memory_stats': stats
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Failed to get memory stats: {str(e)}'
+        }), 500
+
+@app.route('/api/chat/memory/<session_id>', methods=['DELETE'])
+def clear_session_memory(session_id):
+    """Clear conversation memory for a specific session"""
+    try:
+        from langchain_legal_assistant import ModernLegalAssistant
+        assistant = ModernLegalAssistant()
+        assistant.clear_session_memory(session_id)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Memory cleared for session {session_id}'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Failed to clear memory: {str(e)}'
+        }), 500
+
+@app.route('/api/chat/memory', methods=['GET'])
+def get_all_session_stats():
+    """Get memory statistics for all active sessions"""
+    try:
+        from langchain_legal_assistant import ModernLegalAssistant
+        assistant = ModernLegalAssistant()
+        
+        # Get stats for all sessions currently in memory
+        all_stats = {}
+        for session_id in assistant.session_memories.keys():
+            all_stats[session_id] = assistant.get_session_stats(session_id)
+        
+        return jsonify({
+            'success': True,
+            'sessions': all_stats,
+            'total_active_sessions': len(all_stats)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Failed to get session stats: {str(e)}'
+        }), 500
 
 # ============================================================================
 # UTILITY ROUTES
