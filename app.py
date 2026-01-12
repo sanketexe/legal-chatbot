@@ -69,6 +69,22 @@ try:
 except ImportError:
     print("WARN: Translation service not available")
     TRANSLATION_AVAILABLE = False
+
+# Import AI and UX enhancement blueprints
+try:
+    from ai_enhancements_api import register_ai_enhancements
+    AI_ENHANCEMENTS_AVAILABLE = True
+except ImportError:
+    print("WARN: AI enhancements API not available")
+    AI_ENHANCEMENTS_AVAILABLE = False
+    
+try:
+    from ux_enhancements_api import register_ux_enhancements
+    UX_ENHANCEMENTS_AVAILABLE = True
+except ImportError:
+    print("WARN: UX enhancements API not available")
+    UX_ENHANCEMENTS_AVAILABLE = False
+
 from logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -307,6 +323,15 @@ logger.info("-" * 40)
 from admin_blueprint import admin_bp
 app.register_blueprint(admin_bp)
 logger.info("Admin dashboard registered at /admin")
+
+# Register AI and UX enhancement blueprints
+if AI_ENHANCEMENTS_AVAILABLE:
+    register_ai_enhancements(app)
+    logger.info("AI enhancements API registered at /api/ai")
+    
+if UX_ENHANCEMENTS_AVAILABLE:
+    register_ux_enhancements(app)
+    logger.info("UX enhancements API registered at /api/ux")
 
 # ============================================================================
 # AUTHENTICATION ROUTES
