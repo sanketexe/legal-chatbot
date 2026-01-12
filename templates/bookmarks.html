@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmarks - LegalAssist Pro</title>
+    
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .bookmarks-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 1.5rem;
+        }
+        
+        .bookmarks-sidebar {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            margin-bottom: 0.75rem;
+        }
+        
+        .filter-item {
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+        
+        .filter-item:hover {
+            background: var(--gray-100);
+        }
+        
+        .filter-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .filter-icon {
+            margin-right: 0.5rem;
+        }
+        
+        .filter-count {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 12px;
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+        
+        .filter-item.active .filter-count {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .bookmarks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .bookmark-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+        }
+        
+        .bookmark-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--box-shadow-lg);
+        }
+        
+        .bookmark-favorite {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.25rem;
+            color: var(--secondary-color);
+        }
+        
+        .bookmark-type {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .bookmark-type.case { background: #dbeafe; color: #1e40af; }
+        .bookmark-type.query { background: #dcfce7; color: #15803d; }
+        .bookmark-type.conversation { background: #fef3c7; color: #92400e; }
+        .bookmark-type.document { background: #e0e7ff; color: #4338ca; }
+        
+        .bookmark-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+        
+        .bookmark-content {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+        
+        .bookmark-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .bookmark-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        .bookmark-stats {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .bookmark-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .view-toggle {
+            display: flex;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 0.25rem;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .view-toggle button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: calc(var(--border-radius) - 2px);
+            transition: all var(--transition-fast);
+        }
+        
+        .view-toggle button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .bookmarks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .bookmark-list-item {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .bookmark-list-item:hover {
+            box-shadow: var(--box-shadow-lg);
+        }
+        
+        .bookmark-list-content {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>⚖️ LegalAssist Pro</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item" onclick="window.location.href='/dashboard'">
+                    <span class="nav-item-icon">📊</span>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='/conversation-history'">
+                    <span class="nav-item-icon">📝</span>
+                    <span>Conversations</span>
+                </div>
+                <div class="nav-item active">
+                    <span class="nav-item-icon">🔖</span>
+                    <span>Bookmarks</span>
+                </div>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-title">
+                    <h1>My Bookmarks</h1>
+                </div>
+                <div class="header-actions">
+                    <div class="view-toggle">
+                        <button id="grid-view" class="active" onclick="switchView('grid')">
+                            <i class="fas fa-th"></i> Grid
+                        </button>
+                        <button id="list-view" onclick="switchView('list')">
+                            <i class="fas fa-list"></i> List
+                        </button>
+                    </div>
+                    <button class="btn btn-primary" onclick="showAddBookmarkModal()">
+                        <i class="fas fa-plus"></i> Add Bookmark
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content-area">
+                <div class="bookmarks-layout">
+                    <!-- Filters Sidebar -->
+                    <div class="bookmarks-sidebar">
+                        <!-- Type Filter -->
+                        <div class="sidebar-section">
+                            <div class="sidebar-title">Type</div>
+                            <div class="filter-item active" data-type="all" onclick="filterByType('all')">
+                                <span><span class="filter-icon">📚</span>All</span>
+                                <span class="filter-count" id="count-all">0</span>
+                            </div>
+                            <div class="filter-item" data-type="case" onclick="filterByType('case')">
+                                <span><span class="filter-icon">⚖️</span>Cases</span>
+                                <span class="filter-count" id="count-case">0</span>
+                            </div>
+                            <div class="filter-item" data-type="query" onclick="filterByType('query')">
+                                <span><span class="filter-icon">❓</span>Queries</span>
+                                <span class="filter-count" id="count-query">0</span>
+                            </div>
+                            <div class="filter-item" data-type="conversation" onclick="filterByType('conversation')">
+                                <span><span class="filter-icon">💬</span>Conversations</span>
+                                <span class="filter-count" id="count-conversation">0</span>
+                            </div>
+                            <div class="filter-item" data-type="document" onclick="filterByType('document')">
+                                <span><span class="filter-icon">📄</span>Documents</span>
+                                <span class="filter-count" id="count-document">0</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Folder Filter -->
+                        <div class="sidebar-section">
+                            <div class="sidebar-title">Folders</div>
+                            <div id="folder-filters"></div>
+                        </div>
+                        
+                        <!-- Favorites -->
+                        <div class="sidebar-section">
+                            <div class="filter-item" data-favorite="true" onclick="filterByFavorite()">
+                                <span><span class="filter-icon">⭐</span>Favorites</span>
+                                <span class="filter-count" id="count-favorites">0</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Tags -->
+                        <div class="sidebar-section">
+                            <div class="sidebar-title">Tags</div>
+                            <div id="tag-filters"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bookmarks Content -->
+                    <div>
+                        <!-- Search Bar -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <input type="text" id="search-input" class="form-control" 
+                                       placeholder="Search bookmarks..." 
+                                       onkeyup="handleSearch()">
+                            </div>
+                        </div>
+                        
+                        <!-- Bookmarks Grid/List -->
+                        <div id="bookmarks-container">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                                <p class="loading-message">Loading bookmarks...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/static/js/api-client.js"></script>
+    <script>
+        // State
+        let allBookmarks = [];
+        let filteredBookmarks = [];
+        let currentView = 'grid';
+        let currentFilters = {
+            type: 'all',
+            folder: null,
+            favorite: false,
+            tag: null,
+            search: ''
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBookmarks();
+        });
+        
+        // Load bookmarks
+        async function loadBookmarks() {
+            const container = document.getElementById('bookmarks-container');
+            
+            try {
+                UIUtils.showLoading(container, 'Loading bookmarks...');
+                
+                const data = await BookmarksAPI.list();
+                allBookmarks = data.bookmarks || [];
+                
+                if (allBookmarks.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔖</div>
+                            <div class="empty-state-title">No bookmarks yet</div>
+                            <div class="empty-state-description">
+                                Start bookmarking important cases, conversations, and documents
+                            </div>
+                            <button class="btn btn-primary" onclick="showAddBookmarkModal()">
+                                <i class="fas fa-plus"></i> Add First Bookmark
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Update counts
+                updateCounts();
+                
+                // Build folder and tag filters
+                buildFolderFilters();
+                buildTagFilters();
+                
+                // Apply filters and render
+                applyFilters();
+                
+            } catch (error) {
+                console.error('Error loading bookmarks:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <div class="empty-state-title">Failed to load bookmarks</div>
+                        <div class="empty-state-description">${error.message}</div>
+                        <button class="btn btn-primary" onclick="loadBookmarks()">
+                            <i class="fas fa-redo"></i> Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Update counts
+        function updateCounts() {
+            document.getElementById('count-all').textContent = allBookmarks.length;
+            
+            const typeCounts = {};
+            let favoritesCount = 0;
+            
+            allBookmarks.forEach(b => {
+                typeCounts[b.item_type] = (typeCounts[b.item_type] || 0) + 1;
+                if (b.is_favorite) favoritesCount++;
+            });
+            
+            ['case', 'query', 'conversation', 'document'].forEach(type => {
+                const el = document.getElementById(`count-${type}`);
+                if (el) el.textContent = typeCounts[type] || 0;
+            });
+            
+            document.getElementById('count-favorites').textContent = favoritesCount;
+        }
+        
+        // Build folder filters
+        function buildFolderFilters() {
+            const folders = [...new Set(allBookmarks.map(b => b.folder).filter(f => f))];
+            const container = document.getElementById('folder-filters');
+            
+            if (folders.length === 0) {
+                container.innerHTML = '<p class="text-muted" style="font-size: 0.75rem; padding: 0.5rem 0.75rem;">No folders</p>';
+                return;
+            }
+            
+            container.innerHTML = folders.map(folder => {
+                const count = allBookmarks.filter(b => b.folder === folder).length;
+                return `
+                    <div class="filter-item" data-folder="${folder}" onclick="filterByFolder('${folder}')">
+                        <span><span class="filter-icon">📁</span>${folder}</span>
+                        <span class="filter-count">${count}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Build tag filters
+        function buildTagFilters() {
+            const allTags = new Set();
+            allBookmarks.forEach(b => {
+                if (b.tags) b.tags.forEach(tag => allTags.add(tag));
+            });
+            
+            const container = document.getElementById('tag-filters');
+            
+            if (allTags.size === 0) {
+                container.innerHTML = '<p class="text-muted" style="font-size: 0.75rem; padding: 0.5rem 0.75rem;">No tags</p>';
+                return;
+            }
+            
+            container.innerHTML = Array.from(allTags).map(tag => {
+                const count = allBookmarks.filter(b => b.tags && b.tags.includes(tag)).length;
+                return `
+                    <div class="filter-item" data-tag="${tag}" onclick="filterByTag('${tag}')">
+                        <span><span class="filter-icon">#</span>${tag}</span>
+                        <span class="filter-count">${count}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Apply filters
+        function applyFilters() {
+            filteredBookmarks = allBookmarks.filter(b => {
+                if (currentFilters.type !== 'all' && b.item_type !== currentFilters.type) return false;
+                if (currentFilters.folder && b.folder !== currentFilters.folder) return false;
+                if (currentFilters.favorite && !b.is_favorite) return false;
+                if (currentFilters.tag && (!b.tags || !b.tags.includes(currentFilters.tag))) return false;
+                if (currentFilters.search) {
+                    const search = currentFilters.search.toLowerCase();
+                    return b.title.toLowerCase().includes(search) || 
+                           (b.content && b.content.toLowerCase().includes(search));
+                }
+                return true;
+            });
+            
+            renderBookmarks();
+        }
+        
+        // Render bookmarks
+        function renderBookmarks() {
+            const container = document.getElementById('bookmarks-container');
+            
+            if (filteredBookmarks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-title">No bookmarks found</div>
+                        <div class="empty-state-description">Try adjusting your filters</div>
+                        <button class="btn btn-outline" onclick="resetFilters()">
+                            <i class="fas fa-redo"></i> Reset Filters
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (currentView === 'grid') {
+                container.innerHTML = `
+                    <div class="bookmarks-grid">
+                        ${filteredBookmarks.map(b => renderBookmarkCard(b)).join('')}
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="bookmarks-list">
+                        ${filteredBookmarks.map(b => renderBookmarkListItem(b)).join('')}
+                    </div>
+                `;
+            }
+        }
+        
+        // Render bookmark card
+        function renderBookmarkCard(bookmark) {
+            return `
+                <div class="bookmark-card" onclick="openBookmark('${bookmark.id}')">
+                    ${bookmark.is_favorite ? '<div class="bookmark-favorite">⭐</div>' : ''}
+                    <div class="bookmark-type ${bookmark.item_type}">${bookmark.item_type}</div>
+                    <div class="bookmark-title">${bookmark.title}</div>
+                    ${bookmark.content ? `<div class="bookmark-content">${UIUtils.truncateText(bookmark.content, 100)}</div>` : ''}
+                    ${bookmark.tags && bookmark.tags.length > 0 ? `
+                        <div class="bookmark-meta">
+                            ${bookmark.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    <div class="bookmark-footer">
+                        <div class="bookmark-stats">
+                            <span>📁 ${bookmark.folder || 'General'}</span>
+                            <span>👁️ ${bookmark.access_count || 0}</span>
+                        </div>
+                        <div class="bookmark-actions">
+                            <button class="btn btn-sm btn-icon" onclick="event.stopPropagation(); editBookmark('${bookmark.id}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-icon" onclick="event.stopPropagation(); deleteBookmark('${bookmark.id}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Render bookmark list item
+        function renderBookmarkListItem(bookmark) {
+            return `
+                <div class="bookmark-list-item" onclick="openBookmark('${bookmark.id}')">
+                    <div class="bookmark-list-content">
+                        <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+                            ${bookmark.is_favorite ? '<span>⭐</span>' : ''}
+                            <span class="bookmark-type ${bookmark.item_type}">${bookmark.item_type}</span>
+                            <span class="bookmark-title" style="margin-bottom: 0;">${bookmark.title}</span>
+                        </div>
+                        ${bookmark.content ? `<div class="bookmark-content">${UIUtils.truncateText(bookmark.content, 200)}</div>` : ''}
+                        <div style="display: flex; gap: 1rem; font-size: 0.75rem; color: var(--gray-500);">
+                            <span>📁 ${bookmark.folder || 'General'}</span>
+                            <span>👁️ ${bookmark.access_count || 0} views</span>
+                            <span>${UIUtils.formatRelativeTime(bookmark.created_at)}</span>
+                        </div>
+                    </div>
+                    <div class="bookmark-actions">
+                        <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); editBookmark('${bookmark.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteBookmark('${bookmark.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Filter functions
+        function filterByType(type) {
+            currentFilters.type = type;
+            document.querySelectorAll('[data-type]').forEach(el => el.classList.remove('active'));
+            document.querySelector(`[data-type="${type}"]`).classList.add('active');
+            applyFilters();
+        }
+        
+        function filterByFolder(folder) {
+            currentFilters.folder = currentFilters.folder === folder ? null : folder;
+            document.querySelectorAll('[data-folder]').forEach(el => el.classList.remove('active'));
+            if (currentFilters.folder) {
+                document.querySelector(`[data-folder="${folder}"]`).classList.add('active');
+            }
+            applyFilters();
+        }
+        
+        function filterByFavorite() {
+            currentFilters.favorite = !currentFilters.favorite;
+            document.querySelector('[data-favorite]').classList.toggle('active');
+            applyFilters();
+        }
+        
+        function filterByTag(tag) {
+            currentFilters.tag = currentFilters.tag === tag ? null : tag;
+            document.querySelectorAll('[data-tag]').forEach(el => el.classList.remove('active'));
+            if (currentFilters.tag) {
+                document.querySelector(`[data-tag="${tag}"]`).classList.add('active');
+            }
+            applyFilters();
+        }
+        
+        function handleSearch() {
+            currentFilters.search = document.getElementById('search-input').value;
+            applyFilters();
+        }
+        
+        function resetFilters() {
+            currentFilters = {
+                type: 'all',
+                folder: null,
+                favorite: false,
+                tag: null,
+                search: ''
+            };
+            document.getElementById('search-input').value = '';
+            document.querySelectorAll('.filter-item').forEach(el => el.classList.remove('active'));
+            document.querySelector('[data-type="all"]').classList.add('active');
+            applyFilters();
+        }
+        
+        // View switching
+        function switchView(view) {
+            currentView = view;
+            document.getElementById('grid-view').classList.toggle('active', view === 'grid');
+            document.getElementById('list-view').classList.toggle('active', view === 'list');
+            renderBookmarks();
+        }
+        
+        // Actions
+        async function openBookmark(id) {
+            try {
+                await BookmarksAPI.recordAccess(id);
+                const bookmark = allBookmarks.find(b => b.id === id);
+                if (bookmark) {
+                    // Navigate based on type
+                    if (bookmark.item_type === 'conversation' && bookmark.item_id) {
+                        window.location.href = `/conversation?id=${bookmark.item_id}`;
+                    } else {
+                        UIUtils.showNotification('Bookmark accessed', 'info');
+                    }
+                }
+                await loadBookmarks(); // Refresh to update access count
+            } catch (error) {
+                UIUtils.showNotification('Failed to access bookmark', 'error');
+            }
+        }
+        
+        async function editBookmark(id) {
+            const bookmark = allBookmarks.find(b => b.id === id);
+            if (!bookmark) return;
+            
+            // Show edit modal (simplified for now)
+            const newTitle = prompt('Edit title:', bookmark.title);
+            if (newTitle && newTitle !== bookmark.title) {
+                try {
+                    await BookmarksAPI.update(id, { title: newTitle });
+                    UIUtils.showNotification('Bookmark updated', 'success');
+                    await loadBookmarks();
+                } catch (error) {
+                    UIUtils.showNotification('Failed to update bookmark', 'error');
+                }
+            }
+        }
+        
+        async function deleteBookmark(id) {
+            UIUtils.confirm(
+                'Are you sure you want to delete this bookmark?',
+                async () => {
+                    try {
+                        await BookmarksAPI.delete(id);
+                        UIUtils.showNotification('Bookmark deleted', 'success');
+                        await loadBookmarks();
+                    } catch (error) {
+                        UIUtils.showNotification('Failed to delete bookmark', 'error');
+                    }
+                }
+            );
+        }
+        
+        function showAddBookmarkModal() {
+            BookmarkUtils.showBookmarkModal('manual', '', 'New Bookmark', '');
+        }
+    </script>
+</body>
+</html>
