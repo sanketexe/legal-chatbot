@@ -1,0 +1,6 @@
+{
+  "embedding_dim": 384,
+  "is_fitted": true,
+  "vocab_size": 10000,
+  "explained_variance": 0.999999999999999
+}

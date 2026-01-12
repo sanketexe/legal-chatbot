@@ -141,25 +141,22 @@ class LegalVectorDatabase:
             return self._create_local_embeddings(texts)
     
     def _create_local_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """Create embeddings using sentence-transformers (free)"""
+        """Create embeddings using hybrid approach (sentence-transformers or lightweight TF-IDF)"""
         try:
-            from sentence_transformers import SentenceTransformer
+            # Use the new lightweight embedding system
+            from .lightweight_embeddings import get_embedding_model
             
-            # Use a legal-domain model if available, otherwise general model
-            model = SentenceTransformer('all-MiniLM-L6-v2')
+            embedding_model = get_embedding_model()
             
-            print("🔄 Creating local embeddings...")
-            embeddings = model.encode(texts, show_progress_bar=True)
+            print("🔄 Creating embeddings...")
+            embeddings = embedding_model.encode(texts, show_progress=True)
             
             return embeddings.tolist()
             
         except Exception as e:
-            # If sentence-transformers or its heavy dependencies fail to import
-            # (common when tensorflow/protobuf mismatches exist), fall back to
-            # a deterministic, lightweight embedding generator so the pipeline
-            # can still run for development and testing.
-            print(f"❌ Local embedding error: {e}")
-            print("💡 Falling back to deterministic lightweight embeddings for testing")
+            # Ultimate fallback: deterministic hash-based embeddings
+            print(f"❌ Embedding error: {e}")
+            print("💡 Using fallback hash-based embeddings")
 
             import hashlib
             import numpy as _np
