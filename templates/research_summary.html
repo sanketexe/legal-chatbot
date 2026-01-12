@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Summary - LegalAssist Pro</title>
+    
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .research-container {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .query-panel {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .case-query-input {
+            min-height: 120px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .query-examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .example-card {
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .example-card:hover {
+            border-color: var(--primary-color);
+            background: var(--gray-50);
+        }
+        
+        .example-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+        
+        .example-text {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+        
+        .research-results {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .memo-header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .memo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+        
+        .memo-meta {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        .memo-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .memo-section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-heading {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .key-points-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .key-point {
+            padding: 1rem;
+            background: #f0f9ff;
+            border-left: 4px solid var(--info-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+        
+        .key-point-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+        
+        .key-point-text {
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+        
+        .legal-principles {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .principle-card {
+            padding: 1rem;
+            background: #fef3c7;
+            border-left: 4px solid var(--secondary-color);
+            border-radius: var(--border-radius);
+        }
+        
+        .principle-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+        
+        .principle-description {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+        
+        .case-analysis {
+            padding: 1.5rem;
+            background: var(--gray-50);
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+        }
+        
+        .case-name {
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+        }
+        
+        .case-details {
+            display: grid;
+            gap: 0.75rem;
+        }
+        
+        .case-detail-row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 1rem;
+        }
+        
+        .case-label {
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+        
+        .case-value {
+            color: var(--gray-900);
+        }
+        
+        .recommendations {
+            background: #dcfce7;
+            border-left: 4px solid var(--success-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+        }
+        
+        .recommendation-item {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .recommendation-item:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        
+        .citations {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .citation-item {
+            padding: 0.75rem;
+            background: var(--gray-50);
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-family: 'Georgia', serif;
+        }
+        
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--gray-200);
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .query-examples {
+                grid-template-columns: 1fr;
+            }
+            
+            .legal-principles {
+                grid-template-columns: 1fr;
+            }
+            
+            .case-detail-row {
+                grid-template-columns: 1fr;
+                gap: 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>⚖️ LegalAssist Pro</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item" onclick="window.location.href='/dashboard'">
+                    <span class="nav-item-icon">📊</span>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='/case-prediction'">
+                    <span class="nav-item-icon">🔮</span>
+                    <span>Case Prediction</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='/document-drafting'">
+                    <span class="nav-item-icon">📄</span>
+                    <span>Document Drafting</span>
+                </div>
+                <div class="nav-item active">
+                    <span class="nav-item-icon">🔍</span>
+                    <span>Research</span>
+                </div>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-title">
+                    <h1>Legal Research & Analysis</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="newResearch()">
+                        <i class="fas fa-plus"></i> New Research
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content-area">
+                <div class="research-container">
+                    <!-- Query Panel -->
+                    <div class="query-panel">
+                        <h2 class="card-title">Research Query</h2>
+                        <p class="text-muted mb-3">Enter case citations or legal questions to analyze</p>
+                        
+                        <form id="research-form" onsubmit="event.preventDefault(); submitResearch()">
+                            <div class="form-group">
+                                <label>Case Citations / Legal Query <span style="color: red;">*</span></label>
+                                <textarea 
+                                    id="query-input" 
+                                    class="form-control case-query-input"
+                                    placeholder="Enter case citations separated by newlines:&#10;&#10;Kesavananda Bharati v. State of Kerala, AIR 1973 SC 1461&#10;Maneka Gandhi v. Union of India, AIR 1978 SC 597&#10;&#10;Or enter a legal question:&#10;What are the principles of natural justice in administrative law?"
+                                    required
+                                ></textarea>
+                                <div class="field-hint">
+                                    Enter one or more case citations, or a legal research question
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Jurisdiction</label>
+                                <select id="jurisdiction-select" class="form-control">
+                                    <option value="india">India (All Courts)</option>
+                                    <option value="supreme-court">Supreme Court of India</option>
+                                    <option value="delhi">Delhi High Court</option>
+                                    <option value="mumbai">Mumbai High Court</option>
+                                    <option value="bangalore">Karnataka High Court</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg" id="research-btn">
+                                <i class="fas fa-search"></i> Start Research
+                            </button>
+                        </form>
+                        
+                        <!-- Query Examples -->
+                        <div style="margin-top: 2rem;">
+                            <h4 style="margin-bottom: 1rem;">Quick Examples</h4>
+                            <div class="query-examples">
+                                <div class="example-card" onclick="useExample('constitutional')">
+                                    <div class="example-title">🏛️ Constitutional Law</div>
+                                    <div class="example-text">Basic structure doctrine cases</div>
+                                </div>
+                                <div class="example-card" onclick="useExample('contracts')">
+                                    <div class="example-title">📝 Contract Law</div>
+                                    <div class="example-text">Breach of contract remedies</div>
+                                </div>
+                                <div class="example-card" onclick="useExample('criminal')">
+                                    <div class="example-title">⚖️ Criminal Law</div>
+                                    <div class="example-text">Burden of proof standards</div>
+                                </div>
+                                <div class="example-card" onclick="useExample('property')">
+                                    <div class="example-title">🏠 Property Law</div>
+                                    <div class="example-text">Adverse possession principles</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Research Results -->
+                    <div class="research-results" id="research-results" style="display: none;">
+                        <div class="memo-header">
+                            <div class="memo-title" id="memo-title">Research Memorandum</div>
+                            <div class="memo-meta">
+                                <div class="memo-meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span id="memo-date"></span>
+                                </div>
+                                <div class="memo-meta-item">
+                                    <i class="fas fa-gavel"></i>
+                                    <span id="memo-jurisdiction"></span>
+                                </div>
+                                <div class="memo-meta-item">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span id="memo-cases-count"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="memo-section">
+                            <div class="section-heading">
+                                <i class="fas fa-lightbulb"></i> Key Points
+                            </div>
+                            <ul class="key-points-list" id="key-points-list"></ul>
+                        </div>
+                        
+                        <div class="memo-section">
+                            <div class="section-heading">
+                                <i class="fas fa-balance-scale"></i> Legal Principles
+                            </div>
+                            <div class="legal-principles" id="legal-principles"></div>
+                        </div>
+                        
+                        <div class="memo-section">
+                            <div class="section-heading">
+                                <i class="fas fa-folder-open"></i> Case Analysis
+                            </div>
+                            <div id="case-analysis"></div>
+                        </div>
+                        
+                        <div class="memo-section">
+                            <div class="section-heading">
+                                <i class="fas fa-check-circle"></i> Recommendations
+                            </div>
+                            <div class="recommendations" id="recommendations"></div>
+                        </div>
+                        
+                        <div class="citations">
+                            <strong>Citations:</strong>
+                            <div id="citations-list" style="margin-top: 1rem;"></div>
+                        </div>
+                        
+                        <div class="action-bar">
+                            <button class="btn btn-primary" onclick="exportMemo()">
+                                <i class="fas fa-download"></i> Export Memo
+                            </button>
+                            <button class="btn btn-outline" onclick="bookmarkResearch()">
+                                <i class="fas fa-bookmark"></i> Bookmark
+                            </button>
+                            <button class="btn btn-outline" onclick="draftFromResearch()">
+                                <i class="fas fa-file-alt"></i> Draft Document
+                            </button>
+                            <button class="btn btn-outline" onclick="copyToClipboard()">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/static/js/api-client.js"></script>
+    <script>
+        let currentMemo = null;
+        
+        const exampleQueries = {
+            constitutional: `Kesavananda Bharati v. State of Kerala, AIR 1973 SC 1461
+Maneka Gandhi v. Union of India, AIR 1978 SC 597
+I.R. Coelho v. State of Tamil Nadu, AIR 2007 SC 861`,
+            
+            contracts: `Hadley v. Baxendale (1854) EWHC Exch J70
+Satyabrata Ghose v. Mugneeram Bangur & Co., AIR 1954 SC 44
+What are the remedies available for breach of contract under Indian Contract Act?`,
+            
+            criminal: `Woolmington v. DPP [1935] AC 462
+State of U.P. v. Deoman Upadhyaya, AIR 1961 SC 1106
+What is the standard of proof in criminal cases?`,
+            
+            property: `State of Haryana v. Mukesh Kumar, AIR 2011 SC 3509
+Karnataka Board v. Kaverappa, AIR 1976 SC 1785
+Explain the doctrine of adverse possession in Indian law`
+        };
+        
+        // Use example query
+        function useExample(type) {
+            document.getElementById('query-input').value = exampleQueries[type];
+        }
+        
+        // Submit research
+        async function submitResearch() {
+            const query = document.getElementById('query-input').value.trim();
+            const jurisdiction = document.getElementById('jurisdiction-select').value;
+            const btn = document.getElementById('research-btn');
+            
+            if (!query) return;
+            
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Researching...';
+                
+                // Call API
+                const result = await AIEnhancementsAPI.summarizeResearch({
+                    query: query,
+                    jurisdiction: jurisdiction
+                });
+                
+                currentMemo = result.memo;
+                displayResearchResults(currentMemo);
+                
+                // Scroll to results
+                document.getElementById('research-results').scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+                
+                UIUtils.showNotification('Research completed successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Research error:', error);
+                UIUtils.showNotification(`Research failed: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-search"></i> Start Research';
+            }
+        }
+        
+        // Display research results
+        function displayResearchResults(memo) {
+            // Show results container
+            document.getElementById('research-results').style.display = 'block';
+            
+            // Set header
+            document.getElementById('memo-title').textContent = 
+                memo.title || 'Legal Research Memorandum';
+            document.getElementById('memo-date').textContent = 
+                UIUtils.formatDate(new Date());
+            document.getElementById('memo-jurisdiction').textContent = 
+                memo.jurisdiction || 'Multiple Jurisdictions';
+            document.getElementById('memo-cases-count').textContent = 
+                `${memo.cases_analyzed || 0} Cases Analyzed`;
+            
+            // Key Points
+            const keyPointsList = document.getElementById('key-points-list');
+            keyPointsList.innerHTML = (memo.key_points || []).map((point, i) => `
+                <li class="key-point">
+                    <div class="key-point-title">Point ${i + 1}</div>
+                    <div class="key-point-text">${point}</div>
+                </li>
+            `).join('');
+            
+            // Legal Principles
+            const principlesContainer = document.getElementById('legal-principles');
+            principlesContainer.innerHTML = (memo.legal_principles || []).map(principle => `
+                <div class="principle-card">
+                    <div class="principle-name">${principle.name || 'Legal Principle'}</div>
+                    <div class="principle-description">${principle.description || principle}</div>
+                </div>
+            `).join('');
+            
+            // Case Analysis
+            const caseAnalysisContainer = document.getElementById('case-analysis');
+            caseAnalysisContainer.innerHTML = (memo.case_summaries || []).map(caseInfo => `
+                <div class="case-analysis">
+                    <div class="case-name">${caseInfo.name || caseInfo.citation}</div>
+                    <div class="case-details">
+                        ${caseInfo.court ? `
+                            <div class="case-detail-row">
+                                <div class="case-label">Court:</div>
+                                <div class="case-value">${caseInfo.court}</div>
+                            </div>
+                        ` : ''}
+                        ${caseInfo.year ? `
+                            <div class="case-detail-row">
+                                <div class="case-label">Year:</div>
+                                <div class="case-value">${caseInfo.year}</div>
+                            </div>
+                        ` : ''}
+                        ${caseInfo.holding ? `
+                            <div class="case-detail-row">
+                                <div class="case-label">Holding:</div>
+                                <div class="case-value">${caseInfo.holding}</div>
+                            </div>
+                        ` : ''}
+                        ${caseInfo.relevance ? `
+                            <div class="case-detail-row">
+                                <div class="case-label">Relevance:</div>
+                                <div class="case-value">${caseInfo.relevance}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            // Recommendations
+            const recommendationsContainer = document.getElementById('recommendations');
+            recommendationsContainer.innerHTML = `
+                <strong style="display: block; margin-bottom: 1rem;">Strategic Recommendations:</strong>
+                ${(memo.recommendations || []).map(rec => `
+                    <div class="recommendation-item">${rec}</div>
+                `).join('')}
+            `;
+            
+            // Citations
+            const citationsList = document.getElementById('citations-list');
+            citationsList.innerHTML = (memo.citations || []).map(citation => `
+                <div class="citation-item">${citation}</div>
+            `).join('');
+        }
+        
+        // Export memo
+        async function exportMemo() {
+            if (!currentMemo) return;
+            
+            try {
+                const result = await AIEnhancementsAPI.generateResearchMemo({
+                    memo_id: currentMemo.id,
+                    format: 'pdf'
+                });
+                
+                // Download
+                const content = formatMemoAsText(currentMemo);
+                const filename = `research_memo_${Date.now()}.txt`;
+                UIUtils.downloadFile(content, filename, 'text/plain');
+                
+                UIUtils.showNotification('Memo exported successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                UIUtils.showNotification('Export failed', 'error');
+            }
+        }
+        
+        // Format memo as text
+        function formatMemoAsText(memo) {
+            let text = `LEGAL RESEARCH MEMORANDUM\n`;
+            text += `${'='.repeat(60)}\n\n`;
+            text += `Title: ${memo.title || 'Legal Research'}\n`;
+            text += `Date: ${UIUtils.formatDate(new Date())}\n`;
+            text += `Jurisdiction: ${memo.jurisdiction || 'Multiple'}\n`;
+            text += `Cases Analyzed: ${memo.cases_analyzed || 0}\n\n`;
+            
+            text += `KEY POINTS\n${'-'.repeat(60)}\n`;
+            (memo.key_points || []).forEach((point, i) => {
+                text += `${i + 1}. ${point}\n\n`;
+            });
+            
+            text += `\nLEGAL PRINCIPLES\n${'-'.repeat(60)}\n`;
+            (memo.legal_principles || []).forEach(principle => {
+                const name = principle.name || 'Legal Principle';
+                const desc = principle.description || principle;
+                text += `• ${name}: ${desc}\n\n`;
+            });
+            
+            text += `\nCASE ANALYSIS\n${'-'.repeat(60)}\n`;
+            (memo.case_summaries || []).forEach(caseInfo => {
+                text += `${caseInfo.name || caseInfo.citation}\n`;
+                if (caseInfo.court) text += `Court: ${caseInfo.court}\n`;
+                if (caseInfo.year) text += `Year: ${caseInfo.year}\n`;
+                if (caseInfo.holding) text += `Holding: ${caseInfo.holding}\n`;
+                text += `\n`;
+            });
+            
+            text += `\nRECOMMENDATIONS\n${'-'.repeat(60)}\n`;
+            (memo.recommendations || []).forEach(rec => {
+                text += `✓ ${rec}\n`;
+            });
+            
+            text += `\nCITATIONS\n${'-'.repeat(60)}\n`;
+            (memo.citations || []).forEach(citation => {
+                text += `${citation}\n`;
+            });
+            
+            return text;
+        }
+        
+        // Bookmark research
+        async function bookmarkResearch() {
+            if (!currentMemo) return;
+            
+            try {
+                await BookmarksAPI.create({
+                    type: 'research',
+                    title: currentMemo.title || 'Legal Research',
+                    content: currentMemo.key_points ? currentMemo.key_points[0] : '',
+                    metadata: {
+                        query: document.getElementById('query-input').value,
+                        jurisdiction: document.getElementById('jurisdiction-select').value,
+                        cases_count: currentMemo.cases_analyzed
+                    }
+                });
+                
+                UIUtils.showNotification('Research bookmarked!', 'success');
+                
+            } catch (error) {
+                console.error('Bookmark error:', error);
+                UIUtils.showNotification('Failed to bookmark', 'error');
+            }
+        }
+        
+        // Draft from research
+        function draftFromResearch() {
+            window.location.href = '/document-drafting';
+        }
+        
+        // Copy to clipboard
+        function copyToClipboard() {
+            if (!currentMemo) return;
+            
+            const text = formatMemoAsText(currentMemo);
+            navigator.clipboard.writeText(text)
+                .then(() => UIUtils.showNotification('Copied to clipboard!', 'success'))
+                .catch(err => UIUtils.showNotification('Copy failed', 'error'));
+        }
+        
+        // New research
+        function newResearch() {
+            currentMemo = null;
+            document.getElementById('query-input').value = '';
+            document.getElementById('research-results').style.display = 'none';
+            document.getElementById('query-input').focus();
+        }
+    </script>
+</body>
+</html>

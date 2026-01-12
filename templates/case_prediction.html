@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Case Prediction - LegalAssist Pro</title>
+    
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        .prediction-form-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .prediction-results {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+            display: none;
+        }
+        
+        .prediction-results.show {
+            display: block;
+        }
+        
+        .confidence-meter {
+            margin: 2rem 0;
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 40px;
+            background: var(--gray-200);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .confidence-high { background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
+        .confidence-medium { background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); }
+        .confidence-low { background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%); }
+        
+        .outcome-card {
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            border: 2px solid;
+        }
+        
+        .outcome-favorable {
+            background: #f0fdf4;
+            border-color: var(--success-color);
+        }
+        
+        .outcome-unfavorable {
+            background: #fef2f2;
+            border-color: var(--error-color);
+        }
+        
+        .outcome-uncertain {
+            background: #fef3c7;
+            border-color: var(--warning-color);
+        }
+        
+        .outcome-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .feature-importance {
+            margin-top: 2rem;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-name {
+            flex: 0 0 200px;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+        
+        .feature-bar {
+            flex: 1;
+            height: 24px;
+            background: var(--gray-200);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 0 1rem;
+        }
+        
+        .feature-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            transition: width 0.5s ease;
+        }
+        
+        .feature-value {
+            flex: 0 0 60px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning-color);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            margin: 1.5rem 0;
+        }
+        
+        .warning-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .warning-text {
+            color: #78350f;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        
+        .probability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .probability-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: var(--border-radius);
+        }
+        
+        .probability-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .probability-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .prediction-explanation {
+            background: var(--gray-50);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .explanation-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .explanation-item {
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .explanation-item::before {
+            content: "•";
+            position: absolute;
+            left: 0.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        .chart-container {
+            max-width: 400px;
+            margin: 2rem auto;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>⚖️ LegalAssist Pro</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item" onclick="window.location.href='/dashboard'">
+                    <span class="nav-item-icon">📊</span>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item active">
+                    <span class="nav-item-icon">🔮</span>
+                    <span>Case Prediction</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='/document-drafting'">
+                    <span class="nav-item-icon">📄</span>
+                    <span>Document Drafting</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='/research-summary'">
+                    <span class="nav-item-icon">🔍</span>
+                    <span>Research</span>
+                </div>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-title">
+                    <h1>AI Case Outcome Prediction</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="resetForm()">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content-area">
+                <!-- Prediction Form -->
+                <div class="prediction-form-card">
+                    <h2 class="card-title">Case Details</h2>
+                    <p class="text-muted mb-2">Enter the details of your case for AI-powered outcome prediction</p>
+                    
+                    <form id="prediction-form" onsubmit="event.preventDefault(); submitPrediction()">
+                        <div class="form-group">
+                            <label>Case Type <span style="color: red;">*</span></label>
+                            <select id="case-type" class="form-control" required>
+                                <option value="">Select case type...</option>
+                                <option value="employment">Employment Law</option>
+                                <option value="contract">Contract Dispute</option>
+                                <option value="property">Property Law</option>
+                                <option value="family">Family Law</option>
+                                <option value="criminal">Criminal Law</option>
+                                <option value="corporate">Corporate Law</option>
+                                <option value="constitutional">Constitutional Law</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Case Description <span style="color: red;">*</span></label>
+                            <textarea id="case-description" class="form-control" rows="6" 
+                                      placeholder="Provide a detailed description of your case, including key facts, parties involved, and legal issues..." 
+                                      required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Jurisdiction</label>
+                            <select id="jurisdiction" class="form-control">
+                                <option value="india">India</option>
+                                <option value="delhi">Delhi</option>
+                                <option value="mumbai">Mumbai</option>
+                                <option value="bangalore">Bangalore</option>
+                                <option value="chennai">Chennai</option>
+                                <option value="kolkata">Kolkata</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Similar Precedents (Optional)</label>
+                            <textarea id="precedents" class="form-control" rows="3" 
+                                      placeholder="List any similar cases or precedents you're aware of..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Evidence Strength</label>
+                            <select id="evidence-strength" class="form-control">
+                                <option value="strong">Strong Evidence</option>
+                                <option value="moderate">Moderate Evidence</option>
+                                <option value="weak">Weak Evidence</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Opposing Party Resources</label>
+                            <select id="opposing-resources" class="form-control">
+                                <option value="low">Limited Resources</option>
+                                <option value="medium">Moderate Resources</option>
+                                <option value="high">Well-Funded</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg" id="predict-btn">
+                            <i class="fas fa-brain"></i> Predict Outcome
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Prediction Results -->
+                <div class="prediction-results" id="results-container">
+                    <div class="d-flex justify-between align-center mb-2">
+                        <h2 class="card-title" style="margin-bottom: 0;">Prediction Results</h2>
+                        <button class="btn btn-outline btn-sm" onclick="bookmarkPrediction()">
+                            <i class="fas fa-bookmark"></i> Bookmark
+                        </button>
+                    </div>
+                    
+                    <!-- Outcome Card -->
+                    <div id="outcome-card"></div>
+                    
+                    <!-- Confidence Meter -->
+                    <div class="confidence-meter">
+                        <h3 style="margin-bottom: 1rem;">Confidence Level</h3>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidence-fill">0%</div>
+                        </div>
+                        <div class="probability-grid" id="probability-grid"></div>
+                    </div>
+                    
+                    <!-- Feature Importance -->
+                    <div class="feature-importance">
+                        <h3 style="margin-bottom: 1.5rem;">
+                            <i class="fas fa-chart-bar"></i> Key Factors Influencing Prediction
+                        </h3>
+                        <div id="feature-list"></div>
+                    </div>
+                    
+                    <!-- Prediction Chart -->
+                    <div class="chart-container">
+                        <canvas id="prediction-chart"></canvas>
+                    </div>
+                    
+                    <!-- Explanation -->
+                    <div class="prediction-explanation" id="explanation-container"></div>
+                    
+                    <!-- Warnings -->
+                    <div id="warnings-container"></div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="draftDocumentFromPrediction()">
+                            <i class="fas fa-file-alt"></i> Draft Legal Document
+                        </button>
+                        <button class="btn btn-outline" onclick="researchSimilarCases()">
+                            <i class="fas fa-search"></i> Research Similar Cases
+                        </button>
+                        <button class="btn btn-outline" onclick="exportPrediction()">
+                            <i class="fas fa-download"></i> Export Report
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-redo"></i> New Prediction
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/static/js/api-client.js"></script>
+    <script>
+        let currentPrediction = null;
+        let predictionChart = null;
+        
+        // Submit prediction
+        async function submitPrediction() {
+            const form = document.getElementById('prediction-form');
+            const btn = document.getElementById('predict-btn');
+            
+            // Get form data
+            const predictionData = {
+                case_type: document.getElementById('case-type').value,
+                case_description: document.getElementById('case-description').value,
+                jurisdiction: document.getElementById('jurisdiction').value,
+                precedents: document.getElementById('precedents').value,
+                evidence_strength: document.getElementById('evidence-strength').value,
+                opposing_resources: document.getElementById('opposing-resources').value
+            };
+            
+            try {
+                // Show loading
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+                
+                // Call API
+                const result = await AIEnhancementsAPI.predictCaseOutcome(predictionData);
+                currentPrediction = result;
+                
+                // Display results
+                displayPredictionResults(result);
+                
+                // Show results container
+                document.getElementById('results-container').classList.add('show');
+                
+                // Scroll to results
+                document.getElementById('results-container').scrollIntoView({ behavior: 'smooth' });
+                
+                UIUtils.showNotification('Prediction generated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Prediction error:', error);
+                UIUtils.showNotification(`Prediction failed: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-brain"></i> Predict Outcome';
+            }
+        }
+        
+        // Display prediction results
+        function displayPredictionResults(result) {
+            const prediction = result.prediction || {};
+            const outcome = prediction.outcome || 'uncertain';
+            const confidence = Math.round((prediction.confidence || 0) * 100);
+            const probabilities = prediction.probabilities || {};
+            const features = prediction.feature_importance || {};
+            const explanation = prediction.explanation || '';
+            
+            // Outcome Card
+            const outcomeCard = document.getElementById('outcome-card');
+            let outcomeClass = 'outcome-uncertain';
+            let outcomeIcon = '⚖️';
+            let outcomeText = 'Uncertain Outcome';
+            
+            if (outcome.toLowerCase().includes('favor')) {
+                outcomeClass = 'outcome-favorable';
+                outcomeIcon = '✓';
+                outcomeText = 'Favorable Outcome Predicted';
+            } else if (outcome.toLowerCase().includes('unfavor')) {
+                outcomeClass = 'outcome-unfavorable';
+                outcomeIcon = '✕';
+                outcomeText = 'Unfavorable Outcome Predicted';
+            }
+            
+            outcomeCard.className = `outcome-card ${outcomeClass}`;
+            outcomeCard.innerHTML = `
+                <div class="outcome-title">
+                    <span style="font-size: 2rem;">${outcomeIcon}</span>
+                    <span>${outcomeText}</span>
+                </div>
+                <p style="font-size: 1.125rem; color: var(--gray-700); margin-top: 0.5rem;">
+                    ${outcome}
+                </p>
+            `;
+            
+            // Confidence Meter
+            const confidenceFill = document.getElementById('confidence-fill');
+            let confidenceClass = 'confidence-low';
+            if (confidence >= 70) confidenceClass = 'confidence-high';
+            else if (confidence >= 50) confidenceClass = 'confidence-medium';
+            
+            confidenceFill.className = `confidence-fill ${confidenceClass}`;
+            setTimeout(() => {
+                confidenceFill.style.width = `${confidence}%`;
+                confidenceFill.textContent = `${confidence}% Confidence`;
+            }, 100);
+            
+            // Probabilities
+            const probabilityGrid = document.getElementById('probability-grid');
+            probabilityGrid.innerHTML = Object.entries(probabilities).map(([key, value]) => `
+                <div class="probability-item">
+                    <div class="probability-label">${key.replace('_', ' ')}</div>
+                    <div class="probability-value">${Math.round(value * 100)}%</div>
+                </div>
+            `).join('');
+            
+            // Feature Importance
+            const featureList = document.getElementById('feature-list');
+            const sortedFeatures = Object.entries(features)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5);
+            
+            featureList.innerHTML = sortedFeatures.map(([name, value]) => {
+                const percentage = Math.round(value * 100);
+                return `
+                    <div class="feature-item">
+                        <div class="feature-name">${name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+                        <div class="feature-bar">
+                            <div class="feature-bar-fill" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="feature-value">${percentage}%</div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Chart
+            displayPredictionChart(probabilities);
+            
+            // Explanation
+            const explanationContainer = document.getElementById('explanation-container');
+            if (explanation) {
+                const reasons = explanation.split('\n').filter(line => line.trim());
+                explanationContainer.innerHTML = `
+                    <div class="explanation-title">
+                        <i class="fas fa-lightbulb"></i> Why This Prediction?
+                    </div>
+                    ${reasons.map(reason => `<div class="explanation-item">${reason}</div>`).join('')}
+                `;
+            }
+            
+            // Warnings
+            const warningsContainer = document.getElementById('warnings-container');
+            if (confidence < 60) {
+                warningsContainer.innerHTML = `
+                    <div class="warning-box">
+                        <div class="warning-title">
+                            <i class="fas fa-exclamation-triangle"></i> Low Confidence Warning
+                        </div>
+                        <div class="warning-text">
+                            This prediction has a confidence level below 60%. The outcome is highly uncertain 
+                            and depends on many factors. We strongly recommend consulting with a qualified 
+                            attorney for your specific case. AI predictions should not replace professional legal advice.
+                        </div>
+                    </div>
+                `;
+            } else {
+                warningsContainer.innerHTML = `
+                    <div class="warning-box">
+                        <div class="warning-title">
+                            <i class="fas fa-info-circle"></i> Important Disclaimer
+                        </div>
+                        <div class="warning-text">
+                            While this AI prediction is based on historical case data and legal precedents, 
+                            it cannot account for all nuances of your specific situation. Always consult 
+                            with a qualified attorney before making legal decisions.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Display prediction chart
+        function displayPredictionChart(probabilities) {
+            const ctx = document.getElementById('prediction-chart');
+            
+            if (predictionChart) {
+                predictionChart.destroy();
+            }
+            
+            const labels = Object.keys(probabilities).map(k => k.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()));
+            const data = Object.values(probabilities).map(v => Math.round(v * 100));
+            
+            predictionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#10b981',
+                            '#ef4444',
+                            '#f59e0b',
+                            '#3b82f6'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Reset form
+        function resetForm() {
+            document.getElementById('prediction-form').reset();
+            document.getElementById('results-container').classList.remove('show');
+            currentPrediction = null;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Bookmark prediction
+        async function bookmarkPrediction() {
+            if (!currentPrediction) return;
+            
+            const caseType = document.getElementById('case-type').value;
+            const description = document.getElementById('case-description').value;
+            const outcome = currentPrediction.prediction.outcome;
+            
+            await BookmarkUtils.showBookmarkModal(
+                'case',
+                'prediction_' + Date.now(),
+                `Case Prediction: ${caseType}`,
+                `${UIUtils.truncateText(description, 100)}\n\nPredicted Outcome: ${outcome}`
+            );
+        }
+        
+        // Draft document from prediction
+        function draftDocumentFromPrediction() {
+            window.location.href = '/document-drafting';
+        }
+        
+        // Research similar cases
+        function researchSimilarCases() {
+            const description = document.getElementById('case-description').value;
+            window.location.href = `/research-summary?query=${encodeURIComponent(description)}`;
+        }
+        
+        // Export prediction
+        function exportPrediction() {
+            if (!currentPrediction) return;
+            
+            const report = {
+                case_details: {
+                    type: document.getElementById('case-type').value,
+                    description: document.getElementById('case-description').value,
+                    jurisdiction: document.getElementById('jurisdiction').value
+                },
+                prediction: currentPrediction.prediction,
+                timestamp: new Date().toISOString()
+            };
+            
+            const content = JSON.stringify(report, null, 2);
+            UIUtils.downloadFile(content, `case-prediction-${Date.now()}.json`, 'application/json');
+            UIUtils.showNotification('Prediction exported successfully!', 'success');
+        }
+    </script>
+</body>
+</html>

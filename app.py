@@ -689,7 +689,7 @@ def index():
 @auth_required
 def dashboard():
     """User dashboard with analytics"""
-    return render_template('dashboard.html')
+    return render_template('dashboard_enhanced.html')
 
 @app.route('/search')
 def search_chats():
@@ -723,8 +723,26 @@ def case_summarization_ui():
 
 @app.route('/case-predictor')
 def case_predictor_ui():
-    """Case outcome predictor interface"""
+    """Case outcome predictor interface (legacy)"""
     return render_template('case_predictor.html')
+
+@app.route('/case-prediction')
+@auth_required
+def case_prediction_ui():
+    """Enhanced AI case prediction interface"""
+    return render_template('case_prediction.html')
+
+@app.route('/document-drafting')
+@auth_required
+def document_drafting_ui():
+    """AI document drafting wizard interface"""
+    return render_template('document_drafting.html')
+
+@app.route('/research-summary')
+@auth_required
+def research_summary_ui():
+    """Legal research and analysis interface"""
+    return render_template('research_summary.html')
 
 @app.route('/api/upload-document', methods=['POST'])
 def upload_document():

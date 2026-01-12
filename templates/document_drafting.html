@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Drafting - LegalAssist Pro</title>
+    
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .drafting-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1.5rem;
+        }
+        
+        .template-list {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+        }
+        
+        .template-item {
+            padding: 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .template-item:hover {
+            border-color: var(--primary-color);
+            background: var(--gray-50);
+        }
+        
+        .template-item.active {
+            border-color: var(--primary-color);
+            background: #e0f2fe;
+        }
+        
+        .template-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .template-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+        
+        .template-description {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+        
+        .drafting-form {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .field-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .preview-pane {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+            margin-top: 1.5rem;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        
+        .preview-content {
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+            color: var(--gray-900);
+            white-space: pre-wrap;
+            min-height: 400px;
+        }
+        
+        .field-hint {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+        
+        .validation-error {
+            color: var(--error-color);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        
+        .validation-error.show {
+            display: block;
+        }
+        
+        .compliance-check {
+            background: #dbeafe;
+            border-left: 4px solid var(--info-color);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+        }
+        
+        .compliance-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .compliance-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        @media (max-width: 968px) {
+            .drafting-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .template-list {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>⚖️ LegalAssist Pro</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item" onclick="window.location.href='/dashboard'">
+                    <span class="nav-item-icon">📊</span>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='/case-prediction'">
+                    <span class="nav-item-icon">🔮</span>
+                    <span>Case Prediction</span>
+                </div>
+                <div class="nav-item active">
+                    <span class="nav-item-icon">📄</span>
+                    <span>Document Drafting</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='/research-summary'">
+                    <span class="nav-item-icon">🔍</span>
+                    <span>Research</span>
+                </div>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-title">
+                    <h1>AI Document Drafting</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="resetDrafting()">
+                        <i class="fas fa-redo"></i> Start Over
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content-area">
+                <div class="drafting-layout">
+                    <!-- Template List -->
+                    <div class="template-list">
+                        <h3 style="margin-bottom: 1.5rem;">Select Template</h3>
+                        <div id="template-list-container">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                                <p class="loading-message">Loading templates...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Drafting Form -->
+                    <div>
+                        <div class="drafting-form" id="drafting-form-container">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📄</div>
+                                <div class="empty-state-title">No Template Selected</div>
+                                <div class="empty-state-description">
+                                    Please select a template from the left to start drafting
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview Pane -->
+                        <div class="preview-pane" id="preview-pane" style="display: none;">
+                            <div class="preview-header">
+                                <h3>Document Preview</h3>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="btn btn-sm btn-outline" onclick="updatePreview()">
+                                        <i class="fas fa-sync"></i> Refresh
+                                    </button>
+                                    <button class="btn btn-sm btn-primary" onclick="exportDocument()">
+                                        <i class="fas fa-download"></i> Export
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="preview-content" id="preview-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/static/js/api-client.js"></script>
+    <script>
+        let templates = [];
+        let selectedTemplate = null;
+        let currentDocument = null;
+        let formData = {};
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTemplates();
+        });
+        
+        // Load templates
+        async function loadTemplates() {
+            const container = document.getElementById('template-list-container');
+            
+            try {
+                const data = await AIEnhancementsAPI.listTemplates();
+                templates = data.templates || [];
+                
+                if (templates.length === 0) {
+                    container.innerHTML = '<p class="text-muted">No templates available</p>';
+                    return;
+                }
+                
+                container.innerHTML = templates.map(template => `
+                    <div class="template-item" onclick="selectTemplate('${template.id}')">
+                        <div class="template-icon">${getTemplateIcon(template.id)}</div>
+                        <div class="template-name">${template.name}</div>
+                        <div class="template-description">${template.description || 'Professional legal document'}</div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading templates:', error);
+                container.innerHTML = '<p class="text-muted">Failed to load templates</p>';
+            }
+        }
+        
+        // Get template icon
+        function getTemplateIcon(templateId) {
+            const icons = {
+                'nda': '🤐',
+                'employment_contract': '💼',
+                'legal_notice': '⚠️',
+                'power_of_attorney': '📋',
+                'rental_agreement': '🏠',
+                'service_agreement': '🤝'
+            };
+            return icons[templateId] || '📄';
+        }
+        
+        // Select template
+        async function selectTemplate(templateId) {
+            try {
+                // Update active state
+                document.querySelectorAll('.template-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                event.target.closest('.template-item').classList.add('active');
+                
+                // Get template details
+                const data = await AIEnhancementsAPI.getTemplate(templateId);
+                selectedTemplate = data.template;
+                
+                // Build form
+                buildDraftingForm(selectedTemplate);
+                
+                // Show preview pane
+                document.getElementById('preview-pane').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error selecting template:', error);
+                UIUtils.showNotification('Failed to load template', 'error');
+            }
+        }
+        
+        // Build drafting form
+        function buildDraftingForm(template) {
+            const container = document.getElementById('drafting-form-container');
+            const fields = template.required_fields || [];
+            
+            // Group fields by section
+            const sections = {
+                'Party Information': ['party1_name', 'party2_name', 'party1_address', 'party2_address'],
+                'Agreement Details': ['effective_date', 'duration', 'compensation', 'scope'],
+                'Additional Terms': ['special_terms', 'additional_clauses']
+            };
+            
+            let formHTML = `
+                <h2 class="card-title">${template.name}</h2>
+                <p class="text-muted mb-3">${template.description || 'Fill in the details below'}</p>
+                <form id="document-form" onsubmit="event.preventDefault(); generateDocument()">
+            `;
+            
+            // Build sections
+            for (const [sectionName, sectionFields] of Object.entries(sections)) {
+                const relevantFields = fields.filter(f => sectionFields.includes(f.name));
+                if (relevantFields.length === 0) continue;
+                
+                formHTML += `
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="fas fa-chevron-right"></i> ${sectionName}
+                        </div>
+                        <div class="field-group">
+                `;
+                
+                for (const field of relevantFields) {
+                    formHTML += buildFieldHTML(field);
+                }
+                
+                formHTML += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Compliance checks
+            if (template.compliance_checks && template.compliance_checks.length > 0) {
+                formHTML += `
+                    <div class="compliance-check">
+                        <strong style="display: block; margin-bottom: 0.5rem;">
+                            <i class="fas fa-shield-alt"></i> Compliance Checks
+                        </strong>
+                        ${template.compliance_checks.map(check => `
+                            <div class="compliance-item">
+                                <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+                                <span>${check}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            formHTML += `
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary btn-lg" id="generate-btn">
+                            <i class="fas fa-file-alt"></i> Generate Document
+                        </button>
+                        <button type="button" class="btn btn-outline btn-lg" onclick="updatePreview()">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                    </div>
+                </form>
+            `;
+            
+            container.innerHTML = formHTML;
+        }
+        
+        // Build field HTML
+        function buildFieldHTML(field) {
+            const isRequired = field.required ? '<span style="color: red;">*</span>' : '';
+            const hint = field.hint ? `<div class="field-hint">${field.hint}</div>` : '';
+            
+            let inputHTML = '';
+            
+            if (field.type === 'textarea') {
+                inputHTML = `
+                    <textarea id="${field.name}" class="form-control" rows="3" 
+                              ${field.required ? 'required' : ''} 
+                              placeholder="${field.placeholder || ''}"
+                              onchange="updateFormData('${field.name}', this.value)"></textarea>
+                `;
+            } else if (field.type === 'date') {
+                inputHTML = `
+                    <input type="date" id="${field.name}" class="form-control" 
+                           ${field.required ? 'required' : ''}
+                           onchange="updateFormData('${field.name}', this.value)">
+                `;
+            } else if (field.type === 'select' && field.options) {
+                inputHTML = `
+                    <select id="${field.name}" class="form-control" 
+                            ${field.required ? 'required' : ''}
+                            onchange="updateFormData('${field.name}', this.value)">
+                        <option value="">Select...</option>
+                        ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                    </select>
+                `;
+            } else {
+                inputHTML = `
+                    <input type="${field.type || 'text'}" id="${field.name}" class="form-control" 
+                           ${field.required ? 'required' : ''} 
+                           placeholder="${field.placeholder || ''}"
+                           onchange="updateFormData('${field.name}', this.value)">
+                `;
+            }
+            
+            return `
+                <div class="form-group">
+                    <label>${field.label} ${isRequired}</label>
+                    ${inputHTML}
+                    ${hint}
+                    <div class="validation-error" id="error-${field.name}"></div>
+                </div>
+            `;
+        }
+        
+        // Update form data
+        function updateFormData(fieldName, value) {
+            formData[fieldName] = value;
+        }
+        
+        // Generate document
+        async function generateDocument() {
+            if (!selectedTemplate) return;
+            
+            const btn = document.getElementById('generate-btn');
+            
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+                
+                const result = await AIEnhancementsAPI.draftDocument({
+                    template_id: selectedTemplate.id,
+                    data: formData
+                });
+                
+                currentDocument = result.document;
+                
+                // Display in preview
+                document.getElementById('preview-content').textContent = result.document.content;
+                
+                // Scroll to preview
+                document.getElementById('preview-pane').scrollIntoView({ behavior: 'smooth' });
+                
+                UIUtils.showNotification('Document generated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error generating document:', error);
+                UIUtils.showNotification(`Generation failed: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-file-alt"></i> Generate Document';
+            }
+        }
+        
+        // Update preview
+        function updatePreview() {
+            if (!currentDocument) {
+                generateDocument();
+            }
+        }
+        
+        // Export document
+        async function exportDocument() {
+            if (!currentDocument) {
+                UIUtils.showNotification('Please generate a document first', 'warning');
+                return;
+            }
+            
+            UIUtils.showModal('Export Document', `
+                <p>Select export format:</p>
+                <div class="export-format-grid">
+                    <button class="export-format-btn" onclick="doExport('txt')">
+                        <span class="format-icon">📃</span>
+                        <span class="format-name">TXT</span>
+                    </button>
+                    <button class="export-format-btn" onclick="doExport('md')">
+                        <span class="format-icon">📝</span>
+                        <span class="format-name">Markdown</span>
+                    </button>
+                </div>
+            `, [{
+                label: 'Cancel',
+                type: 'secondary',
+                onclick: 'UIUtils.closeModal()'
+            }]);
+        }
+        
+        // Do export
+        async function doExport(format) {
+            UIUtils.closeModal();
+            
+            try {
+                const result = await AIEnhancementsAPI.exportDocument({
+                    document_id: currentDocument.id,
+                    format: format
+                });
+                
+                // Download file
+                const content = result.content || currentDocument.content;
+                const filename = `${selectedTemplate.id}_${Date.now()}.${format}`;
+                UIUtils.downloadFile(content, filename, format === 'md' ? 'text/markdown' : 'text/plain');
+                
+                UIUtils.showNotification('Document exported successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                UIUtils.showNotification('Export failed', 'error');
+            }
+        }
+        
+        // Reset drafting
+        function resetDrafting() {
+            formData = {};
+            currentDocument = null;
+            selectedTemplate = null;
+            document.querySelectorAll('.template-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('drafting-form-container').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📄</div>
+                    <div class="empty-state-title">No Template Selected</div>
+                    <div class="empty-state-description">
+                        Please select a template from the left to start drafting
+                    </div>
+                </div>
+            `;
+            document.getElementById('preview-pane').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
