@@ -35,12 +35,22 @@ lxml==5.1.0
 numpy>=1.26.0
 pandas>=2.1.3
 
+# Machine Learning (NEW - Case Outcome Predictor)
+scikit-learn>=1.3.0
+xgboost>=2.0.0
+
 # Performance Monitoring (NEW)
 psutil==5.9.8
 
 # Security and Validation (NEW)
 bleach==6.1.0
 validators==0.22.0
+
+# Voice and Translation Services (NEW)
+gTTS==2.5.1
+SpeechRecognition==3.10.1
+googletrans==4.0.0rc1
+pydub==0.25.1
 
 # Development and Testing (optional)
 # streamlit==1.28.1

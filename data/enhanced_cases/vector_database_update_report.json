@@ -1,0 +1,50 @@
+{
+  "update_summary": {
+    "timestamp": "2025-12-28T22:42:21.235039",
+    "total_cases_processed": 315,
+    "successful_embeddings": 315,
+    "high_quality_cases": 315,
+    "embedding_errors": 0,
+    "backup_created": false,
+    "success_rate": 100.0
+  },
+  "domain_distribution": {
+    "Property Law": 106,
+    "Family Law": 4,
+    "Criminal Law": 34,
+    "Constitutional Law": 44,
+    "Labor Law": 2,
+    "Corporate Law": 125
+  },
+  "database_collections": {
+    "main_collection": "legal_cases",
+    "enhanced_collection": "enhanced_legal_cases",
+    "backup_collection": null
+  },
+  "search_improvements": {
+    "enhanced_metadata_fields": [
+      "court",
+      "judge",
+      "case_number",
+      "date",
+      "legal_domain",
+      "outcome",
+      "quality_score",
+      "importance_score"
+    ],
+    "searchable_content": [
+      "case_summary",
+      "legal_principles",
+      "court_details",
+      "party_information",
+      "full_case_text"
+    ],
+    "filtering_capabilities": [
+      "by_legal_domain",
+      "by_court_type",
+      "by_outcome",
+      "by_quality_score",
+      "by_date_range"
+    ]
+  }
+}

@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal AI Assistant - Multi-turn Conversations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --light: #f8f9fa;
+            --dark: #1f2937;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            height: calc(100vh - 40px);
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .sidebar-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px;
+        }
+        
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .new-chat-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .session-info {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .session-id {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .session-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stat {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .stat strong {
+            color: var(--dark);
+            display: block;
+            font-size: 16px;
+        }
+        
+        .context-panel {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .context-section {
+            margin-bottom: 20px;
+        }
+        
+        .context-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .context-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--light);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--dark);
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .context-badge.domain {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .context-badge.case {
+            background: #dbeafe;
+            color: var(--info);
+        }
+        
+        .context-badge.statute {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+        
+        .context-list {
+            list-style: none;
+        }
+        
+        .context-list li {
+            font-size: 13px;
+            color: #6b7280;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .context-list li:last-child {
+            border-bottom: none;
+        }
+        
+        /* Main Chat Area */
+        .chat-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .chat-title p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .chat-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--light);
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            margin-right: 12px;
+        }
+        
+        .message.user .message-avatar {
+            background: #e5e7eb;
+            color: var(--dark);
+            margin-left: 12px;
+        }
+        
+        .message-wrapper {
+            max-width: 70%;
+        }
+        
+        .message-content {
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-size: 15px;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+        
+        .message.ai .message-content {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 15px 15px 15px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 15px 15px 5px 15px;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 5px;
+        }
+        
+        .message-sources {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 10px;
+            border-left: 3px solid var(--info);
+        }
+        
+        .message-sources h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        
+        .source-item {
+            font-size: 12px;
+            color: #6b7280;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .source-item:last-child {
+            border-bottom: none;
+        }
+        
+        .source-title {
+            color: var(--info);
+            font-weight: 500;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 15px 15px 15px 5px;
+            width: fit-content;
+        }
+        
+        .typing-indicator.active {
+            display: block;
+        }
+        
+        .typing-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #9ca3af;
+            margin: 0 3px;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .context-indicator {
+            display: none;
+            padding: 10px 15px;
+            background: var(--light);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .context-indicator.active {
+            display: block;
+        }
+        
+        .context-indicator strong {
+            color: var(--dark);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s;
+            resize: none;
+            font-family: inherit;
+            max-height: 150px;
+        }
+        
+        #user-input:focus {
+            border-color: var(--primary);
+        }
+        
+        #send-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        #send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #9ca3af;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h3 {
+            font-size: 24px;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            font-size: 16px;
+            max-width: 500px;
+        }
+        
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .suggestion-chip {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .suggestion-chip:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .toast.active {
+            display: flex;
+        }
+        
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+        
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+            
+            .app-container {
+                height: 100vh;
+                gap: 0;
+            }
+            
+            .chat-container {
+                border-radius: 0;
+            }
+            
+            .message-wrapper {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>💬 Conversations</h2>
+                <button class="new-chat-btn" onclick="startNewConversation()">
+                    ➕ New Conversation
+                </button>
+            </div>
+            
+            <div class="session-info">
+                <div class="session-id">
+                    <strong>Session ID:</strong>
+                    <div id="current-session-display" style="font-family: monospace; font-size: 11px; margin-top: 5px; color: #9ca3af;">
+                        Not started
+                    </div>
+                </div>
+                <div class="session-stats">
+                    <div class="stat">
+                        <strong id="message-count">0</strong>
+                        Messages
+                    </div>
+                    <div class="stat">
+                        <strong id="question-count">0</strong>
+                        Questions
+                    </div>
+                </div>
+            </div>
+            
+            <div class="context-panel">
+                <div class="context-section">
+                    <h3>🏛️ Legal Domain</h3>
+                    <div id="legal-domain">
+                        <span class="context-badge">Not detected yet</span>
+                    </div>
+                </div>
+                
+                <div class="context-section">
+                    <h3>⚖️ Referenced Cases</h3>
+                    <div id="referenced-cases">
+                        <p style="font-size: 13px; color: #9ca3af;">No cases mentioned yet</p>
+                    </div>
+                </div>
+                
+                <div class="context-section">
+                    <h3>📜 Referenced Statutes</h3>
+                    <div id="referenced-statutes">
+                        <p style="font-size: 13px; color: #9ca3af;">No statutes mentioned yet</p>
+                    </div>
+                </div>
+                
+                <div class="context-section">
+                    <h3>📋 Previous Questions</h3>
+                    <ul class="context-list" id="previous-questions">
+                        <li style="color: #9ca3af;">No questions yet</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Chat -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <h1>⚖️ Legal AI Assistant</h1>
+                    <p>Multi-turn conversations with context preservation</p>
+                </div>
+                <div class="chat-actions">
+                    <button class="action-btn" onclick="viewHistory()" title="View full history">
+                        📖 History
+                    </button>
+                    <button class="action-btn" onclick="clearConversation()" title="Clear current conversation">
+                        🗑️ Clear
+                    </button>
+                </div>
+            </div>
+            
+            <div class="messages-container" id="messages-container">
+                <div class="empty-state">
+                    <div class="empty-state-icon">⚖️</div>
+                    <h3>Welcome to Legal AI Assistant</h3>
+                    <p>Ask any legal question and I'll provide detailed answers with relevant case citations. Your conversation context is preserved across questions!</p>
+                    <div class="suggestion-chips">
+                        <div class="suggestion-chip" onclick="sendSuggestion('What are the grounds for divorce under Hindu Marriage Act?')">
+                            Divorce Grounds
+                        </div>
+                        <div class="suggestion-chip" onclick="sendSuggestion('What is Section 420 IPC?')">
+                            Section 420 IPC
+                        </div>
+                        <div class="suggestion-chip" onclick="sendSuggestion('What are property partition rights?')">
+                            Property Rights
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <div class="context-indicator" id="context-indicator">
+                    Continuing conversation in <strong id="context-domain-name">—</strong>
+                </div>
+                <div class="input-group">
+                    <textarea 
+                        id="user-input" 
+                        placeholder="Ask a legal question..." 
+                        rows="1"
+                        onkeydown="handleKeyPress(event)"
+                    ></textarea>
+                    <button id="send-btn" onclick="sendMessage()">
+                        <span>Send</span>
+                        <span>➤</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span id="toast-message"></span>
+    </div>
+    
+    <script>
+        // Global state
+        let sessionId = null;
+        let conversationContext = null;
+        let messageCount = 0;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Legal AI Assistant initialized');
+            autoResizeTextarea();
+        });
+        
+        // Auto-resize textarea
+        function autoResizeTextarea() {
+            const textarea = document.getElementById('user-input');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            });
+        }
+        
+        // Handle Enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Clear input
+            input.value = '';
+            input.style.height = 'auto';
+            
+            // Hide empty state
+            const emptyState = document.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+            
+            // Display user message
+            addMessage('user', message);
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Disable send button
+            const sendBtn = document.getElementById('send-btn');
+            sendBtn.disabled = true;
+            
+            try {
+                // Send to API
+                const response = await fetch('/api/conversation/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: message,
+                        session_id: sessionId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update session ID
+                    sessionId = data.session_id;
+                    updateSessionDisplay();
+                    
+                    // Update context
+                    conversationContext = data.conversation_context;
+                    updateContextDisplay();
+                    
+                    // Display AI response
+                    hideTypingIndicator();
+                    addMessage('ai', data.response, data.sources);
+                    
+                    // Show context indicator
+                    if (conversationContext && conversationContext.legal_domain) {
+                        showContextIndicator(conversationContext.legal_domain);
+                    }
+                    
+                    // Increment message count
+                    messageCount++;
+                    document.getElementById('message-count').textContent = messageCount;
+                    
+                } else {
+                    hideTypingIndicator();
+                    addMessage('ai', 'Sorry, there was an error processing your request. Please try again.');
+                    showToast('Error: ' + data.error, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                hideTypingIndicator();
+                addMessage('ai', 'Sorry, I could not connect to the server. Please check your connection and try again.');
+                showToast('Connection error', 'error');
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+        
+        // Add message to chat
+        function addMessage(role, content, sources = null) {
+            const container = document.getElementById('messages-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = role === 'ai' ? '⚖️' : '👤';
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'message-wrapper';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = formatMessage(content);
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = new Date().toLocaleTimeString();
+            
+            wrapper.appendChild(contentDiv);
+            wrapper.appendChild(timeDiv);
+            
+            if (sources && sources.length > 0) {
+                const sourcesDiv = createSourcesDisplay(sources);
+                wrapper.appendChild(sourcesDiv);
+            }
+            
+            if (role === 'ai') {
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(wrapper);
+            } else {
+                messageDiv.appendChild(wrapper);
+                messageDiv.appendChild(avatar);
+            }
+            
+            container.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        // Format message content
+        function formatMessage(text) {
+            // Convert markdown-like formatting
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/\n/g, '<br>');
+            return text;
+        }
+        
+        // Create sources display
+        function createSourcesDisplay(sources) {
+            const sourcesDiv = document.createElement('div');
+            sourcesDiv.className = 'message-sources';
+            
+            const title = document.createElement('h4');
+            title.textContent = '📚 Cited Cases:';
+            sourcesDiv.appendChild(title);
+            
+            sources.slice(0, 3).forEach((source, index) => {
+                const sourceItem = document.createElement('div');
+                sourceItem.className = 'source-item';
+                sourceItem.innerHTML = `
+                    <div class="source-title">${index + 1}. ${source.title}</div>
+                    <div>${source.court} | ${source.date}</div>
+                    <div>Relevance: ${Math.round(source.relevance * 100)}%</div>
+                `;
+                sourcesDiv.appendChild(sourceItem);
+            });
+            
+            return sourcesDiv;
+        }
+        
+        // Typing indicator
+        function showTypingIndicator() {
+            const container = document.getElementById('messages-container');
+            const indicatorDiv = document.createElement('div');
+            indicatorDiv.id = 'typing-indicator-wrapper';
+            indicatorDiv.className = 'message ai';
+            indicatorDiv.innerHTML = `
+                <div class="message-avatar">⚖️</div>
+                <div class="typing-indicator active">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+            `;
+            container.appendChild(indicatorDiv);
+            scrollToBottom();
+        }
+        
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator-wrapper');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+        
+        // Update session display
+        function updateSessionDisplay() {
+            const display = document.getElementById('current-session-display');
+            if (sessionId) {
+                display.textContent = sessionId.substring(0, 20) + '...';
+                display.style.color = '#10b981';
+            }
+        }
+        
+        // Update context display
+        function updateContextDisplay() {
+            if (!conversationContext) return;
+            
+            // Legal domain
+            if (conversationContext.legal_domain) {
+                document.getElementById('legal-domain').innerHTML = 
+                    `<span class="context-badge domain">${conversationContext.legal_domain}</span>`;
+            }
+            
+            // Referenced cases
+            const casesDiv = document.getElementById('referenced-cases');
+            if (conversationContext.mentioned_cases && conversationContext.mentioned_cases.length > 0) {
+                casesDiv.innerHTML = conversationContext.mentioned_cases
+                    .map(c => `<span class="context-badge case">${c}</span>`)
+                    .join('');
+            }
+            
+            // Referenced statutes
+            const statutesDiv = document.getElementById('referenced-statutes');
+            if (conversationContext.mentioned_statutes && conversationContext.mentioned_statutes.length > 0) {
+                statutesDiv.innerHTML = conversationContext.mentioned_statutes
+                    .map(s => `<span class="context-badge statute">${s}</span>`)
+                    .join('');
+            }
+            
+            // Previous questions
+            const questionsList = document.getElementById('previous-questions');
+            if (conversationContext.previous_questions && conversationContext.previous_questions.length > 0) {
+                questionsList.innerHTML = conversationContext.previous_questions
+                    .map(q => `<li>${q}</li>`)
+                    .join('');
+                
+                document.getElementById('question-count').textContent = 
+                    conversationContext.previous_questions.length;
+            }
+        }
+        
+        // Show context indicator
+        function showContextIndicator(domain) {
+            const indicator = document.getElementById('context-indicator');
+            const domainName = document.getElementById('context-domain-name');
+            domainName.textContent = domain;
+            indicator.classList.add('active');
+        }
+        
+        // Start new conversation
+        function startNewConversation() {
+            if (confirm('Start a new conversation? This will clear the current chat.')) {
+                sessionId = null;
+                conversationContext = null;
+                messageCount = 0;
+                
+                // Clear messages
+                const container = document.getElementById('messages-container');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚖️</div>
+                        <h3>New Conversation Started</h3>
+                        <p>Ask your first question to begin!</p>
+                    </div>
+                `;
+                
+                // Reset displays
+                document.getElementById('current-session-display').textContent = 'Not started';
+                document.getElementById('current-session-display').style.color = '#9ca3af';
+                document.getElementById('message-count').textContent = '0';
+                document.getElementById('question-count').textContent = '0';
+                document.getElementById('legal-domain').innerHTML = '<span class="context-badge">Not detected yet</span>';
+                document.getElementById('referenced-cases').innerHTML = '<p style="font-size: 13px; color: #9ca3af;">No cases mentioned yet</p>';
+                document.getElementById('referenced-statutes').innerHTML = '<p style="font-size: 13px; color: #9ca3af;">No statutes mentioned yet</p>';
+                document.getElementById('previous-questions').innerHTML = '<li style="color: #9ca3af;">No questions yet</li>';
+                document.getElementById('context-indicator').classList.remove('active');
+                
+                showToast('New conversation started', 'success');
+            }
+        }
+        
+        // View history
+        async function viewHistory() {
+            if (!sessionId) {
+                showToast('No active session', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/conversation/history/${sessionId}?format=formatted`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Conversation History:\n\n' + data.history.history);
+                } else {
+                    showToast('Could not load history', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+                showToast('Error loading history', 'error');
+            }
+        }
+        
+        // Clear conversation
+        async function clearConversation() {
+            if (!sessionId) {
+                showToast('No active session', 'error');
+                return;
+            }
+            
+            if (confirm('Delete this conversation? This cannot be undone.')) {
+                try {
+                    const response = await fetch(`/api/conversation/session/${sessionId}`, {
+                        method: 'DELETE'
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        startNewConversation();
+                        showToast('Conversation deleted', 'success');
+                    } else {
+                        showToast('Could not delete conversation', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting conversation:', error);
+                    showToast('Error deleting conversation', 'error');
+                }
+            }
+        }
+        
+        // Send suggestion
+        function sendSuggestion(text) {
+            document.getElementById('user-input').value = text;
+            sendMessage();
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const messageEl = document.getElementById('toast-message');
+            
+            messageEl.textContent = message;
+            toast.className = `toast ${type} active`;
+            
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+        
+        // Scroll to bottom
+        function scrollToBottom() {
+            const container = document.getElementById('messages-container');
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+</body>
+</html>

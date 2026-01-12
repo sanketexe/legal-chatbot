@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multilingual Legal Assistant - Voice & Text</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --border: #e5e7eb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 40px);
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        /* Language Selector */
+        .language-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .language-selector label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .language-selector select {
+            background: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        /* Voice Toggle */
+        .voice-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .voice-toggle label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle-switch.active {
+            background: var(--success);
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+        
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* Messages Area */
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: var(--light);
+        }
+        
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            position: relative;
+        }
+        
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.bot .message-content {
+            background: white;
+            color: var(--dark);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .message-lang {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+        }
+        
+        .message-time {
+            font-size: 11px;
+        }
+        
+        .message-text {
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+        
+        .message-text.rtl {
+            direction: rtl;
+            text-align: right;
+        }
+        
+        .message-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .message-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0.6;
+            transition: opacity 0.2s, transform 0.2s;
+            font-size: 18px;
+        }
+        
+        .message-action-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .message.user .message-action-btn {
+            color: white;
+        }
+        
+        .message.bot .message-action-btn {
+            color: var(--dark);
+        }
+        
+        /* Translation Display */
+        .translation {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 13px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+        
+        .message.bot .translation {
+            border-top-color: var(--border);
+        }
+        
+        /* Input Area */
+        .input-area {
+            padding: 20px 30px;
+            background: white;
+            border-top: 1px solid var(--border);
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        
+        #queryInput {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--border);
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+            resize: none;
+            max-height: 120px;
+            font-family: inherit;
+        }
+        
+        #queryInput:focus {
+            border-color: var(--primary);
+        }
+        
+        #queryInput.rtl {
+            direction: rtl;
+            text-align: right;
+        }
+        
+        .voice-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.3s;
+            position: relative;
+        }
+        
+        .voice-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .voice-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .voice-btn.recording {
+            background: var(--danger);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 20px rgba(239, 68, 68, 0);
+            }
+        }
+        
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Status Message */
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .status-message.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .status-message.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+        
+        .status-message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .loading-dots {
+            display: inline-flex;
+            gap: 8px;
+        }
+        
+        .loading-dots span {
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .loading-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+        
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+        
+        .welcome-message h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        .welcome-message p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .welcome-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+        
+        .feature-desc {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+                margin: -20px;
+            }
+            
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .messages-area {
+                padding: 20px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .input-area {
+                padding: 15px 20px;
+            }
+            
+            .welcome-features {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Audio Player */
+        .audio-player {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .audio-player audio {
+            flex: 1;
+            height: 30px;
+        }
+        
+        /* Keyboard Shortcuts Help */
+        .shortcuts-hint {
+            font-size: 12px;
+            color: #9ca3af;
+            text-align: center;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span>⚖️</span>
+                <span>Multilingual Legal Assistant</span>
+            </h1>
+            <div class="header-controls">
+                <!-- Language Selector -->
+                <div class="language-selector">
+                    <label>🌐 Language:</label>
+                    <select id="languageSelect">
+                        <option value="en" selected>English</option>
+                        <option value="hi">हिन्दी (Hindi)</option>
+                        <option value="ta">தமிழ் (Tamil)</option>
+                        <option value="te">తెలుగు (Telugu)</option>
+                        <option value="bn">বাংলা (Bengali)</option>
+                        <option value="mr">मराठी (Marathi)</option>
+                        <option value="gu">ગુજરાતી (Gujarati)</option>
+                        <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                        <option value="ml">മലയാളം (Malayalam)</option>
+                        <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                        <option value="or">ଓଡ଼ିଆ (Odia)</option>
+                        <option value="ur">اردو (Urdu)</option>
+                    </select>
+                </div>
+                
+                <!-- Voice Output Toggle -->
+                <div class="voice-toggle">
+                    <label>🔊 Voice:</label>
+                    <div class="toggle-switch" id="voiceToggle"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <!-- Status Message -->
+            <div class="status-message" id="statusMessage"></div>
+            
+            <!-- Messages Area -->
+            <div class="messages-area" id="messagesArea">
+                <div class="welcome-message">
+                    <h2>Welcome to Multilingual Legal Assistant! 🎉</h2>
+                    <p>Ask legal questions in your preferred language using text or voice.</p>
+                    <p>We support 12 Indian languages with voice input and output.</p>
+                    
+                    <div class="welcome-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">🎤</div>
+                            <div class="feature-title">Voice Input</div>
+                            <div class="feature-desc">Speak your questions in any supported language</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🔊</div>
+                            <div class="feature-title">Voice Output</div>
+                            <div class="feature-desc">Listen to responses in your language</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🌍</div>
+                            <div class="feature-title">12 Languages</div>
+                            <div class="feature-desc">English, Hindi, Tamil, Telugu, and more</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🔄</div>
+                            <div class="feature-title">Real-time Translation</div>
+                            <div class="feature-desc">Automatic translation between languages</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div class="loading" id="loadingIndicator">
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="shortcuts-hint">
+                    💡 Press Enter to send • Shift+Enter for new line • Click 🎤 to speak
+                </div>
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="queryInput" 
+                            placeholder="Type your legal question here or use voice input..."
+                            rows="1"
+                        ></textarea>
+                    </div>
+                    <button class="voice-btn" id="voiceBtn" title="Voice Input">
+                        🎤
+                    </button>
+                    <button class="send-btn" id="sendBtn" title="Send Message">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentLanguage = 'en';
+        let voiceOutputEnabled = false;
+        let isRecording = false;
+        let recognition = null;
+        
+        // Language metadata
+        const languageInfo = {
+            'en': { name: 'English', native: 'English', rtl: false, sttCode: 'en-IN' },
+            'hi': { name: 'Hindi', native: 'हिन्दी', rtl: false, sttCode: 'hi-IN' },
+            'ta': { name: 'Tamil', native: 'தமிழ்', rtl: false, sttCode: 'ta-IN' },
+            'te': { name: 'Telugu', native: 'తెలుగు', rtl: false, sttCode: 'te-IN' },
+            'bn': { name: 'Bengali', native: 'বাংলা', rtl: false, sttCode: 'bn-IN' },
+            'mr': { name: 'Marathi', native: 'मराठी', rtl: false, sttCode: 'mr-IN' },
+            'gu': { name: 'Gujarati', native: 'ગુજરાતી', rtl: false, sttCode: 'gu-IN' },
+            'kn': { name: 'Kannada', native: 'ಕನ್ನಡ', rtl: false, sttCode: 'kn-IN' },
+            'ml': { name: 'Malayalam', native: 'മലയാളം', rtl: false, sttCode: 'ml-IN' },
+            'pa': { name: 'Punjabi', native: 'ਪੰਜਾਬੀ', rtl: false, sttCode: 'pa-IN' },
+            'or': { name: 'Odia', native: 'ଓଡ଼ିଆ', rtl: false, sttCode: 'or-IN' },
+            'ur': { name: 'Urdu', native: 'اردو', rtl: true, sttCode: 'ur-IN' }
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            initializeVoiceRecognition();
+        });
+        
+        // Event Listeners
+        function initializeEventListeners() {
+            // Language selector
+            document.getElementById('languageSelect').addEventListener('change', function(e) {
+                currentLanguage = e.target.value;
+                updateInputDirection();
+                showStatus(`Language changed to ${languageInfo[currentLanguage].native}`, 'success');
+            });
+            
+            // Voice toggle
+            document.getElementById('voiceToggle').addEventListener('click', function() {
+                voiceOutputEnabled = !voiceOutputEnabled;
+                this.classList.toggle('active');
+                showStatus(voiceOutputEnabled ? 'Voice output enabled' : 'Voice output disabled', 'info');
+            });
+            
+            // Voice button
+            document.getElementById('voiceBtn').addEventListener('click', toggleVoiceRecording);
+            
+            // Send button
+            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+            
+            // Input field
+            const input = document.getElementById('queryInput');
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // Auto-resize textarea
+            input.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+        }
+        
+        // Update input direction for RTL languages
+        function updateInputDirection() {
+            const input = document.getElementById('queryInput');
+            if (languageInfo[currentLanguage].rtl) {
+                input.classList.add('rtl');
+            } else {
+                input.classList.remove('rtl');
+            }
+        }
+        
+        // Initialize Web Speech API
+        function initializeVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('queryInput').value = transcript;
+                    showStatus('Speech recognized successfully', 'success');
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    showStatus('Speech recognition error: ' + event.error, 'error');
+                    stopRecording();
+                };
+                
+                recognition.onend = function() {
+                    stopRecording();
+                };
+            } else {
+                console.warn('Speech recognition not supported');
+            }
+        }
+        
+        // Toggle voice recording
+        function toggleVoiceRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+        
+        // Start recording
+        function startRecording() {
+            if (!recognition) {
+                showStatus('Speech recognition not supported in your browser', 'error');
+                return;
+            }
+            
+            try {
+                recognition.lang = languageInfo[currentLanguage].sttCode;
+                recognition.start();
+                isRecording = true;
+                document.getElementById('voiceBtn').classList.add('recording');
+                document.getElementById('voiceBtn').innerHTML = '⏹️';
+                showStatus('Listening... Speak now', 'info');
+            } catch (error) {
+                console.error('Error starting recognition:', error);
+                showStatus('Failed to start voice recording', 'error');
+            }
+        }
+        
+        // Stop recording
+        function stopRecording() {
+            if (recognition && isRecording) {
+                recognition.stop();
+            }
+            isRecording = false;
+            document.getElementById('voiceBtn').classList.remove('recording');
+            document.getElementById('voiceBtn').innerHTML = '🎤';
+        }
+        
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('queryInput');
+            const query = input.value.trim();
+            
+            if (!query) {
+                showStatus('Please enter a question', 'error');
+                return;
+            }
+            
+            // Clear input
+            input.value = '';
+            input.style.height = 'auto';
+            
+            // Add user message
+            addMessage(query, 'user', currentLanguage);
+            
+            // Show loading
+            showLoading(true);
+            
+            try {
+                // Translate query to English if needed
+                let englishQuery = query;
+                if (currentLanguage !== 'en') {
+                    const translateResult = await translateText(query, 'en', currentLanguage);
+                    if (translateResult.success) {
+                        englishQuery = translateResult.translated_text;
+                    }
+                }
+                
+                // Get response from chatbot
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: englishQuery,
+                        language: currentLanguage
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let responseText = data.response;
+                    
+                    // Translate response if needed
+                    if (currentLanguage !== 'en') {
+                        const translateResult = await translateText(responseText, currentLanguage, 'en');
+                        if (translateResult.success) {
+                            responseText = translateResult.translated_text;
+                        }
+                    }
+                    
+                    // Add bot message
+                    addMessage(responseText, 'bot', currentLanguage, data.response);
+                    
+                    // Play audio if voice output enabled
+                    if (voiceOutputEnabled) {
+                        playAudio(responseText, currentLanguage);
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to get response');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('Error: ' + error.message, 'error');
+                addMessage('Sorry, I encountered an error processing your request. Please try again.', 'bot', 'en');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Translate text
+        async function translateText(text, destLang, srcLang = 'auto') {
+            try {
+                const response = await fetch('/api/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        dest_lang: destLang,
+                        src_lang: srcLang
+                    })
+                });
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Translation error:', error);
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // Play audio
+        async function playAudio(text, lang) {
+            try {
+                const response = await fetch('/api/text-to-speech', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        language: lang
+                    })
+                });
+                
+                if (response.ok) {
+                    const audioBlob = await response.blob();
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                } else {
+                    console.error('Failed to generate audio');
+                }
+            } catch (error) {
+                console.error('Audio playback error:', error);
+            }
+        }
+        
+        // Add message to chat
+        function addMessage(text, sender, lang, originalText = null) {
+            const messagesArea = document.getElementById('messagesArea');
+            
+            // Remove welcome message if present
+            const welcomeMsg = messagesArea.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            // Header
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'message-header';
+            headerDiv.innerHTML = `
+                <span class="message-lang">${languageInfo[lang].native}</span>
+                <span class="message-time">${new Date().toLocaleTimeString()}</span>
+            `;
+            contentDiv.appendChild(headerDiv);
+            
+            // Text
+            const textDiv = document.createElement('div');
+            textDiv.className = `message-text ${languageInfo[lang].rtl ? 'rtl' : ''}`;
+            textDiv.textContent = text;
+            contentDiv.appendChild(textDiv);
+            
+            // Show original if translation occurred
+            if (originalText && originalText !== text) {
+                const translationDiv = document.createElement('div');
+                translationDiv.className = 'translation';
+                translationDiv.textContent = `Original (English): ${originalText}`;
+                contentDiv.appendChild(translationDiv);
+            }
+            
+            // Actions
+            if (sender === 'bot') {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'message-actions';
+                actionsDiv.innerHTML = `
+                    <button class="message-action-btn" onclick="playMessageAudio(this, '${text.replace(/'/g, "\\'")}', '${lang}')" title="Play audio">
+                        🔊
+                    </button>
+                    <button class="message-action-btn" onclick="copyMessageText(this, '${text.replace(/'/g, "\\'")}' )" title="Copy text">
+                        📋
+                    </button>
+                `;
+                contentDiv.appendChild(actionsDiv);
+            }
+            
+            messageDiv.appendChild(contentDiv);
+            messagesArea.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+        
+        // Play message audio
+        window.playMessageAudio = function(button, text, lang) {
+            playAudio(text, lang);
+            showStatus('Playing audio...', 'info');
+        };
+        
+        // Copy message text
+        window.copyMessageText = function(button, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showStatus('Text copied to clipboard', 'success');
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                showStatus('Failed to copy text', 'error');
+            });
+        };
+        
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type} show`;
+            
+            setTimeout(() => {
+                statusDiv.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Show/hide loading
+        function showLoading(show) {
+            const loadingDiv = document.getElementById('loadingIndicator');
+            if (show) {
+                loadingDiv.classList.add('show');
+            } else {
+                loadingDiv.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>

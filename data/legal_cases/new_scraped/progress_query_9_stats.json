@@ -1,0 +1,22 @@
+{
+  "total_cases": 45,
+  "queries": [
+    "unnao rape case",
+    "minerva mills case",
+    "kathua rape case",
+    "hyderabad rape murder case",
+    "golaknath case fundamental rights",
+    "nirbhaya gangrape delhi 2012",
+    "maneka gandhi passport article 21",
+    "mukesh singh death penalty",
+    "kesavananda bharati basic structure"
+  ],
+  "courts": [
+    "District Court",
+    "High Court",
+    "Unknown",
+    "Supreme Court"
+  ],
+  "avg_text_length": 150451.2,
+  "scraped_at": "2026-01-02T15:12:28.928586"
+}

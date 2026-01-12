@@ -1,0 +1,46 @@
+{
+  "enhancement_summary": {
+    "timestamp": "2025-12-28T22:38:39.999872",
+    "original_files_processed": 94,
+    "original_total_cases": 44650,
+    "duplicates_removed": 43244,
+    "incomplete_cases_removed": 1091,
+    "final_enhanced_cases": 315,
+    "high_quality_cases": 315,
+    "cases_with_full_text": 315,
+    "cases_with_metadata": 315,
+    "average_quality_score": 99.83
+  },
+  "domain_distribution": {
+    "Property Law": 106,
+    "Family Law": 4,
+    "Criminal Law": 34,
+    "Constitutional Law": 44,
+    "Labor Law": 2,
+    "Corporate Law": 125
+  },
+  "outcome_distribution": {
+    "Allowed": 146,
+    "Dismissed": 164,
+    "Acquitted": 4
+  },
+  "court_distribution": {
+    "HIGH": 146,
+    "SUPREME": 10,
+    "High": 9,
+    "open": 9,
+    "Allahabad": 6,
+    "Madhya Pradesh": 5,
+    "Karnataka": 4,
+    "opinion of the": 3,
+    "Haryana": 3,
+    "Delhi": 3
+  },
+  "quality_score_distribution": {
+    "excellent (90-100)": 314,
+    "very_good (80-89)": 1,
+    "good (70-79)": 0,
+    "fair (60-69)": 0,
+    "poor (0-59)": 0
+  }
+}

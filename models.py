@@ -283,3 +283,246 @@ def create_sample_data():
         session.generate_title()
         
     logger.info("Sample test data created")
+
+
+class CaseSummary(db.Model):
+    """Cache for generated case summaries"""
+    __tablename__ = 'case_summaries'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    case_id = db.Column(db.String(100), nullable=False, index=True)
+    case_title = db.Column(db.String(500), nullable=True)
+    
+    # Summary content
+    summary_text = db.Column(db.Text, nullable=False)
+    facts = db.Column(db.Text, nullable=True)
+    issues = db.Column(db.Text, nullable=True)
+    reasoning = db.Column(db.Text, nullable=True)
+    judgment = db.Column(db.Text, nullable=True)
+    key_points = db.Column(db.JSON, nullable=True)  # List of key points
+    
+    # Summary metadata
+    summary_type = db.Column(db.String(20), nullable=False)  # 'extractive', 'abstractive', 'hybrid'
+    length = db.Column(db.String(10), nullable=False)  # 'short', 'medium', 'long'
+    word_count = db.Column(db.Integer, nullable=True)
+    
+    # Case metadata
+    court = db.Column(db.String(200), nullable=True)
+    year = db.Column(db.String(10), nullable=True)
+    
+    # Audit fields
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    created_by = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=True)
+    
+    # Relationship
+    creator = db.relationship('User', backref='summaries', foreign_keys=[created_by])
+    
+    def to_dict(self, include_details=True):
+        """Convert summary to dictionary for JSON response"""
+        result = {
+            'id': self.id,
+            'case_id': self.case_id,
+            'case_title': self.case_title,
+            'summary': self.summary_text,
+            'type': self.summary_type,
+            'length': self.length,
+            'word_count': self.word_count,
+            'court': self.court,
+            'year': self.year,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+        
+        if include_details:
+            result.update({
+                'facts': self.facts,
+                'issues': self.issues,
+                'reasoning': self.reasoning,
+                'judgment': self.judgment,
+                'key_points': self.key_points or []
+            })
+        
+        return result
+    
+    @classmethod
+    def get_by_case_id(cls, case_id: str, length: str = None, summary_type: str = None):
+        """
+        Get cached summary for a case
+        
+        Args:
+            case_id: Case identifier
+            length: Optional length filter
+            summary_type: Optional type filter
+        
+        Returns:
+            CaseSummary object or None
+        """
+        query = cls.query.filter_by(case_id=case_id)
+        
+        if length:
+            query = query.filter_by(length=length)
+        if summary_type:
+            query = query.filter_by(summary_type=summary_type)
+        
+        # Return most recent
+        return query.order_by(cls.created_at.desc()).first()
+    
+    @classmethod
+    def cache_summary(cls, summary_data: dict, user_id: str = None):
+        """
+        Cache a generated summary
+        
+        Args:
+            summary_data: Dictionary with summary information
+            user_id: Optional user ID who generated the summary
+        
+        Returns:
+            Created CaseSummary object
+        """
+        summary = cls(
+            case_id=summary_data.get('case_id'),
+            case_title=summary_data.get('title'),
+            summary_text=summary_data.get('summary'),
+            facts=summary_data.get('facts'),
+            issues=summary_data.get('issues'),
+            reasoning=summary_data.get('reasoning'),
+            judgment=summary_data.get('judgment'),
+            key_points=summary_data.get('key_points'),
+            summary_type=summary_data.get('method', 'hybrid'),
+            length=summary_data.get('length', 'medium'),
+            word_count=summary_data.get('word_count'),
+            court=summary_data.get('court'),
+            year=summary_data.get('year'),
+            created_by=user_id
+        )
+        
+        db.session.add(summary)
+        db.session.commit()
+        
+        logger.info(f"Cached summary for case {summary_data.get('case_id')}")
+        return summary
+
+
+class CasePrediction(db.Model):
+    """Store ML predictions for case outcomes"""
+    __tablename__ = 'case_predictions'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False, index=True)
+    
+    # Input data
+    case_facts = db.Column(db.Text, nullable=False)
+    case_issues = db.Column(db.Text, nullable=True)
+    case_charges = db.Column(db.Text, nullable=True)
+    court_type = db.Column(db.String(50), nullable=True)
+    case_type = db.Column(db.String(50), nullable=True)
+    
+    # Prediction results
+    predicted_outcome = db.Column(db.String(50), nullable=False)  # 'favorable', 'unfavorable', 'partial'
+    confidence_score = db.Column(db.Float, nullable=False)  # 0-100
+    confidence_level = db.Column(db.String(20), nullable=True)  # 'High', 'Medium', 'Low'
+    
+    # Additional prediction data
+    reasoning = db.Column(db.JSON, nullable=True)  # List of contributing factors
+    similar_cases = db.Column(db.JSON, nullable=True)  # Similar historical cases
+    all_probabilities = db.Column(db.JSON, nullable=True)  # Probabilities for all outcomes
+    
+    # Model metadata
+    model_version = db.Column(db.String(50), default='v1.0')
+    rf_accuracy = db.Column(db.Float, nullable=True)
+    xgb_accuracy = db.Column(db.Float, nullable=True)
+    
+    # User feedback (for model improvement)
+    user_rating = db.Column(db.Integer, nullable=True)  # 1-5 stars
+    was_accurate = db.Column(db.Boolean, nullable=True)  # Did prediction match actual outcome?
+    actual_outcome = db.Column(db.String(50), nullable=True)  # If user provides actual result
+    feedback_notes = db.Column(db.Text, nullable=True)
+    
+    # Audit fields
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    
+    # Relationship
+    user = db.relationship('User', backref='predictions', foreign_keys=[user_id])
+    
+    def to_dict(self, include_details=True):
+        """Convert prediction to dictionary for JSON response"""
+        result = {
+            'id': self.id,
+            'predicted_outcome': self.predicted_outcome,
+            'confidence_score': round(self.confidence_score, 2),
+            'confidence_level': self.confidence_level,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'user_rating': self.user_rating,
+            'was_accurate': self.was_accurate
+        }
+        
+        if include_details:
+            result.update({
+                'case_facts': self.case_facts,
+                'case_issues': self.case_issues,
+                'case_charges': self.case_charges,
+                'court_type': self.court_type,
+                'case_type': self.case_type,
+                'reasoning': self.reasoning or [],
+                'similar_cases': self.similar_cases or [],
+                'all_probabilities': self.all_probabilities or {},
+                'model_version': self.model_version,
+                'feedback_notes': self.feedback_notes
+            })
+        
+        return result
+    
+    @classmethod
+    def save_prediction(cls, user_id: str, case_input: dict, prediction_result: dict):
+        """
+        Save a prediction to database
+        
+        Args:
+            user_id: User who made the prediction
+            case_input: Dictionary with case details
+            prediction_result: Dictionary with prediction results
+        
+        Returns:
+            Created CasePrediction object
+        """
+        prediction = cls(
+            user_id=user_id,
+            case_facts=case_input.get('facts', ''),
+            case_issues=case_input.get('issues', ''),
+            case_charges=case_input.get('charges', ''),
+            court_type=case_input.get('court', ''),
+            case_type=case_input.get('case_type', ''),
+            predicted_outcome=prediction_result.get('outcome'),
+            confidence_score=prediction_result.get('confidence', 0),
+            confidence_level=prediction_result.get('confidence_level'),
+            reasoning=prediction_result.get('reasoning', []),
+            similar_cases=prediction_result.get('similar_cases', []),
+            all_probabilities=prediction_result.get('all_probabilities', {}),
+            model_version='v1.0'
+        )
+        
+        # Extract model accuracy if available
+        model_acc = prediction_result.get('model_accuracy', {})
+        if model_acc:
+            prediction.rf_accuracy = float(model_acc.get('random_forest', '0%').replace('%', ''))
+            prediction.xgb_accuracy = float(model_acc.get('xgboost', '0%').replace('%', ''))
+        
+        db.session.add(prediction)
+        db.session.commit()
+        
+        logger.info(f"Saved prediction {prediction.id} for user {user_id}")
+        return prediction
+    
+    def update_feedback(self, rating: int = None, was_accurate: bool = None, 
+                       actual_outcome: str = None, notes: str = None):
+        """Update user feedback on prediction accuracy"""
+        if rating is not None:
+            self.user_rating = rating
+        if was_accurate is not None:
+            self.was_accurate = was_accurate
+        if actual_outcome:
+            self.actual_outcome = actual_outcome
+        if notes:
+            self.feedback_notes = notes
+        
+        db.session.commit()
+        logger.info(f"Updated feedback for prediction {self.id}")

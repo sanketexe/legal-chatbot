@@ -101,6 +101,18 @@ class Config:
         "workmen compensation injury",
         "sexual harassment workplace vishakha",
         
+        # Tech Employment & Corporate (NEW - 10 categories)
+        "non-compete agreement software engineer",
+        "ESOP equity startup dilution",
+        "intellectual property code ownership",
+        "performance improvement plan PIP",
+        "notice period buyout resignation",
+        "remote work from home rights",
+        "moonlighting dual employment",
+        "unpaid overtime IT professional",
+        "founder vesting acceleration",
+        "open source GPL license compliance",
+        
         # Constitutional & Administrative (6 categories)
         "writ petition habeas corpus",
         "fundamental rights Article 21",

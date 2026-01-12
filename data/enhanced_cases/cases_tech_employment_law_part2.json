@@ -1,0 +1,252 @@
+[
+  {
+    "id": "tech_emp_006",
+    "case_name": "Workplace Sexual Harassment - Vishakha Guidelines Compliance",
+    "category": "Employment Law - Tech Sector",
+    "subcategory": "Sexual Harassment & Workplace Safety",
+    "scenario": "A female software engineer filed a complaint against her team lead for persistent sexual harassment including inappropriate messages, unwanted physical contact, and quid pro quo demands. The company's Internal Complaints Committee (ICC) dismissed the complaint citing 'insufficient evidence'.",
+    "facts": "The engineer documented harassment over 6 months including WhatsApp messages, witnesses who saw inappropriate behavior, and instances of career retaliation when she rejected advances. The ICC consisted only of male members and did not follow proper inquiry procedures.",
+    "legal_issues": [
+      "Sexual harassment at workplace under POSH Act",
+      "Proper constitution and functioning of ICC",
+      "Employer's liability for inadequate response",
+      "Procedural compliance with Vishakha Guidelines",
+      "Victimization and retaliation"
+    ],
+    "applicable_laws": [
+      "Sexual Harassment of Women at Workplace (Prevention, Prohibition and Redressal) Act, 2013",
+      "Vishakha Guidelines (1997 Supreme Court)",
+      "Indian Penal Code - Section 354A, 509",
+      "Constitution of India - Article 14, 15, 19(1)(g), 21"
+    ],
+    "judgment": "The court held the company liable for failing to comply with POSH Act requirements. The ICC was improperly constituted (must have external member and 50% women members). The inquiry was procedurally flawed. The court ordered: 1) Fresh inquiry by properly constituted ICC, 2) Interim relief including transfer of harasser, 3) Compensation of 6 months salary, 4) Company to undergo compliance audit, 5) Criminal proceedings against harasser under IPC 354A.",
+    "key_principles": [
+      "All workplaces with 10+ employees must have ICC",
+      "ICC must have 50% women members and one external member",
+      "Burden of proof shifts to accused in POSH cases",
+      "Company liable for not taking complaints seriously",
+      "Digital evidence (WhatsApp, emails) is admissible and strong evidence",
+      "Retaliation against complainant is punishable offense",
+      "Compensation can include mental agony, loss of career opportunity"
+    ],
+    "precedents": [
+      "Vishaka v. State of Rajasthan (1997) - Landmark case establishing guidelines",
+      "Medha Kotwal Lele v. Union of India (2013) - POSH Act enforcement",
+      "Apparel Export Promotion Council v. A.K. Chopra (1999)"
+    ],
+    "practical_advice": [
+      "Document all instances of harassment immediately",
+      "Save digital evidence (messages, emails, screenshots)",
+      "File written complaint with ICC within 3 months (extendable to 6 months)",
+      "Request interim relief (transfer, leave) during inquiry",
+      "ICC inquiry must complete within 90 days",
+      "Complainant can bring support person to ICC proceedings",
+      "If ICC fails, can approach police and file FIR",
+      "Company must display POSH Act provisions prominently",
+      "Annual compliance reports are mandatory",
+      "Know your rights - harassment includes verbal, physical, digital conduct"
+    ],
+    "importance_score": 99
+  },
+  {
+    "id": "tech_emp_007",
+    "case_name": "Remote Work and Work From Home Rights Post-Pandemic",
+    "category": "Employment Law - Tech Sector",
+    "subcategory": "Remote Work & Flexible Working",
+    "scenario": "After 2 years of successful remote work during pandemic, company mandated full return to office. An employee with medical condition requested permanent WFH as reasonable accommodation but was denied and threatened with termination.",
+    "facts": "The employee, a software engineer with chronic health condition, worked remotely with excellent performance ratings. Post-pandemic, company issued blanket return-to-office policy without considering individual circumstances. Employee provided medical certificates supporting WFH request.",
+    "legal_issues": [
+      "Right to work from home in post-pandemic era",
+      "Reasonable accommodation for employees with disabilities",
+      "Unilateral change in employment terms",
+      "Discrimination based on health condition",
+      "Constructive dismissal through impossible conditions"
+    ],
+    "applicable_laws": [
+      "Rights of Persons with Disabilities Act, 2016 - Section 20, 21",
+      "Industrial Employment (Standing Orders) Act, 1946",
+      "Constitution of India - Article 14 (Equality), 21 (Right to life)",
+      "Shops and Establishments Act (State-specific)",
+      "COVID-19 related government advisories"
+    ],
+    "judgment": "The court ruled partially in favor of the employee. While employers generally have right to determine work location, they must: 1) Provide reasonable accommodation for persons with disabilities, 2) Consider individual circumstances in good faith, 3) Not discriminate based on health conditions. The court ordered: a) Permanent WFH arrangement for the employee with periodic review, b) Company to develop formal WFH policy with objective criteria, c) Compensation for mental harassment.",
+    "key_principles": [
+      "Employers must provide reasonable accommodation for disabilities",
+      "Unilateral change in fundamental employment terms requires consent",
+      "Medical evidence supporting WFH creates obligation to consider",
+      "Post-pandemic, WFH is recognized as viable work arrangement",
+      "Blanket policies without individual consideration may be discriminatory",
+      "Performance track record relevant in WFH requests",
+      "Constructive dismissal occurs when conditions made untenable"
+    ],
+    "precedents": [
+      "National Federation of the Blind v. Union of India (2013) - Disability rights",
+      "Jeeja Ghosh v. Union of India (2016) - Reasonable accommodation",
+      "Samta Andolan Samiti v. State of Uttar Pradesh (2017)"
+    ],
+    "practical_advice": [
+      "Request WFH accommodation in writing with medical evidence",
+      "Document performance achievements during remote work period",
+      "Propose hybrid arrangement as compromise if needed",
+      "Companies should have formal WFH/hybrid policies",
+      "Disability accommodation is legal right, not favor",
+      "Keep all communications regarding WFH requests",
+      "If denied, file grievance through internal channels first",
+      "Consider disability discrimination complaint if applicable",
+      "Many IT companies now offer permanent hybrid options",
+      "Negotiate WFH as part of employment terms for new jobs"
+    ],
+    "importance_score": 90
+  },
+  {
+    "id": "tech_emp_008",
+    "case_name": "Notice Period Buyout and Immediate Resignation",
+    "category": "Employment Law - Tech Sector",
+    "subcategory": "Notice Period & Resignation",
+    "scenario": "An engineer wanted to join a new company immediately but was required to serve 3-month notice period. The employee offered to pay 3 months salary as buyout but employer refused and threatened legal action if employee left.",
+    "facts": "Employment contract stated 90-day notice period or payment of equivalent salary. Employee had urgent family reasons to relocate. Employer refused buyout citing critical project and 'unrecoverable losses'. Employee resigned and left, depositing 3 months salary with labor court.",
+    "legal_issues": [
+      "Enforceability of long notice periods",
+      "Right to buy out notice period",
+      "Liquidated damages vs. penalty",
+      "Involuntary servitude and forced labor",
+      "Employer's right to refuse notice buyout"
+    ],
+    "applicable_laws": [
+      "Indian Contract Act, 1872 - Section 73, 74 (Liquidated damages)",
+      "Shops and Establishments Act - Notice period regulations",
+      "Constitution of India - Article 23 (Prohibition of forced labor)",
+      "Payment of Wages Act, 1936"
+    ],
+    "judgment": "The court held in favor of the employee. Key findings: 1) Notice period buyout clause is essentially liquidated damages, 2) If employee pays equivalent salary, employer cannot refuse and insist on service, 3) Forcing employee to serve against will violates Article 23, 4) Employer failed to prove actual loss exceeding 3 months salary, 5) Contract terms must be reasonable and not amount to servitude. The court dismissed employer's suit and ordered return of deposited amount to employee with interest.",
+    "key_principles": [
+      "Employer cannot force employee to serve notice period if buyout is paid",
+      "Notice period buyout is liquidated damages, not optional",
+      "Long notice periods (3 months) are enforceable only for specific roles",
+      "Employer must prove actual damages exceeding liquidated amount",
+      "Forcing service against will violates fundamental rights",
+      "Payment in lieu of notice must be accepted by employer",
+      "Contract cannot create involuntary servitude"
+    ],
+    "precedents": [
+      "Central Inland Water Transport Corporation Ltd. v. Brojo Nath Ganguly (1986)",
+      "Delhi Transport Corporation v. D.T.C. Mazdoor Congress (1991)",
+      "ONGC v. Offshore Pipeline Contractors (1994) - Liquidated damages"
+    ],
+    "practical_advice": [
+      "Notice period buyout is your right if provided in contract",
+      "Employer generally cannot refuse buyout payment",
+      "Keep written proof of resignation and buyout offer",
+      "90 days is common in IT, but enforceability depends on circumstances",
+      "Negotiate shorter notice period in employment contract",
+      "Some companies have clauses to recover training costs - check contract",
+      "If employer refuses buyout unreasonably, consult lawyer",
+      "New employer should provide joining buffer for notice period",
+      "Document handover activities to show good faith",
+      "Notice period cannot be indefinite or unreasonable"
+    ],
+    "importance_score": 86
+  },
+  {
+    "id": "tech_emp_009",
+    "case_name": "Mental Health Leave and Workplace Stress",
+    "category": "Employment Law - Tech Sector",
+    "subcategory": "Health & Medical Leave",
+    "scenario": "A software engineer suffered severe depression and anxiety due to workplace stress, excessive work hours, and hostile management. The employee requested medical leave but was denied and threatened with performance action.",
+    "facts": "The employee worked 70-80 hour weeks consistently, received abusive messages from manager, and developed clinical depression requiring psychiatric treatment. Doctor certified 30-day rest. Company denied leave citing 'business needs' and started performance review.",
+    "legal_issues": [
+      "Right to medical leave for mental health",
+      "Workplace stress and employer liability",
+      "Disability discrimination for mental health conditions",
+      "Constructive dismissal through impossible work conditions",
+      "Duty of care owed by employer"
+    ],
+    "applicable_laws": [
+      "Rights of Persons with Disabilities Act, 2016 (mental illness is disability)",
+      "Mental Healthcare Act, 2017",
+      "Factories Act, 1948 - Worker health and safety",
+      "Shops and Establishments Act - Medical leave provisions",
+      "Constitution of India - Article 21 (Right to health)"
+    ],
+    "judgment": "The court ruled strongly in favor of the employee. Mental health is equally protected as physical health under law. Employer's denial of legitimate medical leave is illegal and amounts to disability discrimination. The excessive work hours and hostile environment violated duty of care. The court ordered: 1) Immediate grant of 30-day medical leave with pay, 2) Abandonment of performance review, 3) Compensation for mental harassment (Rs. 5 lakhs), 4) Mandatory mental health policy implementation, 5) Psychological counseling support.",
+    "key_principles": [
+      "Mental health leave has same legal status as physical health leave",
+      "Mental illness is recognized as disability requiring accommodation",
+      "Employer has duty of care for employee mental wellbeing",
+      "Excessive work hours creating health issues is actionable",
+      "Medical certificates for mental health must be honored",
+      "Retaliation for taking mental health leave is illegal",
+      "Workplace stress causing clinical condition = employer liability"
+    ],
+    "precedents": [
+      "Food Corporation of India v. Smt. Ved Prakash Gupta (1990) - Mental health disability",
+      "Air India v. Nergesh Meerza (1981) - Health rights of employees",
+      "State of Punjab v. Jagir Singh (2015) - Mental fitness"
+    ],
+    "practical_advice": [
+      "Mental health is valid medical reason for leave",
+      "Get proper medical certification from psychiatrist/psychologist",
+      "Mental Healthcare Act 2017 protects rights of persons with mental illness",
+      "Employer cannot discriminate based on mental health condition",
+      "Document excessive work hours and toxic workplace conditions",
+      "Many companies now have EAP (Employee Assistance Programs)",
+      "Request reasonable accommodation for mental health conditions",
+      "Workplace stress causing illness can lead to compensation claims",
+      "Know your leave entitlements - privilege, sick, casual leave",
+      "If denied, file complaint with HR and labor authorities",
+      "Seek professional help without fear of job loss"
+    ],
+    "importance_score": 94
+  },
+  {
+    "id": "tech_emp_010",
+    "case_name": "Variable Pay and Performance Bonus Disputes",
+    "category": "Employment Law - Tech Sector",
+    "subcategory": "Compensation & Benefits",
+    "scenario": "A senior engineer was promised 30% variable pay based on performance. Despite excellent ratings and achievement of all KPIs, company paid only 10% citing 'business losses' and 'discretionary nature' of bonus.",
+    "facts": "Offer letter stated 'up to 30% variable pay based on performance'. Annual review rated employee 4.5/5. All measurable targets exceeded. Company made profit that year but paid minimal bonus citing 'discretion' and 'performance linkage'.",
+    "legal_issues": [
+      "Enforceability of performance-linked variable pay",
+      "Discretionary vs. contractual bonus",
+      "Interpretation of 'up to' clauses in compensation",
+      "Unfair labor practice in bonus denial",
+      "Payment of Wages Act applicability"
+    ],
+    "applicable_laws": [
+      "Payment of Bonus Act, 1965",
+      "Payment of Wages Act, 1936",
+      "Indian Contract Act, 1872 - Interpretation of contracts",
+      "Shops and Establishments Act",
+      "Industrial Disputes Act, 1947"
+    ],
+    "judgment": "The court analyzed the employment contract and company's bonus policy. While 'up to 30%' gives some discretion, it cannot be illusory. When employee achieves excellent performance (documented), reduction to 10% without valid business reason is arbitrary. Company's profitability that year negated 'business loss' argument. The court ordered: 1) Payment of 25% variable pay (reasonable given performance), 2) Interest on delayed payment, 3) Clarification of bonus policy for future transparency.",
+    "key_principles": [
+      "'Discretionary' bonus becomes contractual when systematically promised",
+      "Excellent performance creates legitimate expectation of promised variable pay",
+      "Company cannot arbitrarily reduce variable pay without valid reasons",
+      "'Up to X%' means genuine possibility of X%, not just 0-X%",
+      "Business losses must be genuine and documented to reduce variable pay",
+      "Contractual terms must be applied consistently and fairly",
+      "Employer cannot use 'discretion' to deny earned compensation"
+    ],
+    "precedents": [
+      "Bridge & Roof Co. Ltd. v. Union of India (1963) - Bonus as deferred wage",
+      "Associated Cement Companies Ltd. v. P.N. Sharma (1965)",
+      "Workmen of Nilgiri Coop. Marketing Society v. State of TN (2004)"
+    ],
+    "practical_advice": [
+      "Get variable pay terms in writing in offer letter",
+      "Understand difference between discretionary and guaranteed bonus",
+      "Document all performance achievements and KPIs met",
+      "Request clear, measurable criteria for variable pay calculation",
+      "'Up to X%' should realistically pay X% for excellent performance",
+      "Ask for transparency in bonus calculation methodology",
+      "Compare with peers who received full variable pay",
+      "Bonus Act applies only to employees earning below threshold",
+      "For high earners, contract terms govern variable pay",
+      "If systematically promised and paid, bonus becomes contractual right",
+      "Raise dispute through HR and labor commissioner if denied unfairly"
+    ],
+    "importance_score": 85
+  }
+]

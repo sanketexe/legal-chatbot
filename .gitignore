@@ -61,3 +61,24 @@ debug_*.py
 diagnose_*.py
 fix_*.py
 quick_*.py
+check_*.py
+find_*.py
+analyze_*.py
+enhance_*.py
+verify_*.py
+load_*.py
+update_*.py
+scrape_*.py
+
+# Documentation files
+*INTEGRATION*.md
+*QUICKSTART*.md
+*TESTING*.md
+REMAINING_FEATURES.md
+SMART_CASE_HANDLER_README.md
+SEARCH_QUICK_REFERENCE.md
+
+# LaTeX and text files (except requirements.txt)
+*.tex
+*.txt
+!requirements.txt

@@ -5,15 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Legal AI Assistant - Powered by Gemini</title>
     <style>
+        :root {
+            /* Light Mode Colors */
+            --bg-gradient-start: #667eea;
+            --bg-gradient-end: #764ba2;
+            --container-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --message-user-bg: #667eea;
+            --message-ai-bg: #f1f3f4;
+            --message-ai-text: #333333;
+            --input-bg: #f8f9fa;
+            --input-border: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --welcome-text: #666666;
+        }
+        
+        body.dark-mode {
+            /* Dark Mode Colors */
+            --bg-gradient-start: #1a1a2e;
+            --bg-gradient-end: #16213e;
+            --container-bg: #0f3460;
+            --text-primary: #e8e8e8;
+            --text-secondary: #b8b8b8;
+            --message-user-bg: #533483;
+            --message-ai-bg: #1a1a2e;
+            --message-ai-text: #e8e8e8;
+            --input-bg: #16213e;
+            --input-border: #533483;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --welcome-text: #b8b8b8;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -21,9 +54,9 @@
         }
         
         .chat-container {
-            background: white;
+            background: var(--container-bg);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px var(--shadow-color);
             width: 90%;
             max-width: 800px;
             height: 600px;
@@ -33,10 +66,11 @@
         }
         
         .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
             color: white;
             padding: 20px;
             text-align: center;
+            position: relative;
         }
         
         .chat-header h1 {
@@ -50,11 +84,95 @@
             font-size: 14px;
         }
         
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(180deg);
+        }
+        
+        /* Language Selector */
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .language-selector:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .language-dropdown {
+            position: absolute;
+            top: 70px;
+            right: 70px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            display: none;
+            z-index: 1000;
+            min-width: 150px;
+        }
+        
+        .language-dropdown.show {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        .language-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .language-option:hover {
+            background: #f0f0f0;
+        }
+        
+        .language-option.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
         .messages-container {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            background: #f8f9fa;
+            background: var(--container-bg);
         }
         
         .message {
@@ -73,24 +191,76 @@
             border-radius: 20px;
             font-size: 15px;
             line-height: 1.5;
+            color: var(--text-primary);
         }
         
         .message.ai .message-content {
-            background: white;
-            border: 1px solid #e1e8ed;
+            background: var(--message-ai-bg);
+            border: 1px solid var(--input-border);
             border-radius: 20px 20px 20px 5px;
+            color: var(--message-ai-text);
         }
         
         .message.user .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--message-user-bg);
             color: white;
             border-radius: 20px 20px 5px 20px;
         }
         
+        .message-actions {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+            padding-left: 5px;
+        }
+        
+        .btn-network-small {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+        }
+        
+        .btn-network-small:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-network-small:active {
+            transform: translateY(0);
+        }
+        
+        .btn-summary-small {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+            margin-left: 8px;
+        }
+        
+        .btn-summary-small:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-summary-small:active {
+            transform: translateY(0);
+        }
+        
         .input-container {
             padding: 20px;
-            background: white;
-            border-top: 1px solid #e1e8ed;
+            background: var(--container-bg);
+            border-top: 1px solid var(--input-border);
         }
         
         .input-group {
@@ -102,17 +272,23 @@
         #messageInput {
             flex: 1;
             padding: 15px;
-            border: 1px solid #e1e8ed;
+            border: 1px solid var(--input-border);
             border-radius: 25px;
             font-size: 15px;
             resize: none;
             outline: none;
             min-height: 50px;
             max-height: 120px;
+            background: var(--input-bg);
+            color: var(--text-primary);
         }
         
         #messageInput:focus {
-            border-color: #667eea;
+            border-color: var(--bg-gradient-start);
+        }
+        
+        #messageInput::placeholder {
+            color: var(--text-secondary);
         }
         
         #sendBtn {
@@ -172,6 +348,268 @@
             }
         }
         
+        /* Enhanced Loading Spinner */
+        .enhanced-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f4f6;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-message {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(-5px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        /* Document Upload Styles */
+        .upload-section {
+            padding: 20px;
+            background: var(--input-bg);
+            border-top: 2px solid var(--input-border);
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from { max-height: 0; opacity: 0; }
+            to { max-height: 500px; opacity: 1; }
+        }
+        
+        .upload-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .upload-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+        
+        .close-upload-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        .close-upload-btn:hover {
+            background: var(--input-border);
+            color: var(--text-primary);
+        }
+        
+        .upload-dropzone {
+            border: 2px dashed var(--bg-gradient-start);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            background: var(--container-bg);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .upload-header h3 {
+            margin: 0;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .close-upload-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        .close-upload-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .upload-dropzone {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-dropzone:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+        }
+        
+        .upload-dropzone.dragover {
+            border-color: #10b981;
+            background: #f0fdf4;
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .upload-main-text {
+            font-size: 16px;
+            color: #333;
+            margin: 10px 0 5px 0;
+            font-weight: 500;
+        }
+        
+        .upload-hint {
+            color: #666;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .browse-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: all 0.2s;
+        }
+        
+        .browse-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .upload-formats {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+        
+        .upload-progress {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .upload-result {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .attach-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+            margin-right: 8px;
+        }
+        
+        .attach-btn:hover {
+            background: #f0f0f0;
+            transform: rotate(20deg);
+        }
+        
+        /* Voice Input Button */
+        .voice-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+            margin-right: 8px;
+        }
+        
+        .voice-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .voice-btn.recording {
+            background: #ef4444;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
         .welcome-message {
             text-align: center;
             color: #666;
@@ -217,14 +655,30 @@
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <h1>🏛️ Legal AI Assistant</h1>
-            <p>Powered by Google Gemini AI • Specializing in Indian Law</p>
+            <button class="language-selector" onclick="toggleLanguageDropdown()" title="Select Language">
+                <span id="currentLang">🌐 EN</span>
+            </button>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
+                <span id="themeIcon">🌙</span>
+            </button>
+            <h1 data-translate="title">🏛️ Legal AI Assistant</h1>
+            <p data-translate="subtitle">Powered by Google Gemini AI • Specializing in Indian Law</p>
+        </div>
+        
+        <!-- Language Dropdown -->
+        <div class="language-dropdown" id="languageDropdown">
+            <div class="language-option" onclick="changeLanguage('en')">🇬🇧 English</div>
+            <div class="language-option" onclick="changeLanguage('hi')">🇮🇳 हिंदी (Hindi)</div>
+            <div class="language-option" onclick="changeLanguage('ta')">🇮🇳 தமிழ் (Tamil)</div>
+            <div class="language-option" onclick="changeLanguage('te')">🇮🇳 తెలుగు (Telugu)</div>
+            <div class="language-option" onclick="changeLanguage('bn')">🇮🇳 বাংলা (Bengali)</div>
+            <div class="language-option" onclick="changeLanguage('mr')">🇮🇳 मराठी (Marathi)</div>
         </div>
         
         <div class="messages-container" id="messagesContainer">
             <div class="welcome-message">
-                <h2>Welcome to your Legal AI Assistant!</h2>
-                <p>I can help you with questions about Indian law, constitutional rights, contracts, and more.</p>
+                <h2 data-translate="welcomeTitle">Welcome to your Legal AI Assistant!</h2>
+                <p data-translate="welcomeText">I can help you with questions about Indian law, constitutional rights, contracts, and more.</p>
                 
                 <div class="quick-questions">
                     <button class="quick-question" onclick="askQuestion('What is Article 21 of the Indian Constitution?')">Article 21</button>
@@ -235,17 +689,43 @@
             </div>
         </div>
         
+        <!-- Document Upload Section -->
+        <div class="upload-section" id="uploadSection" style="display: none;">
+            <div class="upload-header">
+                <h3>📄 Upload Legal Document</h3>
+                <button class="close-upload-btn" onclick="toggleUploadSection()">✕</button>
+            </div>
+            <div class="upload-dropzone" id="dropzone">
+                <input type="file" id="fileInput" hidden accept=".pdf,.docx,.doc,.txt" onchange="handleFileSelect(event)">
+                <div class="upload-icon">📄</div>
+                <p class="upload-main-text">Drag & drop your document here</p>
+                <p class="upload-hint">or</p>
+                <button class="browse-btn" onclick="selectFile()">Browse Files</button>
+                <p class="upload-formats">Supported: PDF, Word, Text (Max 10MB)</p>
+            </div>
+            <div id="uploadProgress" class="upload-progress hidden">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p id="uploadStatus">Analyzing document...</p>
+            </div>
+            <div id="uploadResult" class="upload-result hidden"></div>
+        </div>
+        
         <div class="input-container">
             <div class="input-group">
+                <button class="attach-btn" onclick="toggleUploadSection()" title="Upload Document">📎</button>
+                <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceInput()" title="Voice Input">🎤</button>
                 <textarea 
                     id="messageInput" 
                     placeholder="Ask me about Indian law, contracts, rights, or any legal question..."
                     rows="1"
                     onkeypress="handleKeyPress(event)"
+                    data-translate="inputPlaceholder"
                 ></textarea>
-                <button id="sendBtn" onclick="sendMessage()">Send</button>
+                <button id="sendBtn" onclick="sendMessage()" data-translate="sendButton">Send</button>
             </div>
-            <div class="status" id="status">Ready to help with your legal questions</div>
+            <div class="status" id="status" data-translate="statusReady">Ready to help with your legal questions</div>
         </div>
     </div>
 
@@ -324,13 +804,379 @@
             if (sender === 'ai') {
                 // Format AI responses with better readability
                 contentDiv.innerHTML = formatLegalResponse(content);
+                
+                // Detect case references and add action buttons
+                const caseReferences = detectCaseReferences(content);
+                if (caseReferences.length > 0) {
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'message-actions';
+                    
+                    // Add button for first case found
+                    const caseId = caseReferences[0].caseId;
+                    
+                    // Network button
+                    const networkButton = document.createElement('button');
+                    networkButton.className = 'btn-network-small';
+                    networkButton.innerHTML = '🔗 Citation Network';
+                    networkButton.onclick = function() {
+                        openCitationNetwork(caseId);
+                    };
+                    
+                    // Summary button
+                    const summaryButton = document.createElement('button');
+                    summaryButton.className = 'btn-summary-small';
+                    summaryButton.innerHTML = '📝 View Summary';
+                    summaryButton.onclick = function() {
+                        viewCaseSummary(caseReferences[0].fullText, caseId);
+                    };
+                    
+                    actionsDiv.appendChild(networkButton);
+                    actionsDiv.appendChild(summaryButton);
+                    messageDiv.appendChild(contentDiv);
+                    messageDiv.appendChild(actionsDiv);
+                } else {
+                    messageDiv.appendChild(contentDiv);
+                }
             } else {
                 contentDiv.textContent = content;
+                messageDiv.appendChild(contentDiv);
             }
             
-            messageDiv.appendChild(contentDiv);
             container.appendChild(messageDiv);
             container.scrollTop = container.scrollHeight;
+        }
+        
+        function detectCaseReferences(messageText) {
+            // Detect various case citation formats
+            const casePatterns = [
+                // Format: State v. Kumar [2020] SC 123 or State v Kumar [2020] SC 123
+                /([A-Z][A-Za-z\s&\.]+?)\s+v\.?\s+([A-Z][A-Za-z\s&\.]+?)\s+\[(\d{4})\]\s+([A-Z]+)\s+(\d+)/g,
+                // Format: SC_2020_123 or HC_2021_456
+                /\b([A-Z]{2,})_(\d{4})_(\d+)\b/g,
+                // Format: 2020 SC 123 or 2021 HC 456
+                /\b(\d{4})\s+([A-Z]{2,})\s+(\d+)\b/g
+            ];
+            
+            const cases = [];
+            const seenIds = new Set();
+            
+            // Try all patterns
+            casePatterns.forEach((pattern, idx) => {
+                const matches = [...messageText.matchAll(pattern)];
+                matches.forEach(m => {
+                    let caseId;
+                    if (idx === 0) {
+                        // Format: State v. Kumar [2020] SC 123
+                        caseId = `${m[4]}_${m[3]}_${m[5]}`;
+                    } else if (idx === 1) {
+                        // Format: SC_2020_123
+                        caseId = m[0];
+                    } else if (idx === 2) {
+                        // Format: 2020 SC 123
+                        caseId = `${m[2]}_${m[1]}_${m[3]}`;
+                    }
+                    
+                    if (caseId && !seenIds.has(caseId)) {
+                        seenIds.add(caseId);
+                        cases.push({
+                            fullText: m[0],
+                            caseId: caseId
+                        });
+                    }
+                });
+            });
+            
+            return cases;
+        }
+        
+        function openCitationNetwork(caseId) {
+            // Open citation network in new window with case highlighted
+            const width = 1400;
+            const height = 900;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            
+            const url = `/citations?highlight=${encodeURIComponent(caseId)}`;
+            window.open(url, 'CitationNetwork', 
+                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+        }
+        
+        function viewCaseSummary(caseTitle, caseId) {
+            // Create modal overlay for case summary
+            const modal = document.createElement('div');
+            modal.id = 'summaryModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                backdrop-filter: blur(4px);
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                border-radius: 16px;
+                width: 90%;
+                max-width: 900px;
+                max-height: 90vh;
+                overflow-y: auto;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                animation: slideUp 0.3s ease;
+            `;
+            
+            // Extract basic info from case ID (format: SC_2020_123)
+            let court = 'Supreme Court';
+            let year = 2020;
+            
+            if (caseId) {
+                const parts = caseId.split('_');
+                if (parts.length >= 3) {
+                    const courtCode = parts[0];
+                    year = parseInt(parts[1]) || 2020;
+                    
+                    // Map court codes
+                    const courtMap = {
+                        'SC': 'Supreme Court',
+                        'HC': 'High Court',
+                        'DT': 'District Court',
+                        'TC': 'Tribunal'
+                    };
+                    court = courtMap[courtCode] || courtCode;
+                }
+            }
+            
+            modalContent.innerHTML = `
+                <div style="padding: 24px; border-bottom: 2px solid #f3f4f6;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <h2 style="margin: 0 0 8px 0; color: #1f2937; font-size: 24px; font-weight: 700;">
+                                Case Summary
+                            </h2>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">
+                                ${caseTitle}
+                            </p>
+                        </div>
+                        <button onclick="closeSummaryModal()" style="
+                            background: #f3f4f6;
+                            border: none;
+                            width: 36px;
+                            height: 36px;
+                            border-radius: 50%;
+                            cursor: pointer;
+                            font-size: 20px;
+                            color: #6b7280;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: all 0.2s;
+                            flex-shrink: 0;
+                            margin-left: 16px;
+                        " onmouseover="this.style.background='#e5e7eb'; this.style.color='#1f2937';" 
+                           onmouseout="this.style.background='#f3f4f6'; this.style.color='#6b7280';">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+                <div id="summary-widget" style="padding: 24px;">
+                    <div style="text-align: center; padding: 40px;">
+                        <div style="display: inline-block; width: 48px; height: 48px; border: 4px solid #f3f4f6; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <p style="margin-top: 16px; color: #6b7280;">Loading summary...</p>
+                    </div>
+                </div>
+            `;
+            
+            // Add spinning animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes slideUp {
+                    from { transform: translateY(30px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Close on background click
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeSummaryModal();
+                }
+            });
+            
+            // Load the summary widget component
+            fetch('/templates/components/case_summary.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('summary-widget').innerHTML = html;
+                    
+                    // Initialize the widget with case data
+                    if (window.loadSummary) {
+                        loadSummary(caseId, 'medium', {
+                            title: caseTitle,
+                            court: court,
+                            year: year,
+                            case_id: caseId
+                        });
+                    } else {
+                        // If loadSummary function is not available, make direct API call
+                        summarizeCase(caseId, caseTitle, court, year);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading summary widget:', error);
+                    document.getElementById('summary-widget').innerHTML = `
+                        <div style="padding: 40px; text-align: center; color: #ef4444;">
+                            <p style="font-size: 48px; margin: 0;">⚠️</p>
+                            <p style="margin: 16px 0 0 0;">Failed to load summary component</p>
+                            <p style="margin: 8px 0 0 0; font-size: 14px; color: #6b7280;">${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+        
+        function closeSummaryModal() {
+            const modal = document.getElementById('summaryModal');
+            if (modal) {
+                modal.style.animation = 'fadeOut 0.2s ease';
+                setTimeout(() => modal.remove(), 200);
+            }
+        }
+        
+        function summarizeCase(caseId, caseTitle, court, year) {
+            // Fallback function to directly call the API if loadSummary is not available
+            fetch('/api/summarize-case', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    case_id: caseId,
+                    case_data: {
+                        title: caseTitle,
+                        court: court,
+                        year: year,
+                        case_id: caseId
+                    },
+                    length: 'medium',
+                    method: 'hybrid'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displaySummary(data.summary, caseTitle, court, year);
+                } else {
+                    throw new Error(data.message || 'Failed to generate summary');
+                }
+            })
+            .catch(error => {
+                console.error('Error generating summary:', error);
+                document.getElementById('summary-widget').innerHTML = `
+                    <div style="padding: 40px; text-align: center; color: #ef4444;">
+                        <p style="font-size: 48px; margin: 0;">⚠️</p>
+                        <p style="margin: 16px 0 0 0;">Failed to generate summary</p>
+                        <p style="margin: 8px 0 0 0; font-size: 14px; color: #6b7280;">${error.message}</p>
+                    </div>
+                `;
+            });
+        }
+        
+        function displaySummary(summary, caseTitle, court, year) {
+            // Display the summary in a simple format
+            const widget = document.getElementById('summary-widget');
+            
+            let keyPointsHtml = '';
+            if (summary.key_points && Array.isArray(summary.key_points)) {
+                keyPointsHtml = `
+                    <div style="margin-top: 24px;">
+                        <h3 style="color: #1f2937; font-size: 18px; margin: 0 0 12px 0;">Key Points</h3>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            ${summary.key_points.map(point => `<li style="margin: 8px 0; color: #4b5563;">${point}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            widget.innerHTML = `
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; color: white; margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h3 style="margin: 0 0 8px 0; font-size: 20px;">${caseTitle}</h3>
+                            <p style="margin: 0; opacity: 0.9; font-size: 14px;">${court} • ${year}</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 12px; font-size: 12px;">
+                                ${summary.word_count || 0} words
+                            </span>
+                            <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 12px; font-size: 12px;">
+                                ${summary.type || 'hybrid'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <h3 style="color: #1f2937; font-size: 18px; margin: 0 0 12px 0;">Summary</h3>
+                    <div style="color: #4b5563; line-height: 1.8; text-align: justify;">
+                        ${summary.text || summary.summary_text || 'No summary available'}
+                    </div>
+                </div>
+                
+                ${keyPointsHtml}
+                
+                <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb; display: flex; gap: 12px;">
+                    <button onclick="copySummaryText()" style="
+                        background: linear-gradient(135deg, #667eea, #764ba2);
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        transition: all 0.3s;
+                    ">
+                        📋 Copy to Clipboard
+                    </button>
+                </div>
+            `;
+        }
+        
+        function copySummaryText() {
+            const summaryWidget = document.getElementById('summary-widget');
+            const summaryText = summaryWidget.innerText;
+            
+            navigator.clipboard.writeText(summaryText).then(() => {
+                // Show success message
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✓ Copied!';
+                btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard');
+            });
         }
         
         function formatLegalResponse(content) {
@@ -363,7 +1209,6 @@
         function showTypingIndicator() {
             isTyping = true;
             document.getElementById('sendBtn').disabled = true;
-            updateStatus('AI is thinking...');
             
             const container = document.getElementById('messagesContainer');
             const typingDiv = document.createElement('div');
@@ -371,24 +1216,56 @@
             typingDiv.id = 'typingIndicator';
             
             const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content typing-indicator';
+            contentDiv.className = 'message-content loading-message';
             contentDiv.innerHTML = `
-                AI is typing
-                <div class="typing-dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
+                <div class="enhanced-spinner"></div>
+                <span id="loadingText">🔍 Searching legal database...</span>
             `;
             
             typingDiv.appendChild(contentDiv);
             container.appendChild(typingDiv);
             container.scrollTop = container.scrollHeight;
+            
+            // Start multi-stage loading messages
+            startLoadingStages();
+        }
+        
+        let loadingStageTimeouts = [];
+        
+        function startLoadingStages() {
+            // Clear any existing timeouts
+            loadingStageTimeouts.forEach(timeout => clearTimeout(timeout));
+            loadingStageTimeouts = [];
+            
+            const stages = [
+                { time: 0, message: '🔍 Searching legal database...', status: 'Searching 418 cases...' },
+                { time: 1500, message: '⚖️ Analyzing case law...', status: 'Analyzing matches...' },
+                { time: 3000, message: '🤖 AI is thinking...', status: 'Consulting AI assistant...' },
+                { time: 6000, message: '📚 Generating response...', status: 'Preparing detailed answer...' },
+                { time: 10000, message: '⏳ Still working...', status: 'This is taking a bit longer...' },
+                { time: 18000, message: '⏰ Almost there...', status: 'Finalizing response...' }
+            ];
+            
+            stages.forEach(stage => {
+                const timeout = setTimeout(() => {
+                    const loadingText = document.getElementById('loadingText');
+                    if (loadingText && isTyping) {
+                        loadingText.textContent = stage.message;
+                        updateStatus(stage.status);
+                    }
+                }, stage.time);
+                loadingStageTimeouts.push(timeout);
+            });
         }
         
         function hideTypingIndicator() {
             isTyping = false;
             document.getElementById('sendBtn').disabled = false;
+            
+            // Clear loading stage timeouts
+            loadingStageTimeouts.forEach(timeout => clearTimeout(timeout));
+            loadingStageTimeouts = [];
+            
             const indicator = document.getElementById('typingIndicator');
             if (indicator) {
                 indicator.remove();
@@ -407,6 +1284,449 @@
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
+        
+        // ==================== DOCUMENT UPLOAD FUNCTIONS ====================
+        
+        function toggleUploadSection() {
+            const section = document.getElementById('uploadSection');
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+                // Clear upload result when closing
+                document.getElementById('uploadResult').classList.add('hidden');
+                document.getElementById('uploadProgress').classList.add('hidden');
+            }
+        }
+        
+        function selectFile() {
+            document.getElementById('fileInput').click();
+        }
+        
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                uploadDocument(file);
+            }
+        }
+        
+        // Drag and drop handlers
+        const dropzone = document.getElementById('dropzone');
+        
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+        
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+        
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                uploadDocument(file);
+            }
+        });
+        
+        dropzone.addEventListener('click', () => {
+            selectFile();
+        });
+        
+        async function uploadDocument(file) {
+            // Validate file size (10MB max)
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('File too large! Maximum size is 10MB.');
+                return;
+            }
+            
+            // Validate file type
+            const validTypes = ['.pdf', '.docx', '.doc', '.txt'];
+            const fileName = file.name.toLowerCase();
+            const isValid = validTypes.some(type => fileName.endsWith(type));
+            
+            if (!isValid) {
+                alert('Invalid file type! Please upload PDF, Word, or Text files.');
+                return;
+            }
+            
+            // Show progress
+            document.getElementById('uploadResult').classList.add('hidden');
+            document.getElementById('uploadProgress').classList.remove('hidden');
+            document.getElementById('uploadStatus').textContent = 'Uploading...';
+            document.getElementById('progressBar').style.width = '30%';
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('document', file);
+            
+            try {
+                document.getElementById('uploadStatus').textContent = 'Analyzing document...';
+                document.getElementById('progressBar').style.width = '60%';
+                
+                const response = await fetch('/api/upload-document', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                document.getElementById('progressBar').style.width = '90%';
+                
+                const result = await response.json();
+                
+                document.getElementById('progressBar').style.width = '100%';
+                
+                if (result.status === 'success') {
+                    displayAnalysisResult(result.analysis, file.name);
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Upload failed: ' + error.message);
+                console.error('Upload error:', error);
+            } finally {
+                setTimeout(() => {
+                    document.getElementById('uploadProgress').classList.add('hidden');
+                    document.getElementById('progressBar').style.width = '0%';
+                }, 500);
+            }
+        }
+        
+        function displayAnalysisResult(analysis, fileName) {
+            const resultDiv = document.getElementById('uploadResult');
+            
+            let html = `
+                <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 10px;">
+                    <span>📄</span>
+                    <span>Analysis: ${fileName}</span>
+                </h3>
+            `;
+            
+            if (analysis.document_type) {
+                html += `<p><strong>Document Type:</strong> ${analysis.document_type}</p>`;
+            }
+            
+            if (analysis.summary) {
+                html += `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <strong style="display: block; margin-bottom: 8px; color: #667eea;">📋 Summary:</strong>
+                        ${analysis.summary.replace(/\n/g, '<br>')}
+                    </div>
+                `;
+            }
+            
+            if (analysis.key_points && analysis.key_points.length > 0) {
+                html += `
+                    <div style="margin: 15px 0;">
+                        <strong style="display: block; margin-bottom: 8px; color: #667eea;">✓ Key Points:</strong>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            ${analysis.key_points.map(point => `<li style="margin: 5px 0;">${point}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            if (analysis.recommendations && analysis.recommendations.length > 0) {
+                html += `
+                    <div style="margin: 15px 0;">
+                        <strong style="display: block; margin-bottom: 8px; color: #667eea;">💡 Recommendations:</strong>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            ${analysis.recommendations.map(rec => `<li style="margin: 5px 0;">${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            html += `
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                    <button onclick="toggleUploadSection()" style="
+                        background: linear-gradient(135deg, #667eea, #764ba2);
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">Upload Another Document</button>
+                </div>
+            `;
+            
+            resultDiv.innerHTML = html;
+            resultDiv.classList.remove('hidden');
+        }
+        
+        // ==================== DARK MODE TOGGLE ====================
+        
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-mode');
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // Load saved theme on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeIcon.textContent = '☀️';
+            } else {
+                themeIcon.textContent = '🌙';
+            }
+            
+            // Load saved language
+            const savedLang = localStorage.getItem('language') || 'en';
+            changeLanguage(savedLang, false);
+        });
+        
+        // ==================== MULTI-LANGUAGE SUPPORT ====================
+        
+        const translations = {
+            en: {
+                title: '🏛️ Legal AI Assistant',
+                subtitle: 'Powered by Google Gemini AI • Specializing in Indian Law',
+                welcomeTitle: 'Welcome to your Legal AI Assistant!',
+                welcomeText: 'I can help you with questions about Indian law, constitutional rights, contracts, and more.',
+                inputPlaceholder: 'Ask me about Indian law, contracts, rights, or any legal question...',
+                sendButton: 'Send',
+                statusReady: 'Ready to help with your legal questions'
+            },
+            hi: {
+                title: '🏛️ कानूनी एआई सहायक',
+                subtitle: 'Google Gemini AI द्वारा संचालित • भारतीय कानून में विशेषज्ञ',
+                welcomeTitle: 'अपने कानूनी एआई सहायक में आपका स्वागत है!',
+                welcomeText: 'मैं भारतीय कानून, संवैधानिक अधिकार, अनुबंध और अधिक के बारे में प्रश्नों में आपकी सहायता कर सकता हूं।',
+                inputPlaceholder: 'भारतीय कानून, अनुबंध, अधिकार या किसी कानूनी प्रश्न के बारे में पूछें...',
+                sendButton: 'भेजें',
+                statusReady: 'आपके कानूनी प्रश्नों में मदद के लिए तैयार'
+            },
+            ta: {
+                title: '🏛️ சட்ட AI உதவியாளர்',
+                subtitle: 'Google Gemini AI மூலம் இயக்கப்படுகிறது • இந்திய சட்டத்தில் நிபுணர்',
+                welcomeTitle: 'உங்கள் சட்ட AI உதவியாளருக்கு வரவேற்கிறோம்!',
+                welcomeText: 'இந்திய சட்டம், அரசியலமைப்பு உரிமைகள், ஒப்பந்தங்கள் மற்றும் பலவற்றைப் பற்றிய கேள்விகளில் நான் உங்களுக்கு உதவ முடியும்.',
+                inputPlaceholder: 'இந்திய சட்டம், ஒப்பந்தங்கள், உரிமைகள் அல்லது எந்த சட்ட கேள்வியையும் கேளுங்கள்...',
+                sendButton: 'அனுப்பு',
+                statusReady: 'உங்கள் சட்ட கேள்விகளுக்கு உதவ தயார்'
+            },
+            te: {
+                title: '🏛️ చట్టపరమైన AI సహాయకుడు',
+                subtitle: 'Google Gemini AI ద్వారా శక్తివంతం • భారతీయ చట్టంలో నిపుణులు',
+                welcomeTitle: 'మీ చట్టపరమైన AI సహాయకుడికి స్వాగతం!',
+                welcomeText: 'భారతీయ చట్టం, రాజ్యాంగ హక్కులు, ఒప్పందాలు మరియు మరిన్నింటికి సంబంధించిన ప్రశ్నలలో నేను మీకు సహాయం చేయగలను.',
+                inputPlaceholder: 'భారతీయ చట్టం, ఒప్పందాలు, హక్కులు లేదా ఏదైనా చట్టపరమైన ప్రశ్న గురించి అడగండి...',
+                sendButton: 'పంపు',
+                statusReady: 'మీ చట్టపరమైన ప్రశ్నలకు సహాయం చేయడానికి సిద్ధంగా ఉంది'
+            },
+            bn: {
+                title: '🏛️ আইনি AI সহায়ক',
+                subtitle: 'Google Gemini AI দ্বারা চালিত • ভারতীয় আইনে বিশেষজ্ঞ',
+                welcomeTitle: 'আপনার আইনি AI সহায়কে স্বাগতম!',
+                welcomeText: 'আমি ভারতীয় আইন, সাংবিধানিক অধিকার, চুক্তি এবং আরও অনেক কিছু সম্পর্কে প্রশ্নে আপনাকে সাহায্য করতে পারি।',
+                inputPlaceholder: 'ভারতীয় আইন, চুক্তি, অধিকার বা কোনো আইনি প্রশ্ন সম্পর্কে জিজ্ঞাসা করুন...',
+                sendButton: 'পাঠান',
+                statusReady: 'আপনার আইনি প্রশ্নে সাহায্য করার জন্য প্রস্তুত'
+            },
+            mr: {
+                title: '🏛️ कायदेशीर AI सहाय्यक',
+                subtitle: 'Google Gemini AI द्वारे समर्थित • भारतीय कायद्यात तज्ञ',
+                welcomeTitle: 'तुमच्या कायदेशीर AI सहाय्यकावर स्वागत आहे!',
+                welcomeText: 'मी भारतीय कायदा, घटनात्मक हक्क, करार आणि अधिक विषयी प्रश्नांमध्ये तुम्हाला मदत करू शकतो.',
+                inputPlaceholder: 'भारतीय कायदा, करार, हक्क किंवा कोणत्याही कायदेशीर प्रश्नाबद्दल विचारा...',
+                sendButton: 'पाठवा',
+                statusReady: 'तुमच्या कायदेशीर प्रश्नांमध्ये मदत करण्यासाठी तयार'
+            }
+        };
+        
+        let currentLanguage = 'en';
+        
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('languageDropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('languageDropdown');
+            const langButton = document.querySelector('.language-selector');
+            
+            if (dropdown && langButton && !dropdown.contains(e.target) && !langButton.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+        
+        function changeLanguage(lang, saveToStorage = true) {
+            currentLanguage = lang;
+            
+            // Update all elements with data-translate attribute
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[lang] && translations[lang][key]) {
+                    element.innerHTML = translations[lang][key];
+                }
+            });
+            
+            // Update input placeholder
+            const input = document.getElementById('messageInput');
+            if (input && translations[lang]) {
+                input.placeholder = translations[lang].inputPlaceholder;
+            }
+            
+            // Update send button
+            const sendBtn = document.getElementById('sendBtn');
+            if (sendBtn && translations[lang]) {
+                sendBtn.textContent = translations[lang].sendButton;
+            }
+            
+            // Update status
+            const status = document.getElementById('status');
+            if (status && translations[lang]) {
+                status.textContent = translations[lang].statusReady;
+            }
+            
+            // Update current language display
+            const langCodes = {
+                'en': '🌐 EN',
+                'hi': '🌐 हि',
+                'ta': '🌐 த',
+                'te': '🌐 తె',
+                'bn': '🌐 বা',
+                'mr': '🌐 म'
+            };
+            document.getElementById('currentLang').textContent = langCodes[lang] || '🌐 EN';
+            
+            // Close dropdown
+            document.getElementById('languageDropdown').classList.remove('show');
+            
+            // Save to localStorage
+            if (saveToStorage) {
+                localStorage.setItem('language', lang);
+            }
+            
+            // Add language code to chat messages for context
+            window.currentChatLanguage = lang;
+        }
+        
+        // ==================== VOICE INPUT ====================
+        
+        let recognition = null;
+        let isRecording = false;
+        
+        // Check if browser supports speech recognition
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            // Configure recognition
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            // Set language based on current selection
+            const langMap = {
+                'en': 'en-US',
+                'hi': 'hi-IN',
+                'ta': 'ta-IN',
+                'te': 'te-IN',
+                'bn': 'bn-IN',
+                'mr': 'mr-IN'
+            };
+            
+            recognition.onstart = function() {
+                isRecording = true;
+                const voiceBtn = document.getElementById('voiceBtn');
+                voiceBtn.classList.add('recording');
+                voiceBtn.title = 'Recording... Click to stop';
+                updateStatus('🎤 Listening...');
+            };
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                const input = document.getElementById('messageInput');
+                input.value = transcript;
+                
+                // Auto-resize textarea
+                input.style.height = 'auto';
+                input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+                
+                updateStatus('Voice input captured: ' + transcript.substring(0, 30) + '...');
+            };
+            
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                let errorMsg = 'Voice input error';
+                
+                switch(event.error) {
+                    case 'no-speech':
+                        errorMsg = 'No speech detected. Please try again.';
+                        break;
+                    case 'audio-capture':
+                        errorMsg = 'Microphone not found. Please check your device.';
+                        break;
+                    case 'not-allowed':
+                        errorMsg = 'Microphone permission denied.';
+                        break;
+                    default:
+                        errorMsg = 'Voice input error: ' + event.error;
+                }
+                
+                updateStatus(errorMsg);
+                stopRecording();
+            };
+            
+            recognition.onend = function() {
+                stopRecording();
+            };
+        }
+        
+        function toggleVoiceInput() {
+            if (!recognition) {
+                alert('Voice input is not supported in your browser. Please use Chrome, Edge, or Safari.');
+                return;
+            }
+            
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                // Update language before starting
+                const langMap = {
+                    'en': 'en-US',
+                    'hi': 'hi-IN',
+                    'ta': 'ta-IN',
+                    'te': 'te-IN',
+                    'bn': 'bn-IN',
+                    'mr': 'mr-IN'
+                };
+                recognition.lang = langMap[currentLanguage] || 'en-US';
+                
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.error('Failed to start recognition:', e);
+                    updateStatus('Failed to start voice input. Please try again.');
+                }
+            }
+        }
+        
+        function stopRecording() {
+            isRecording = false;
+            const voiceBtn = document.getElementById('voiceBtn');
+            if (voiceBtn) {
+                voiceBtn.classList.remove('recording');
+                voiceBtn.title = 'Voice Input';
+            }
+        }
     </script>
 </body>
 </html>

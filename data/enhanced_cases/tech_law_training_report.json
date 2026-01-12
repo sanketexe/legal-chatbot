@@ -1,0 +1,41 @@
+{
+  "total_cases": 15,
+  "categories": {
+    "Employment Law - Tech Sector": 10,
+    "Corporate Law - Tech Sector": 5
+  },
+  "subcategories": {
+    "Non-Compete Clauses": 1,
+    "IP Rights & Ownership": 1,
+    "Termination & Dismissal": 1,
+    "Wages & Compensation": 1,
+    "Confidentiality & Trade Secrets": 1,
+    "Sexual Harassment & Workplace Safety": 1,
+    "Remote Work & Flexible Working": 1,
+    "Notice Period & Resignation": 1,
+    "Health & Medical Leave": 1,
+    "Compensation & Benefits": 1,
+    "Stock Options & Equity": 1,
+    "Founder Agreements & Vesting": 1,
+    "Conflict of Interest & Loyalty": 1,
+    "Mergers & Acquisitions": 1,
+    "Licensing & Compliance": 1
+  },
+  "coverage": [
+    "Non-compete and non-solicitation agreements",
+    "Intellectual property rights for engineers",
+    "ESOP and equity compensation disputes",
+    "Wrongful termination and PIPs",
+    "Workplace harassment (POSH Act)",
+    "Remote work and WFH rights",
+    "Notice period and resignation",
+    "Mental health and workplace stress",
+    "Variable pay and bonus disputes",
+    "Moonlighting and conflict of interest",
+    "Startup acquisitions and employee rights",
+    "Open source licensing compliance",
+    "Data security and confidentiality",
+    "Unpaid overtime and wage disputes",
+    "Founder disputes and vesting"
+  ]
+}

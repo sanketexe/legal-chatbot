@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citation Network Visualization - Legal Chatbot</title>
+    
+    <!-- Vis.js for network visualization -->
+    <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --border: #e5e7eb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 40px);
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            overflow: hidden;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: var(--light);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+        
+        .sidebar-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .filter-group {
+            margin-bottom: 15px;
+        }
+        
+        .filter-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            border-color: var(--primary);
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            padding-right: 35px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+        
+        .legend {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+        }
+        
+        .legend-line {
+            width: 30px;
+            height: 2px;
+            background: currentColor;
+        }
+        
+        /* Network Container */
+        .network-container {
+            position: relative;
+            background: #fafafa;
+        }
+        
+        #network {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .network-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .network-control-btn {
+            padding: 8px 12px;
+            background: var(--light);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: background 0.2s;
+        }
+        
+        .network-control-btn:hover {
+            background: var(--border);
+        }
+        
+        /* Loading */
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 20;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Case Details Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #9ca3af;
+            transition: color 0.2s;
+        }
+        
+        .close-btn:hover {
+            color: var(--dark);
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .case-detail-item {
+            margin-bottom: 15px;
+        }
+        
+        .case-detail-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        
+        .case-detail-value {
+            font-size: 14px;
+            color: var(--dark);
+        }
+        
+        .citation-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span>🔗</span>
+                <span>Citation Network Visualization</span>
+            </h1>
+            <div class="header-controls">
+                <button class="btn btn-secondary" onclick="loadNetwork()">
+                    🔄 Refresh Network
+                </button>
+                <button class="btn btn-secondary" onclick="calculatePageRank()">
+                    📊 Calculate PageRank
+                </button>
+                <button class="btn btn-secondary" onclick="resetView()">
+                    🔍 Reset View
+                </button>
+                <button class="btn btn-primary" onclick="exportNetwork()">
+                    💾 Export Data
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Statistics -->
+                <div class="sidebar-section">
+                    <h3>📈 Network Statistics</h3>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Cases</div>
+                        <div class="stat-value" id="totalCases">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Citations</div>
+                        <div class="stat-value" id="totalCitations">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Network Density</div>
+                        <div class="stat-value" id="networkDensity">0</div>
+                    </div>
+                </div>
+                
+                <!-- Filters -->
+                <div class="sidebar-section">
+                    <h3>🔍 Filters</h3>
+                    
+                    <div class="filter-group">
+                        <label>Search Cases</label>
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="Search by title...">
+                            <span class="search-icon">🔍</span>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Court</label>
+                        <select id="courtFilter">
+                            <option value="">All Courts</option>
+                            <option value="Supreme Court">Supreme Court</option>
+                            <option value="High Court">High Court</option>
+                            <option value="District Court">District Court</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Year From</label>
+                        <input type="number" id="yearFrom" placeholder="2000" min="1950" max="2025">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Year To</label>
+                        <input type="number" id="yearTo" placeholder="2025" min="1950" max="2025">
+                    </div>
+                    
+                    <button class="btn btn-primary" style="width: 100%;" onclick="applyFilters()">
+                        Apply Filters
+                    </button>
+                </div>
+                
+                <!-- Legend -->
+                <div class="sidebar-section">
+                    <h3>🎨 Legend</h3>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #667eea;"></div>
+                            <span>Supreme Court</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #10b981;"></div>
+                            <span>High Court</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #f59e0b;"></div>
+                            <span>District Court</span>
+                        </div>
+                        <hr style="margin: 10px 0; border: none; border-top: 1px solid var(--border);">
+                        <div class="legend-item">
+                            <div class="legend-line" style="color: #3b82f6;"></div>
+                            <span>Cited</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-line" style="color: #10b981;"></div>
+                            <span>Followed</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-line" style="color: #ef4444;"></div>
+                            <span>Overruled</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Network Visualization -->
+            <div class="network-container">
+                <div id="network"></div>
+                
+                <!-- Network Controls -->
+                <div class="network-controls">
+                    <button class="network-control-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                    <button class="network-control-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                    <button class="network-control-btn" onclick="fitNetwork()" title="Fit">⊡</button>
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 15px; color: var(--dark);">Loading network...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Case Details Modal -->
+    <div class="modal" id="caseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Case Details</div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Case details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let network = null;
+        let nodes = null;
+        let edges = null;
+        let networkData = null;
+        
+        // Color mapping for courts
+        const courtColors = {
+            'Supreme Court': '#667eea',
+            'High Court': '#10b981',
+            'District Court': '#f59e0b',
+            'default': '#9ca3af'
+        };
+        
+        // Color mapping for citation types
+        const citationColors = {
+            'cited': '#3b82f6',
+            'followed': '#10b981',
+            'overruled': '#ef4444',
+            'distinguished': '#f59e0b',
+            'referred': '#9ca3af'
+        };
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeNetwork();
+            loadNetwork();
+            
+            // Check for highlight parameter from search
+            checkHighlightFromSearch();
+        });
+        
+        // Check if we should highlight a specific case from search
+        function checkHighlightFromSearch() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const highlightId = urlParams.get('highlight');
+            const searchQuery = urlParams.get('search');
+            
+            if (highlightId) {
+                // Wait for network to load, then highlight
+                setTimeout(() => {
+                    if (nodes && nodes.get(highlightId)) {
+                        focusAndHighlightCase(highlightId);
+                    }
+                }, 1500);
+            }
+            
+            if (searchQuery) {
+                // Pre-fill search box
+                document.getElementById('searchInput').value = searchQuery;
+                // Apply search filter
+                setTimeout(() => {
+                    const searchEvent = new Event('input');
+                    document.getElementById('searchInput').dispatchEvent(searchEvent);
+                }, 1500);
+            }
+        }
+        
+        function focusAndHighlightCase(caseId) {
+            // Focus on the case
+            network.focus(caseId, {
+                scale: 1.8,
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+            
+            // Highlight the node temporarily
+            const node = nodes.get(caseId);
+            if (node) {
+                const originalColor = node.color;
+                nodes.update({
+                    id: caseId,
+                    color: {
+                        background: '#f59e0b',
+                        border: '#f59e0b',
+                        highlight: {
+                            background: '#f59e0b',
+                            border: '#000'
+                        }
+                    },
+                    borderWidth: 4
+                });
+                
+                // Show case details
+                setTimeout(() => showCaseDetails(caseId), 1200);
+                
+                // Reset color after a few seconds
+                setTimeout(() => {
+                    nodes.update({
+                        id: caseId,
+                        color: originalColor,
+                        borderWidth: 2
+                    });
+                }, 5000);
+            }
+        }
+        
+        // Initialize network
+        function initializeNetwork() {
+            const container = document.getElementById('network');
+            
+            nodes = new vis.DataSet([]);
+            edges = new vis.DataSet([]);
+            
+            const data = {
+                nodes: nodes,
+                edges: edges
+            };
+            
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    size: 16,
+                    font: {
+                        size: 12,
+                        color: '#333'
+                    },
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    width: 2,
+                    shadow: true,
+                    smooth: {
+                        type: 'continuous'
+                    },
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            scaleFactor: 0.5
+                        }
+                    }
+                },
+                physics: {
+                    forceAtlas2Based: {
+                        gravitationalConstant: -26,
+                        centralGravity: 0.005,
+                        springLength: 230,
+                        springConstant: 0.18
+                    },
+                    maxVelocity: 146,
+                    solver: 'forceAtlas2Based',
+                    timestep: 0.35,
+                    stabilization: {
+                        enabled: true,
+                        iterations: 200
+                    }
+                },
+                interaction: {
+                    hover: true,
+                    tooltipDelay: 200,
+                    navigationButtons: false,
+                    keyboard: true
+                }
+            };
+            
+            network = new vis.Network(container, data, options);
+            
+            // Event listeners
+            network.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    showCaseDetails(params.nodes[0]);
+                }
+            });
+            
+            network.on('doubleClick', function(params) {
+                if (params.nodes.length > 0) {
+                    focusOnCase(params.nodes[0]);
+                }
+            });
+        }
+        
+        // Load network data
+        async function loadNetwork() {
+            showLoading(true);
+            
+            try {
+                const response = await fetch('/api/citation-network?top_n=100');
+                const data = await response.json();
+                
+                if (data.success) {
+                    networkData = data;
+                    updateNetwork(data);
+                    updateStatistics(data.statistics);
+                } else {
+                    alert('Error loading network: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load citation network');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Update network visualization
+        function updateNetwork(data) {
+            // Clear existing
+            nodes.clear();
+            edges.clear();
+            
+            // Add nodes
+            data.nodes.forEach(node => {
+                const color = courtColors[node.court] || courtColors.default;
+                const size = 10 + (node.cited_by_count * 3);
+                
+                nodes.add({
+                    id: node.id,
+                    label: node.title.substring(0, 30) + '...',
+                    title: `${node.title}\n${node.court}\n${node.cited_by_count} citations`,
+                    color: {
+                        background: color,
+                        border: color,
+                        highlight: {
+                            background: color,
+                            border: '#000'
+                        }
+                    },
+                    size: size,
+                    data: node
+                });
+            });
+            
+            // Add edges
+            data.edges.forEach(edge => {
+                const color = citationColors[edge.type] || citationColors.cited;
+                
+                edges.add({
+                    id: `${edge.source}_${edge.target}`,
+                    from: edge.source,
+                    to: edge.target,
+                    color: {
+                        color: color,
+                        highlight: color
+                    },
+                    title: edge.type,
+                    data: edge
+                });
+            });
+            
+            // Fit network
+            setTimeout(() => network.fit(), 500);
+        }
+        
+        // Update statistics
+        function updateStatistics(stats) {
+            document.getElementById('totalCases').textContent = stats.total_cases;
+            document.getElementById('totalCitations').textContent = stats.total_citations;
+            document.getElementById('networkDensity').textContent = (stats.density * 100).toFixed(2) + '%';
+        }
+        
+        // Show case details
+        async function showCaseDetails(caseId) {
+            try {
+                const response = await fetch(`/api/case-citations/${caseId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const caseData = data.case;
+                    
+                    document.getElementById('modalTitle').textContent = caseData.title;
+                    
+                    let html = `
+                        <div class="case-detail-item">
+                            <div class="case-detail-label">Case ID</div>
+                            <div class="case-detail-value">${caseData.id}</div>
+                        </div>
+                        <div class="case-detail-item">
+                            <div class="case-detail-label">Court</div>
+                            <div class="case-detail-value">${caseData.court}</div>
+                        </div>
+                        <div class="case-detail-item">
+                            <div class="case-detail-label">Date</div>
+                            <div class="case-detail-value">${caseData.date} (${caseData.year})</div>
+                        </div>
+                        <div class="case-detail-item">
+                            <div class="case-detail-label">Judges</div>
+                            <div class="case-detail-value">${caseData.judges.join(', ') || 'N/A'}</div>
+                        </div>
+                        <div class="case-detail-item">
+                            <div class="case-detail-label">Citations</div>
+                            <div class="case-detail-value">
+                                <span class="citation-badge">↓ ${caseData.cited_by_count} Cited By</span>
+                                <span class="citation-badge">↑ ${caseData.cites_count} Cites</span>
+                            </div>
+                        </div>
+                        <div class="case-detail-item">
+                            <div class="case-detail-label">Importance Score</div>
+                            <div class="case-detail-value">${caseData.importance_score.toFixed(6)}</div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('modalBody').innerHTML = html;
+                    document.getElementById('caseModal').classList.add('show');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('caseModal').classList.remove('show');
+        }
+        
+        // Apply filters
+        async function applyFilters() {
+            const court = document.getElementById('courtFilter').value;
+            const yearFrom = document.getElementById('yearFrom').value;
+            const yearTo = document.getElementById('yearTo').value;
+            
+            showLoading(true);
+            
+            try {
+                let url = '/api/citation-network?top_n=100';
+                if (court) url += `&court=${encodeURIComponent(court)}`;
+                if (yearFrom) url += `&year_from=${yearFrom}`;
+                if (yearTo) url += `&year_to=${yearTo}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateNetwork(data);
+                    updateStatistics(data.statistics);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Calculate PageRank
+        async function calculatePageRank() {
+            alert('PageRank calculation will be implemented in the backend');
+        }
+        
+        // Export network
+        function exportNetwork() {
+            if (!networkData) return;
+            
+            const dataStr = JSON.stringify(networkData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'citation_network.json';
+            link.click();
+        }
+        
+        // Network control functions
+        function zoomIn() {
+            network.moveTo({scale: network.getScale() * 1.2});
+        }
+        
+        function zoomOut() {
+            network.moveTo({scale: network.getScale() / 1.2});
+        }
+        
+        function fitNetwork() {
+            network.fit();
+        }
+        
+        function resetView() {
+            network.fit();
+            network.setOptions({physics: true});
+        }
+        
+        function focusOnCase(caseId) {
+            network.focus(caseId, {
+                scale: 1.5,
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+        }
+        
+        // Show/hide loading
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            if (show) {
+                loading.classList.add('show');
+            } else {
+                loading.classList.remove('show');
+            }
+        }
+        
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            if (searchTerm.length < 2) {
+                nodes.forEach(node => {
+                    nodes.update({id: node.id, hidden: false});
+                });
+                return;
+            }
+            
+            nodes.forEach(node => {
+                const title = node.data.title.toLowerCase();
+                const matches = title.includes(searchTerm);
+                nodes.update({id: node.id, hidden: !matches});
+            });
+        });
+        
+        // Close modal on outside click
+        document.getElementById('caseModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

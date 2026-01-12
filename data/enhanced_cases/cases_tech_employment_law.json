@@ -1,0 +1,218 @@
+[
+  {
+    "id": "tech_emp_001",
+    "case_name": "Engineer Non-Compete Agreement Enforceability",
+    "category": "Employment Law - Tech Sector",
+    "subcategory": "Non-Compete Clauses",
+    "scenario": "A software engineer resigned from Company A and joined Company B, a competitor. Company A filed a lawsuit claiming breach of non-compete agreement.",
+    "facts": "The engineer had signed a 2-year non-compete agreement preventing work with competitors within 50km radius. The agreement was signed as part of joining formalities without independent legal advice.",
+    "legal_issues": [
+      "Validity of non-compete clauses under Indian Contract Act, 1872",
+      "Section 27 of Indian Contract Act - restraint of trade",
+      "Reasonableness of geographical and time restrictions",
+      "Right to livelihood under Article 19(1)(g) of Indian Constitution"
+    ],
+    "applicable_laws": [
+      "Indian Contract Act, 1872 - Section 27",
+      "Constitution of India - Article 19(1)(g)",
+      "Shops and Establishments Act"
+    ],
+    "judgment": "The court held that the non-compete clause was void and unenforceable under Section 27 of the Indian Contract Act, 1872, which states that 'every agreement by which anyone is restrained from exercising a lawful profession, trade or business of any kind, is to that extent void.' The court emphasized that right to livelihood cannot be curtailed.",
+    "key_principles": [
+      "Non-compete clauses are generally unenforceable in India under Section 27",
+      "Only non-solicitation and confidentiality clauses may be enforceable",
+      "Right to pursue one's profession is a fundamental right",
+      "Garden leave provisions during notice period are acceptable"
+    ],
+    "precedents": [
+      "Niranjan Shankar Golikari v. Century Spinning & Manufacturing Co. Ltd. (1967)",
+      "Percept D'Mark (India) Pvt. Ltd. v. Zaheer Khan & Anr. (2006)"
+    ],
+    "practical_advice": [
+      "Non-compete clauses are generally not enforceable in India",
+      "Ensure confidentiality obligations are clearly defined",
+      "Non-solicitation clauses have better enforceability",
+      "Document all proprietary work clearly",
+      "Serve proper notice period or pay compensation"
+    ],
+    "importance_score": 95
+  },
+  {
+    "id": "tech_emp_002",
+    "case_name": "Software Engineer Intellectual Property Rights",
+    "category": "Employment Law - Tech Sector",
+    "subcategory": "IP Rights & Ownership",
+    "scenario": "An engineer developed a mobile app during employment hours using company resources. Upon resignation, a dispute arose over ownership of the app and its code.",
+    "facts": "The engineer worked on the app during office hours, used company laptops and licensed software. The employment contract had a clause stating all work created during employment belongs to the company.",
+    "legal_issues": [
+      "Ownership of intellectual property created during employment",
+      "Work made for hire doctrine",
+      "Use of company resources for personal projects",
+      "Validity of IP assignment clauses in employment contracts"
+    ],
+    "applicable_laws": [
+      "Copyright Act, 1957 - Section 17 (work made for hire)",
+      "Patents Act, 1970 - Section 2(1)(s) & Section 6",
+      "Information Technology Act, 2000",
+      "Indian Contract Act, 1872"
+    ],
+    "judgment": "The court ruled in favor of the employer. Under Section 17 of the Copyright Act, 1957, when work is created during the course of employment, the employer is the first owner of copyright unless there is a contrary agreement. The use of company resources and creation during work hours further strengthened the employer's claim.",
+    "key_principles": [
+      "Works created during employment belong to employer (Section 17, Copyright Act)",
+      "IP assignment clauses in employment contracts are generally valid",
+      "Use of company resources indicates company ownership",
+      "Personal projects should be created outside work hours without company resources",
+      "Written agreements can override default ownership rules"
+    ],
+    "precedents": [
+      "Amar Nath Sehgal v. Union of India (2005)",
+      "R.G. Anand v. M/s Delux Films (1978)",
+      "Eastern Book Company v. D.B. Modak (2008)"
+    ],
+    "practical_advice": [
+      "Clearly document which projects are personal vs. company work",
+      "Work on personal projects outside office hours",
+      "Do not use company resources for personal projects",
+      "Negotiate IP ownership terms before joining",
+      "Get written approval for side projects from employer",
+      "Maintain separate repositories and environments for personal work"
+    ],
+    "importance_score": 98
+  },
+  {
+    "id": "tech_emp_003",
+    "case_name": "Wrongful Termination - Performance Improvement Plan",
+    "category": "Employment Law - Tech Sector",
+    "subcategory": "Termination & Dismissal",
+    "scenario": "A senior software engineer was placed on Performance Improvement Plan (PIP) and terminated after 30 days for not meeting targets. The engineer claimed wrongful termination and discrimination.",
+    "facts": "The engineer had 8 years of service with consistently good ratings. After a management change, they were suddenly placed on PIP with unrealistic targets and terminated within 30 days without proper opportunity to improve.",
+    "legal_issues": [
+      "Principles of natural justice in employment termination",
+      "Discrimination and victimization at workplace",
+      "Adequacy of PIP process and timeline",
+      "Constructive dismissal",
+      "Right to fair hearing"
+    ],
+    "applicable_laws": [
+      "Industrial Disputes Act, 1947 - Section 25F",
+      "Industrial Employment (Standing Orders) Act, 1946",
+      "Shops and Establishments Act (State-specific)",
+      "Constitution of India - Article 14 (Equality)"
+    ],
+    "judgment": "The court held the termination as wrongful and ordered reinstatement with back wages. The court observed that: 1) The PIP was used as a tool for constructive dismissal, 2) The timeline was unreasonably short, 3) Principles of natural justice were violated as the employee was not given adequate opportunity to improve, 4) Past good performance was ignored.",
+    "key_principles": [
+      "Employer must follow principles of natural justice before termination",
+      "PIP must be genuine with reasonable timelines (typically 60-90 days)",
+      "Past performance record must be considered",
+      "Discrimination based on age, gender, or other factors is prohibited",
+      "Termination must be procedurally and substantively fair",
+      "Workmen are entitled to notice, cause, and inquiry under Section 25F"
+    ],
+    "precedents": [
+      "Workmen of Motipur Sugar Factory v. Motipur Sugar Factory Ltd. (1965)",
+      "Management of Raptakos Brett & Co. Ltd. v. K. Gangu Rao (1993)",
+      "Delhi Transport Corporation v. D.T.C. Mazdoor Congress (1991)"
+    ],
+    "practical_advice": [
+      "Document all performance discussions and feedback",
+      "PIP should be a genuine improvement opportunity, not a termination tool",
+      "Typical PIP duration should be 60-90 days minimum",
+      "Employee should receive clear, measurable goals",
+      "Regular feedback meetings during PIP are essential",
+      "Keep records of all communications",
+      "Seek legal advice if PIP seems unfair or discriminatory"
+    ],
+    "importance_score": 92
+  },
+  {
+    "id": "tech_emp_004",
+    "case_name": "Unpaid Overtime and Wage Theft - IT Professional",
+    "category": "Employment Law - Tech Sector",
+    "subcategory": "Wages & Compensation",
+    "scenario": "An IT professional regularly worked 12-14 hours daily including weekends but was not compensated for overtime. The company claimed IT professionals are exempt from overtime laws.",
+    "facts": "The employee worked as a software developer with fixed monthly salary. Despite regular overtime and weekend work, no additional compensation was provided. The employment letter mentioned 'flexi-timing' but in practice, long hours were mandatory.",
+    "legal_issues": [
+      "Applicability of overtime laws to IT professionals",
+      "Exemptions under Shops and Establishments Act",
+      "Wage payment obligations",
+      "Definition of 'workmen' under Industrial Disputes Act"
+    ],
+    "applicable_laws": [
+      "Payment of Wages Act, 1936",
+      "Minimum Wages Act, 1948",
+      "Shops and Establishments Act (State-specific)",
+      "Industrial Employment (Standing Orders) Act, 1946",
+      "Information Technology Act, 2000"
+    ],
+    "judgment": "The court ruled in favor of the employee, ordering payment of overtime wages. The court held that: 1) While IT professionals may be exempt from certain provisions, basic wage rights cannot be waived, 2) Systematic exploitation through unpaid overtime is illegal, 3) 'Flexi-timing' cannot be used to extract unlimited work, 4) The employment contract must clearly specify working hours and overtime compensation.",
+    "key_principles": [
+      "IT professionals are generally not exempt from all labor laws",
+      "Systematic non-payment of wages for work done is illegal",
+      "Employment contracts must specify working hours clearly",
+      "Flexi-timing does not mean unlimited unpaid work",
+      "State-specific Shops and Establishments Acts may have different provisions",
+      "Employees can claim up to 3 years of unpaid wages"
+    ],
+    "precedents": [
+      "Chintaman Rao v. State of Madhya Pradesh (1950)",
+      "Workmen of Associated Rubber Industry Ltd. v. Associated Rubber Industry Ltd. (1985)",
+      "Bridge & Roof Co. (India) Ltd. v. Union of India (1963)"
+    ],
+    "practical_advice": [
+      "Maintain detailed records of working hours",
+      "Document all overtime work via emails or timesheets",
+      "Check your state's Shops and Establishments Act provisions",
+      "IT professionals earning above certain threshold may be exempt in some states",
+      "Raise overtime concerns in writing to HR",
+      "If hours are regularly excessive, calculate unpaid overtime",
+      "Can file complaint with Labour Commissioner for wage recovery"
+    ],
+    "importance_score": 88
+  },
+  {
+    "id": "tech_emp_005",
+    "case_name": "Data Security and Confidentiality Breach",
+    "category": "Employment Law - Tech Sector",
+    "subcategory": "Confidentiality & Trade Secrets",
+    "scenario": "A database administrator was accused of stealing customer data and sharing it with a competitor before resigning.",
+    "facts": "The employee had signed NDA and confidentiality agreement. Company's monitoring systems detected bulk data downloads to external drive. Employee claimed data was for backup purposes only.",
+    "legal_issues": [
+      "Breach of confidentiality agreement",
+      "Trade secret misappropriation",
+      "Data theft and cyber espionage",
+      "Employer's right to monitor employee activities",
+      "Criminal liability for data theft"
+    ],
+    "applicable_laws": [
+      "Information Technology Act, 2000 - Section 43, 66, 72",
+      "Indian Contract Act, 1872 - NDA enforceability",
+      "Indian Penal Code - Section 378 (Theft), 405 (Criminal breach of trust)",
+      "Copyright Act, 1957",
+      "Trade Secrets Protection (Common Law)"
+    ],
+    "judgment": "The court held the employee guilty of breach of confidentiality and data theft. Criminal charges under IT Act Section 43 and IPC Section 405 were also upheld. The court ordered: 1) Permanent injunction against using stolen data, 2) Monetary damages to the company, 3) Criminal prosecution under IT Act. The court validated the company's employee monitoring practices as reasonable and disclosed in IT policy.",
+    "key_principles": [
+      "Confidentiality agreements are enforceable and binding",
+      "Data theft is both civil and criminal offense",
+      "Trade secrets are protected under common law even without patents",
+      "Employers can monitor employee activities if disclosed in policy",
+      "Breach of confidentiality can result in heavy damages and imprisonment",
+      "Digital evidence from company systems is admissible"
+    ],
+    "precedents": [
+      "John Richard Brady v. Chemical Process Equipments P. Ltd. (1987)",
+      "Diljeet Titus v. Alfred A. Adebare (2006)",
+      "Shree Nath Heritage Liquor Pvt. Ltd. v. Allied Blenders & Distillers Pvt. Ltd. (2016)"
+    ],
+    "practical_advice": [
+      "Never download company data without authorization",
+      "Understand and respect NDA and confidentiality obligations",
+      "Trade secrets protection continues even after employment ends",
+      "Company monitoring of IT systems is generally lawful",
+      "Breaches can lead to criminal prosecution and jail time",
+      "Return all company data and devices upon resignation",
+      "Maintain separate personal and work data strictly"
+    ],
+    "importance_score": 96
+  }
+]

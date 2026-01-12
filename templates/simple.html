@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LegalCounsel AI - Professional Legal Information System</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#0D9488">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LegalAI">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
@@ -56,6 +65,919 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Dark Mode Theme - Custom Professional Colors */
+        body.dark-mode {
+            --primary-navy: #0f172a;          /* Dark Slate - Main Background */
+            --steel-blue: #1e293b;            /* Lighter Slate - Card Background */
+            --charcoal: #f8fafc;              /* Soft White - Primary Text */
+            --platinum: #1e293b;              /* Lighter Slate */
+            --pure-white: #1e293b;            /* Lighter Slate - Cards */
+            --border-light: #334155;          /* Subtle border */
+            --soft-gray: #94a3b8;             /* Blue Grey - Secondary Text */
+            --gold-accent: #2dd4bf;           /* Bright Teal - Brand Accent */
+            --gradient-professional: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --gradient-subtle: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.4);
+            --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.5);
+            --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.6);
+            --shadow-floating: 0 12px 48px rgba(0, 0, 0, 0.7);
+            --background-primary: #0f172a;    /* Dark Slate */
+            --background-secondary: #1e293b;  /* Lighter Slate */
+            --text-primary: #f8fafc;          /* Soft White */
+            --text-secondary: #94a3b8;        /* Blue Grey */
+            --text-light: #94a3b8;            /* Blue Grey */
+            --border-color: #334155;          /* Subtle border */
+        }
+
+        body.dark-mode::before {
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(30, 58, 95, 0.1) 0%, transparent 60%),
+                radial-gradient(circle at 75% 75%, rgba(30, 58, 95, 0.05) 0%, transparent 60%);
+        }
+
+        /* Dark Mode Specific Element Styles - Professional Custom Colors */
+        body.dark-mode .app-container {
+            background: #0f172a !important;  /* Dark Slate */
+        }
+
+        body.dark-mode .chat-container {
+            background: #1e293b !important;  /* Lighter Slate - Card Background */
+            border-right-color: #334155 !important;
+        }
+
+        body.dark-mode .header {
+            background: #1e293b !important;  /* Lighter Slate */
+            color: #f8fafc !important;       /* Soft White */
+            border-bottom-color: #334155 !important;
+        }
+
+        body.dark-mode .header::before {
+            background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%) !important;  /* Bright Teal */
+        }
+
+        body.dark-mode .logo-text {
+            color: #f8fafc !important;  /* Soft White */
+        }
+
+        body.dark-mode .tagline,
+        body.dark-mode .credentials {
+            color: #94a3b8 !important;  /* Blue Grey - Secondary Text */
+        }
+
+        body.dark-mode .message-content {
+            background: #1e293b !important;  /* Lighter Slate */
+            color: #f8fafc !important;       /* Soft White */
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .user-message .message-content {
+            background: #2dd4bf !important;  /* Bright Teal */
+            color: #0f172a !important;       /* Dark text on teal */
+        }
+
+        body.dark-mode .input-container {
+            background: #1e293b !important;  /* Lighter Slate */
+            border-top-color: #334155 !important;
+        }
+
+        body.dark-mode .message-input {
+            background: #0f172a !important;  /* Dark Slate */
+            color: #f8fafc !important;       /* Soft White */
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .message-input::placeholder {
+            color: #94a3b8 !important;  /* Blue Grey */
+        }
+
+        body.dark-mode .welcome-message {
+            background: #1e293b !important;  /* Lighter Slate */
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .features-box {
+            background: #1e293b !important;  /* Lighter Slate - Card */
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .feature-card {
+            background: #1e293b !important;  /* Lighter Slate - Card */
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .case-analysis-panel {
+            background: #1e293b !important;  /* Lighter Slate */
+            border-left-color: #334155 !important;
+        }
+
+        body.dark-mode .language-dropdown {
+            background: #1e293b !important;  /* Lighter Slate */
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .language-option {
+            color: #f8fafc !important;  /* Soft White */
+        }
+
+        body.dark-mode .language-option:hover {
+            background: rgba(45, 212, 191, 0.2) !important;  /* Bright Teal hover */
+        }
+
+        body.dark-mode .auth-btn {
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+
+        body.dark-mode .typing {
+            background: #1e293b !important;  /* Lighter Slate */
+            color: #f8fafc !important;       /* Soft White */
+        }
+
+        body.dark-mode .messages {
+            background: #1e293b !important;  /* Lighter Slate */
+        }
+
+        body.dark-mode h1, 
+        body.dark-mode h2, 
+        body.dark-mode h3, 
+        body.dark-mode h4 {
+            color: #f8fafc !important;  /* Soft White - Primary Text */
+        }
+
+        body.dark-mode p,
+        body.dark-mode span,
+        body.dark-mode div {
+            color: #f8fafc !important;  /* Soft White */
+        }
+
+        body.dark-mode .hero-section,
+        body.dark-mode .core-features,
+        body.dark-mode .practice-areas,
+        body.dark-mode .benefits-section,
+        body.dark-mode .cta-section {
+            background: #1e293b !important;  /* Lighter Slate - Card */
+        }
+
+        body.dark-mode .features-container,
+        body.dark-mode .practice-areas-container {
+            background: #0f172a !important;  /* Dark Slate */
+            border-color: #334155 !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        body.dark-mode .section-title {
+            color: #2dd4bf !important;  /* Bright Teal */
+        }
+
+        body.dark-mode .logo-icon {
+            color: #2dd4bf !important;  /* Bright Teal - Brand Accent */
+        }
+
+        body.dark-mode .send-button,
+        body.dark-mode .upload-button {
+            background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%) !important;  /* Bright Teal gradient */
+            color: #0f172a !important;
+        }
+
+        /* Fix all white cards and sections */
+        body.dark-mode .practice-area-card,
+        body.dark-mode .core-feature-card,
+        body.dark-mode .core-feature-item,
+        body.dark-mode .benefit-item,
+        body.dark-mode .feature-highlight,
+        body.dark-mode .info-card,
+        body.dark-mode .disclaimer-box,
+        body.dark-mode .warning-box,
+        body.dark-mode .practice-areas-grid > div,
+        body.dark-mode .core-features-grid > div,
+        body.dark-mode .benefits-grid > div {
+            background: #1e293b !important;  /* Lighter Slate - Card */
+            border-color: #334155 !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        body.dark-mode .practice-area-card:hover,
+        body.dark-mode .core-feature-card:hover {
+            background: #1e293b !important;
+            border-color: #2dd4bf !important;
+            box-shadow: 0 15px 40px rgba(45, 212, 191, 0.2) !important;
+        }
+
+        body.dark-mode .practice-area-icon,
+        body.dark-mode .core-feature-icon,
+        body.dark-mode .benefit-icon {
+            color: #2dd4bf !important;  /* Bright Teal */
+        }
+
+        body.dark-mode .disclaimer-box,
+        body.dark-mode .warning-box {
+            background: #1e293b !important;  /* Lighter Slate - Card */
+            border-left-color: #2dd4bf !important;
+            color: #f8fafc !important;  /* Soft White */
+        }
+        
+        body.dark-mode .disclaimer-box h3,
+        body.dark-mode .warning-box h3 {
+            color: #2dd4bf !important;  /* Bright Teal for heading */
+        }
+        
+        body.dark-mode .disclaimer-box p,
+        body.dark-mode .warning-box p,
+        body.dark-mode .disclaimer-box li,
+        body.dark-mode .warning-box li {
+            color: #94a3b8 !important;  /* Blue Grey for text */
+        }
+
+        /* Disclaimer Banner Dark Mode - THIS IS THE YELLOW BOX! */
+        body.dark-mode .disclaimer-banner {
+            background: #1e293b !important;  /* Lighter Slate - Card */
+            border-color: #2dd4bf !important;
+        }
+
+        body.dark-mode .disclaimer-icon i {
+            color: #2dd4bf !important;  /* Bright Teal */
+        }
+
+        body.dark-mode .disclaimer-title {
+            color: #2dd4bf !important;  /* Bright Teal heading */
+        }
+
+        body.dark-mode .disclaimer-text-main {
+            color: #f8fafc !important;  /* Soft White */
+        }
+
+        body.dark-mode .disclaimer-points li {
+            color: #94a3b8 !important;  /* Blue Grey */
+        }
+
+        body.dark-mode .disclaimer-points i {
+            color: #2dd4bf !important;  /* Bright Teal icons */
+        }
+
+        /* ============================================
+           SMOOTH ANIMATIONS & TRANSITIONS
+           ============================================ */
+        
+        /* Fade In Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Slide In from Left */
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Slide In from Right */
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Scale In Animation */
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Glow Effect */
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(45, 212, 191, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(45, 212, 191, 0.6);
+            }
+        }
+
+        /* Bounce Animation */
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Shimmer Effect */
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        /* Apply Animations to Elements */
+        .practice-area-card,
+        .core-feature-item,
+        .benefit-item {
+            animation: fadeIn 0.6s ease-out;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .practice-area-card:hover,
+        .core-feature-item:hover,
+        .benefit-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(45, 212, 191, 0.15);
+        }
+
+        .message {
+            animation: slideInLeft 0.4s ease-out;
+        }
+
+        .message.user {
+            animation: slideInRight 0.4s ease-out;
+        }
+
+        /* Smooth Scroll Behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Keyboard Shortcut Indicator */
+        .keyboard-shortcuts {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(45, 212, 191, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .keyboard-shortcuts.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        body.dark-mode .keyboard-shortcuts {
+            background: rgba(30, 41, 59, 0.95);
+            border-color: rgba(45, 212, 191, 0.4);
+        }
+
+        .keyboard-shortcuts h4 {
+            margin: 0 0 0.75rem 0;
+            font-size: 0.9rem;
+            color: #0D9488;
+            font-weight: 600;
+        }
+
+        body.dark-mode .keyboard-shortcuts h4 {
+            color: #2dd4bf;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .shortcut-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .shortcut-key {
+            background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+        }
+
+        .shortcut-label {
+            color: #64748b;
+        }
+
+        body.dark-mode .shortcut-label {
+            color: #94a3b8;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+            z-index: 2000;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+
+        .settings-panel.open {
+            right: 0;
+        }
+
+        body.dark-mode .settings-panel {
+            background: #1e293b;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .settings-header {
+            padding: 2rem;
+            background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .close-settings {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-settings:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .settings-content {
+            padding: 2rem;
+        }
+
+        .setting-group {
+            margin-bottom: 2rem;
+        }
+
+        .setting-group h3 {
+            font-size: 1rem;
+            color: #0D9488;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        body.dark-mode .setting-group h3 {
+            color: #2dd4bf;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .setting-item {
+            background: #0f172a;
+        }
+
+        .setting-item:hover {
+            background: #e0f2fe;
+        }
+
+        body.dark-mode .setting-item:hover {
+            background: #1a2332;
+        }
+
+        .setting-label {
+            font-size: 0.9rem;
+            color: #475569;
+        }
+
+        body.dark-mode .setting-label {
+            color: #94a3b8;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: #cbd5e1;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch:hover::after {
+            transform: scale(1.1);
+        }
+
+        .toggle-switch.active::after {
+            left: 27px;
+        }
+
+        /* Settings Button */
+        .settings-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 13rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(13, 148, 136, 0.1);
+            border: 1px solid rgba(13, 148, 136, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .settings-btn:hover {
+            background: rgba(13, 148, 136, 0.15);
+            transform: rotate(90deg);
+        }
+
+        /* Accessibility Focus Styles */
+        *:focus {
+            outline: 2px solid #2dd4bf;
+            outline-offset: 2px;
+        }
+
+        button:focus,
+        input:focus,
+        textarea:focus {
+            outline: 3px solid #2dd4bf;
+            outline-offset: 2px;
+        }
+
+        /* ============================================
+           DOCUMENT GENERATOR MODAL
+           ============================================ */
+        
+        .doc-gen-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .doc-gen-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .doc-gen-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: scaleIn 0.3s ease;
+        }
+
+        body.dark-mode .doc-gen-content {
+            background: #1e293b;
+        }
+
+        .doc-gen-header {
+            padding: 2rem;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            color: white;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .doc-gen-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+        }
+
+        .close-doc-gen {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-doc-gen:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .doc-gen-body {
+            padding: 2rem;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .template-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .template-card {
+            background: #0f172a;
+            border-color: #334155;
+        }
+
+        .template-card:hover {
+            transform: translateY(-4px);
+            border-color: #8b5cf6;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.2);
+        }
+
+        .template-card.selected {
+            border-color: #8b5cf6;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%);
+        }
+
+        .template-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .template-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        body.dark-mode .template-name {
+            color: #f8fafc;
+        }
+
+        .doc-form {
+            display: none;
+        }
+
+        .doc-form.show {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        body.dark-mode .form-group label {
+            color: #94a3b8;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group textarea {
+            background: #0f172a;
+            border-color: #334155;
+            color: #f8fafc;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #8b5cf6;
+            outline: none;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .doc-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-generate {
+            flex: 1;
+            padding: 1rem;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-back {
+            padding: 1rem 2rem;
+            background: #64748b;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: #475569;
+        }
+
+        .generated-doc {
+            display: none;
+        }
+
+        .generated-doc.show {
+            display: block;
+        }
+
+        .doc-preview {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        body.dark-mode .doc-preview {
+            background: #0f172a;
+            border-color: #334155;
+            color: #f8fafc;
+        }
+
+        .doc-download-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-download,
+        .btn-copy {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+            color: white;
+        }
+
+        /* ============================================
+           TEXT-TO-SPEECH BUTTON
+           ============================================ */
+        
+        .tts-btn {
+            background: rgba(13, 148, 136, 0.1);
+            border: 1px solid rgba(13, 148, 136, 0.2);
+            color: #0D9488;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .tts-btn:hover {
+            background: rgba(13, 148, 136, 0.15);
+            transform: translateY(-2px);
+        }
+
+        body.dark-mode .tts-btn {
+            background: rgba(45, 212, 191, 0.1);
+            border-color: rgba(45, 212, 191, 0.2);
+            color: #2dd4bf;
+        }
+
+        .tts-btn.playing {
+            background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -72,6 +994,48 @@
             font-weight: 400;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: #0f1729;
+            color: #e8e8e8;
+        }
+
+        /* Accessibility Features */
+        body.reduce-motion * {
+            animation: none !important;
+            transition: none !important;
+        }
+
+        body.large-text {
+            font-size: 18px !important;
+        }
+
+        body.large-text .message-text {
+            font-size: 1.1rem !important;
+        }
+
+        body.large-text button,
+        body.large-text input,
+        body.large-text textarea {
+            font-size: 1rem !important;
+        }
+
+        body.high-contrast {
+            filter: contrast(1.3);
+        }
+
+        body.high-contrast .message {
+            border: 2px solid currentColor;
+        }
+
+        /* No animations class */
+        body.no-animations *,
+        body.no-animations *::before,
+        body.no-animations *::after {
+            animation: none !important;
+            transition: none !important;
         }
 
         /* Subtle Professional Background */
@@ -99,7 +1063,15 @@
             background: #ffffff;
         }
 
-        /* Clean Chat Container */
+        /* Main Content Area with Two Columns */
+        .main-content-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 0;
+        }
+
+        /* Clean Chat Container - Left Side */
         .chat-container {
             background: #ffffff;
             backdrop-filter: none;
@@ -113,6 +1085,375 @@
             margin: 0;
             animation: slideUp 0.6s ease-out;
             min-height: calc(100vh - 200px);
+            border-right: 1px solid #e2e8f0;
+        }
+
+        /* Case Analysis Panel - Right Side */
+        .case-analysis-panel {
+            width: 420px;
+            background: #f8fafc;
+            border-left: 1px solid #e2e8f0;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            overflow-y: auto;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .case-analysis-panel.active {
+            display: flex;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .case-analysis-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+            color: white;
+            border-bottom: 2px solid #0f766e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .case-analysis-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .close-analysis-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .close-analysis-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .case-analysis-content {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .case-analysis-empty {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #64748b;
+        }
+
+        .case-analysis-empty i {
+            font-size: 3rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        .case-analysis-empty h3 {
+            font-size: 1.1rem;
+            color: #475569;
+            margin: 0.5rem 0;
+        }
+
+        .case-analysis-empty p {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin: 0;
+        }
+
+        /* Case Card in Analysis */
+        .analysis-case-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .case-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 1rem 0;
+            line-height: 1.4;
+        }
+
+        .case-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .meta-item-analysis {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .meta-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .meta-value {
+            font-size: 0.875rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        /* Case Timeline */
+        .case-timeline {
+            margin-top: 1.5rem;
+        }
+
+        .timeline-header {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .timeline-items {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .timeline-items::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #0D9488 0%, #e2e8f0 100%);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.25rem;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -1.47rem;
+            top: 0.25rem;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #0D9488;
+            z-index: 1;
+        }
+
+        .timeline-dot.completed {
+            background: #0D9488;
+        }
+
+        .timeline-date {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-event {
+            font-size: 0.85rem;
+            color: #1e293b;
+            line-height: 1.5;
+        }
+
+        .timeline-status {
+            display: inline-block;
+            padding: 0.25rem 0.625rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .timeline-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .timeline-status.completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .timeline-status.ongoing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Case Parties Section */
+        .case-parties {
+            margin-top: 1.5rem;
+        }
+
+        .parties-header {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .party-item {
+            background: #f1f5f9;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .party-role {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .party-name {
+            font-size: 0.875rem;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        /* Judgment Section */
+        .case-judgment {
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+        }
+
+        .judgment-header {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .judgment-text {
+            font-size: 0.85rem;
+            color: #047857;
+            line-height: 1.6;
+        }
+
+        /* Related Documents */
+        .related-documents {
+            margin-top: 1.5rem;
+        }
+
+        .documents-header {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .document-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .document-item:hover {
+            border-color: #0D9488;
+            transform: translateX(4px);
+        }
+
+        .document-icon {
+            color: #0D9488;
+            margin-right: 0.5rem;
+        }
+
+        .document-name {
+            font-size: 0.85rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .document-date {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .case-analysis-panel {
+                width: 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content-wrapper {
+                flex-direction: column;
+            }
+            
+            .case-analysis-panel {
+                width: 100%;
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1000;
+                box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .chat-container {
+                border-right: none;
+            }
         }
 
         @keyframes slideUp {
@@ -157,6 +1498,94 @@
         .header-content {
             position: relative;
             z-index: 1;
+        }
+
+        /* Theme Toggle & Language Selector Buttons */
+        .theme-toggle, .language-selector {
+            position: absolute;
+            top: 1.5rem;
+            background: rgba(13, 148, 136, 0.1);
+            border: 1px solid rgba(13, 148, 136, 0.2);
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .theme-toggle {
+            right: 1.5rem;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(13, 148, 136, 0.15);
+            transform: rotate(180deg);
+        }
+
+        .language-selector {
+            right: 6rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #0D9488;
+            gap: 0.3rem;
+            height: 45px;
+        }
+
+        .language-selector:hover {
+            background: rgba(13, 148, 136, 0.15);
+        }
+
+        .language-dropdown {
+            position: absolute;
+            top: 4.5rem;
+            right: 6rem;
+            background: var(--pure-white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-elevated);
+            padding: 0.5rem;
+            display: none;
+            z-index: 1000;
+            min-width: 180px;
+            border: 1px solid var(--border-light);
+        }
+
+        .language-dropdown.show {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .language-option {
+            padding: 0.7rem 1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .language-option:hover {
+            background: rgba(13, 148, 136, 0.1);
+        }
+
+        .language-option.active {
+            background: rgba(13, 148, 136, 0.15);
+            color: #0D9488;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Refined Features Box */
@@ -808,14 +2237,45 @@
         .features-container {
             max-width: 1000px;
             margin: 0 auto;
+            background: #ffffff;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(13, 148, 136, 0.08);
+            border: 2px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .features-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #0D9488 0%, #14b8a6 50%, #0D9488 100%);
         }
 
         .section-title {
             text-align: center;
             font-size: 1.8rem;
             font-weight: 700;
-            color: #1e293b;
+            color: #0D9488;
             margin-bottom: 3rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #0D9488 0%, #14b8a6 100%);
+            border-radius: 2px;
         }
 
         .core-features-grid {
@@ -829,11 +2289,12 @@
             background: #ffffff;
             padding: 2rem 1.5rem;
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            border: 2px solid #e2e8f0;
             text-align: center;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.08);
         }
 
         .core-feature-card::before {
@@ -844,17 +2305,16 @@
             width: 100%;
             height: 3px;
             background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
-            transform: scaleX(0);
             transition: transform 0.3s ease;
         }
 
         .core-feature-card:hover::before {
-            transform: scaleX(1);
+            height: 4px;
         }
 
         .core-feature-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(13, 148, 136, 0.1);
+            box-shadow: 0 12px 30px rgba(13, 148, 136, 0.2);
             border-color: #0D9488;
         }
 
@@ -887,6 +2347,23 @@
         .practice-areas-container {
             max-width: 1200px;
             margin: 0 auto;
+            background: #ffffff;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(13, 148, 136, 0.08);
+            border: 2px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .practice-areas-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #0D9488 0%, #14b8a6 50%, #0D9488 100%);
         }
 
         .practice-areas-grid {
@@ -899,11 +2376,12 @@
             background: #ffffff;
             padding: 2.5rem 2rem;
             border-radius: 16px;
-            border: 1px solid #e2e8f0;
+            border: 2px solid #e2e8f0;
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 6px 20px rgba(13, 148, 136, 0.1);
         }
 
         .practice-area-card::before {
@@ -918,7 +2396,7 @@
 
         .practice-area-card:hover {
             transform: translateY(-6px);
-            box-shadow: 0 12px 35px rgba(13, 148, 136, 0.15);
+            box-shadow: 0 15px 40px rgba(13, 148, 136, 0.2);
             border-color: #0D9488;
         }
 
@@ -1114,6 +2592,117 @@
             border-radius: 0.5rem;
             font-size: 0.9rem;
             font-style: italic;
+        }
+
+        /* Prediction Insight Panel Styling */
+        .prediction-insight-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+            color: white;
+        }
+
+        .prediction-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .prediction-icon {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .prediction-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .prediction-outcome {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .outcome-label {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .outcome-badge {
+            padding: 0.375rem 0.875rem;
+            border-radius: 1rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .prediction-confidence {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .confidence-text {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .confidence-bar {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.6s ease;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+        }
+
+        .prediction-factors {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .prediction-factors strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .prediction-factors ul {
+            margin: 0;
+            padding-left: 1.25rem;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .prediction-factors li {
+            margin-bottom: 0.25rem;
+        }
+
+        .prediction-footer {
+            text-align: center;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.8rem;
+            opacity: 0.9;
         }
 
         /* Citations Panel Styling */
@@ -1496,6 +3085,64 @@
             background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
         }
 
+        /* Voice Input Button */
+        .voice-btn {
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            min-width: 60px;
+            justify-content: center;
+        }
+
+        .voice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        }
+
+        .voice-btn.recording {
+            background: #ef4444;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5); }
+        }
+
+        /* Document Generator Button */
+        .doc-generator-btn {
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .doc-generator-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+        }
+
+        body.dark-mode .doc-generator-btn {
+            background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+        }
+
         .upload-button i {
             font-size: 1.1rem;
         }
@@ -1619,6 +3266,32 @@
 
             .logo-text {
                 font-size: 2rem;
+            }
+
+            /* Fix overlapping buttons on mobile */
+            .settings-btn {
+                right: auto;
+                left: 1rem;
+                top: 1rem;
+            }
+
+            .language-selector {
+                right: 5.5rem;
+                top: 1rem;
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .theme-toggle {
+                right: 1rem;
+                top: 1rem;
+                width: 40px;
+                height: 40px;
+            }
+
+            .language-dropdown {
+                right: 5.5rem;
+                top: 3.5rem;
             }
 
             .app-container {
@@ -1821,14 +3494,39 @@
         <!-- Professional Header -->
         <header class="header">
             <div class="header-content">
+                <!-- Settings Button -->
+                <button class="settings-btn" onclick="toggleSettings()" title="Settings (Ctrl+S)">
+                    ⚙️
+                </button>
+                
+                <!-- Theme Toggle Button -->
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode (Ctrl+D)">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                
+                <!-- Language Selector -->
+                <button class="language-selector" onclick="toggleLanguageDropdown()" title="Select Language (Ctrl+L)">
+                    <span id="currentLang">🌐 EN</span>
+                </button>
+                
+                <!-- Language Dropdown -->
+                <div class="language-dropdown" id="languageDropdown">
+                    <div class="language-option" onclick="changeLanguage('en')">🇬🇧 English</div>
+                    <div class="language-option" onclick="changeLanguage('hi')">🇮🇳 हिंदी (Hindi)</div>
+                    <div class="language-option" onclick="changeLanguage('ta')">🇮🇳 தமிழ் (Tamil)</div>
+                    <div class="language-option" onclick="changeLanguage('te')">🇮🇳 తెలుగు (Telugu)</div>
+                    <div class="language-option" onclick="changeLanguage('bn')">🇮🇳 বাংলা (Bengali)</div>
+                    <div class="language-option" onclick="changeLanguage('mr')">🇮🇳 मराठी (Marathi)</div>
+                </div>
+                
                 <div class="logo">
                     <i class="fas fa-balance-scale logo-icon"></i>
-                    <h1 class="logo-text">LegalCounsel AI</h1>
+                    <h1 class="logo-text" data-translate="appTitle">LegalCounsel AI</h1>
                 </div>
-                <p class="tagline">Professional Legal Information & Guidance System</p>
+                <p class="tagline" data-translate="tagline">Professional Legal Information & Guidance System</p>
                 <div class="credentials">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Advanced Legal AI Technology • Confidential & Secure</span>
+                    <span data-translate="credentials">Advanced Legal AI Technology • Confidential & Secure</span>
                 </div>
                 
                 <!-- Authentication Section -->
@@ -1847,16 +3545,24 @@
                             <i class="fas fa-user-circle"></i>
                             <span id="userName">Welcome!</span>
                         </div>
+                        <button class="auth-btn" onclick="goToDashboard()" title="View Dashboard">
+                            <i class="fas fa-chart-line"></i> Dashboard
+                        </button>
+                        <button class="auth-btn" onclick="window.location.href='/search'" title="Search Chats">
+                            <i class="fas fa-search"></i> Search
+                        </button>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- Chat Container -->
-        <div class="chat-container">
-            <div class="messages" id="messages">
-                <!-- Modern Landing Page -->
-                <div class="welcome-message" id="welcomeMessage">
+        <!-- Main Content Wrapper (Chat + Analysis Panel) -->
+        <div class="main-content-wrapper">
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <div class="messages" id="messages">
+                    <!-- Modern Landing Page -->
+                    <div class="welcome-message" id="welcomeMessage">
                     <!-- Chat History Button - Positioned at top right -->
                     <button class="welcome-chat-history-btn" id="welcomeChatHistoryBtn" onclick="showChatHistory()" style="display: none;">
                         <i class="fas fa-history"></i> Chat History
@@ -1971,13 +3677,20 @@
                             id="messageInput" 
                             placeholder="Describe your legal question or situation in detail..."
                             rows="1"
-                            maxlength="2000"></textarea>
+                            maxlength="2000"
+                            data-translate="inputPlaceholder"></textarea>
                     </div>
+                    <button type="button" class="voice-btn" id="voiceBtn" onclick="toggleVoiceInput()" title="Voice Input (Ctrl+V)">
+                        🎤
+                    </button>
+                    <button type="button" class="doc-generator-btn" onclick="openDocumentGenerator()" title="Generate Legal Document">
+                        📄
+                    </button>
                     <button type="button" class="upload-button" id="uploadButton" title="Analyze Legal Document">
                         <i class="fas fa-file-upload"></i>
                         <span class="upload-text">Document</span>
                     </button>
-                    <button type="submit" class="send-button" id="sendButton">
+                    <button type="submit" class="send-button" id="sendButton" data-translate="sendButton">
                         <i class="fas fa-paper-plane"></i>
                         Send
                     </button>
@@ -1985,7 +3698,32 @@
                 <!-- Hidden file input -->
                 <input type="file" id="documentInput" accept=".pdf,.docx,.doc,.txt" style="display: none;">
             </div>
-        </div>
+            </div> <!-- End chat-container -->
+
+            <!-- Case Analysis Panel -->
+            <div class="case-analysis-panel" id="caseAnalysisPanel">
+                <div class="case-analysis-header">
+                    <h2 class="case-analysis-title">
+                        <i class="fas fa-chart-line"></i>
+                        Case Analysis
+                    </h2>
+                    <button class="close-analysis-btn" onclick="closeCaseAnalysis()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="case-analysis-content" id="caseAnalysisContent">
+                    <!-- Default Empty State -->
+                    <div class="case-analysis-empty" id="analysisEmptyState">
+                        <i class="fas fa-search-plus"></i>
+                        <h3>No Case Selected</h3>
+                        <p>Ask about a specific legal case to see detailed analysis here</p>
+                    </div>
+                    
+                    <!-- Dynamic Case Content Will Be Inserted Here -->
+                </div>
+            </div>
+        </div> <!-- End main-content-wrapper -->
 
         <!-- Professional Footer -->
         <footer class="footer">
@@ -2015,7 +3753,7 @@
         // Hide welcome message when first message is sent
         let isFirstMessage = true;
 
-        function addMessage(role, content, sources = null) {
+        function addMessage(role, content, sources = null, prediction = null) {
             // On first message, smoothly minimize welcome content
             if (isFirstMessage && welcomeMessage) {
                 // Instead of hiding completely, collapse it smoothly
@@ -2063,6 +3801,12 @@
             
             messageDiv.appendChild(avatar);
             messageDiv.appendChild(contentDiv);
+            
+            // Add prediction insight if available
+            if (role === 'assistant' && prediction) {
+                const predictionDiv = createPredictionInsight(prediction);
+                messageDiv.appendChild(predictionDiv);
+            }
             
             // Add case citations if available
             if (role === 'assistant' && sources && sources.length > 0) {
@@ -2119,6 +3863,56 @@
             }
             
             return formatted;
+        }
+
+        function createPredictionInsight(prediction) {
+            const panel = document.createElement('div');
+            panel.className = 'prediction-insight-panel';
+            
+            const outcome = prediction.outcome || 'Unknown';
+            const confidence = prediction.confidence || 0;
+            const factors = prediction.top_factors || [];
+            const similarCasesCount = prediction.similar_cases_count || 0;
+
+            // Determine outcome color
+            let outcomeColor = '#6c757d';
+            if (outcome.toLowerCase().includes('favorable')) outcomeColor = '#28a745';
+            else if (outcome.toLowerCase().includes('unfavorable')) outcomeColor = '#dc3545';
+            else if (outcome.toLowerCase().includes('partial')) outcomeColor = '#ffc107';
+
+            panel.innerHTML = `
+                <div class="prediction-header">
+                    <span class="prediction-icon">🔮</span>
+                    <strong>AI Case Outcome Prediction</strong>
+                </div>
+                <div class="prediction-body">
+                    <div class="prediction-outcome">
+                        <span class="outcome-label">Predicted Outcome:</span>
+                        <span class="outcome-badge" style="background: ${outcomeColor}; color: white;">
+                            ${outcome}
+                        </span>
+                    </div>
+                    <div class="prediction-confidence">
+                        <span class="confidence-text">Confidence: <strong>${confidence.toFixed(1)}%</strong></span>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${confidence}%; background: ${outcomeColor};"></div>
+                        </div>
+                    </div>
+                    ${factors.length > 0 ? `
+                    <div class="prediction-factors">
+                        <strong>Key Factors:</strong>
+                        <ul>
+                            ${factors.map(factor => `<li>${factor}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+                    <div class="prediction-footer">
+                        <small>📊 Based on ${similarCasesCount} similar cases</small>
+                    </div>
+                </div>
+            `;
+            
+            return panel;
         }
 
         function createCitationsPanel(sources) {
@@ -2207,7 +4001,12 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    addMessage('assistant', data.response);
+                    addMessage('assistant', data.response, null, data.prediction || null);
+                    
+                    // Automatically show case analysis if sources are available
+                    if (data.sources && data.sources.length > 0) {
+                        setTimeout(() => autoShowCaseAnalysis(data.sources), 500);
+                    }
                 } else {
                     addMessage('assistant', `Error: ${data.error || 'Something went wrong'}`);
                 }
@@ -2532,6 +4331,175 @@
             loadChatHistory();
         }
 
+        // ==========================================
+        // CASE ANALYSIS PANEL FUNCTIONS
+        // ==========================================
+
+        function showCaseAnalysis(caseData) {
+            const panel = document.getElementById('caseAnalysisPanel');
+            const content = document.getElementById('caseAnalysisContent');
+            const emptyState = document.getElementById('analysisEmptyState');
+            
+            // Hide empty state
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+            
+            // Show panel
+            panel.classList.add('active');
+            
+            // Populate with case data
+            content.innerHTML = renderCaseAnalysis(caseData);
+        }
+
+        function closeCaseAnalysis() {
+            const panel = document.getElementById('caseAnalysisPanel');
+            panel.classList.remove('active');
+        }
+
+        function renderCaseAnalysis(caseData) {
+            // Extract case information
+            const caseName = caseData.case_name || caseData.title || 'Unknown Case';
+            const court = caseData.court || 'Unknown Court';
+            const date = caseData.date || caseData.judgment_date || 'Unknown Date';
+            const judges = caseData.judges || [];
+            const petitioner = caseData.petitioner || 'N/A';
+            const respondent = caseData.respondent || 'N/A';
+            const judgment = caseData.judgment || caseData.headnotes || '';
+            const citations = caseData.citations || [];
+
+            return `
+                <div class="analysis-case-card">
+                    <h3 class="case-card-title">${escapeHtml(caseName)}</h3>
+                    
+                    <div class="case-meta-grid">
+                        <div class="meta-item-analysis">
+                            <span class="meta-label">Court</span>
+                            <span class="meta-value">${escapeHtml(court)}</span>
+                        </div>
+                        <div class="meta-item-analysis">
+                            <span class="meta-label">Date</span>
+                            <span class="meta-value">${formatDate(date)}</span>
+                        </div>
+                        <div class="meta-item-analysis">
+                            <span class="meta-label">Status</span>
+                            <span class="meta-value">
+                                <span class="timeline-status completed">Decided</span>
+                            </span>
+                        </div>
+                        ${judges.length > 0 ? `
+                        <div class="meta-item-analysis">
+                            <span class="meta-label">Bench</span>
+                            <span class="meta-value">${judges.length} Judge${judges.length > 1 ? 's' : ''}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    ${petitioner !== 'N/A' || respondent !== 'N/A' ? `
+                    <div class="case-parties">
+                        <h4 class="parties-header">
+                            <i class="fas fa-users"></i>
+                            Parties Involved
+                        </h4>
+                        ${petitioner !== 'N/A' ? `
+                        <div class="party-item">
+                            <div class="party-role">Petitioner/Appellant</div>
+                            <div class="party-name">${escapeHtml(petitioner)}</div>
+                        </div>
+                        ` : ''}
+                        ${respondent !== 'N/A' ? `
+                        <div class="party-item">
+                            <div class="party-role">Respondent</div>
+                            <div class="party-name">${escapeHtml(respondent)}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    ` : ''}
+
+                    ${judges.length > 0 ? `
+                    <div class="case-timeline">
+                        <h4 class="timeline-header">
+                            <i class="fas fa-gavel"></i>
+                            Judicial Bench
+                        </h4>
+                        <div class="timeline-items">
+                            ${judges.map((judge, index) => `
+                                <div class="timeline-item">
+                                    <div class="timeline-dot completed"></div>
+                                    <div class="timeline-event">
+                                        <strong>Hon'ble ${escapeHtml(judge)}</strong>
+                                        <br><span style="font-size: 0.75rem; color: #64748b;">Presiding Judge ${index + 1}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${judgment ? `
+                    <div class="case-judgment">
+                        <h4 class="judgment-header">
+                            <i class="fas fa-balance-scale"></i>
+                            Judgment Summary
+                        </h4>
+                        <div class="judgment-text">
+                            ${truncateText(escapeHtml(judgment), 400)}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${citations.length > 0 ? `
+                    <div class="related-documents">
+                        <h4 class="documents-header">
+                            <i class="fas fa-book"></i>
+                            Citations (${citations.length})
+                        </h4>
+                        ${citations.slice(0, 5).map(citation => `
+                            <div class="document-item">
+                                <i class="fas fa-file-alt document-icon"></i>
+                                <div>
+                                    <div class="document-name">${escapeHtml(citation)}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                        ${citations.length > 5 ? `
+                            <div style="text-align: center; margin-top: 0.5rem; color: #64748b; font-size: 0.85rem;">
+                                + ${citations.length - 5} more citations
+                            </div>
+                        ` : ''}
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr || dateStr === 'Unknown Date') return dateStr;
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-IN', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            } catch {
+                return dateStr;
+            }
+        }
+
+        function truncateText(text, maxLength) {
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+
+        // Automatically show case analysis when sources are returned
+        function autoShowCaseAnalysis(sources) {
+            if (sources && sources.length > 0) {
+                // Show the first relevant case
+                showCaseAnalysis(sources[0]);
+            }
+        }
+
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
             clearFormErrors();
@@ -2666,6 +4634,18 @@
             localStorage.removeItem('authToken');
             localStorage.removeItem('currentUser');
             updateAuthUI();
+        }
+
+        function goToDashboard() {
+            // Check if user is logged in
+            if (!authToken || !currentUser) {
+                showNotification('⚠️ Please login first to access the dashboard', 'warning');
+                showLoginModal();
+                return;
+            }
+            
+            // Navigate to dashboard
+            window.location.href = '/dashboard';
         }
 
         function checkAuthStatus() {
@@ -3054,6 +5034,1015 @@
                 setLoading(false);
             }
         }
+
+        // ==== DARK MODE TOGGLE ====
+        function toggleTheme() {
+            console.log('Toggle theme clicked!');
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+                console.log('Switched to LIGHT mode');
+                
+                // Update settings toggle
+                if (darkModeToggle) {
+                    darkModeToggle.classList.remove('active');
+                }
+            } else {
+                body.classList.add('dark-mode');
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+                console.log('Switched to DARK mode');
+                
+                // Update settings toggle
+                if (darkModeToggle) {
+                    darkModeToggle.classList.add('active');
+                }
+            }
+            
+            // Force style recalculation
+            void body.offsetHeight;
+            console.log('Body classes:', body.className);
+        }
+
+        // ==== MULTI-LANGUAGE SUPPORT ====
+        let currentLanguage = 'en';
+
+        const translations = {
+            en: {
+                appTitle: 'LegalCounsel AI',
+                tagline: 'Professional Legal Information & Guidance System',
+                credentials: 'Advanced Legal AI Technology • Confidential & Secure',
+                inputPlaceholder: 'Describe your legal question or situation in detail...',
+                sendButton: 'Send'
+            },
+            hi: {
+                appTitle: 'कानूनी सलाहकार AI',
+                tagline: 'व्यावसायिक कानूनी सूचना और मार्गदर्शन प्रणाली',
+                credentials: 'उन्नत कानूनी AI तकनीक • गोपनीय और सुरक्षित',
+                inputPlaceholder: 'अपने कानूनी प्रश्न या स्थिति का विस्तार से वर्णन करें...',
+                sendButton: 'भेजें'
+            },
+            ta: {
+                appTitle: 'சட்ட ஆலோசகர் AI',
+                tagline: 'தொழில்முறை சட்ட தகவல் மற்றும் வழிகாட்டுதல் அமைப்பு',
+                credentials: 'மேம்பட்ட சட்ட AI தொழில்நுட்பம் • ரகசியம் மற்றும் பாதுகாப்பு',
+                inputPlaceholder: 'உங்கள் சட்ட கேள்வி அல்லது சூழ்நிலையை விரிவாக விவரிக்கவும்...',
+                sendButton: 'அனுப்பு'
+            },
+            te: {
+                appTitle: 'లీగల్ కౌన్సెలర్ AI',
+                tagline: 'వృత్తిపరమైన చట్టపరమైన సమాచారం మరియు మార్గదర్శక వ్యవస్థ',
+                credentials: 'అధునాతన చట్టపరమైన AI సాంకేతికత • గోప్యత మరియు భద్రత',
+                inputPlaceholder: 'మీ చట్టపరమైన ప్రశ్న లేదా పరిస్థితిని వివరంగా వివరించండి...',
+                sendButton: 'పంపించు'
+            },
+            bn: {
+                appTitle: 'আইনি পরামর্শদাতা AI',
+                tagline: 'পেশাদার আইনি তথ্য ও নির্দেশনা সিস্টেম',
+                credentials: 'উন্নত আইনি AI প্রযুক্তি • গোপনীয় এবং নিরাপদ',
+                inputPlaceholder: 'আপনার আইনি প্রশ্ন বা পরিস্থিতি বিস্তারিত বর্ণনা করুন...',
+                sendButton: 'পাঠান'
+            },
+            mr: {
+                appTitle: 'कायदेशीर सल्लागार AI',
+                tagline: 'व्यावसायिक कायदेशीर माहिती आणि मार्गदर्शन प्रणाली',
+                credentials: 'प्रगत कायदेशीर AI तंत्रज्ञान • गोपनीय आणि सुरक्षित',
+                inputPlaceholder: 'तुमचा कायदेशीर प्रश्न किंवा परिस्थिती तपशीलवार वर्णन करा...',
+                sendButton: 'पाठवा'
+            }
+        };
+
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('languageDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update all elements with data-translate attribute
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[lang] && translations[lang][key]) {
+                    if (element.tagName === 'TEXTAREA' || element.tagName === 'INPUT') {
+                        element.placeholder = translations[lang][key];
+                    } else if (element.hasAttribute('title')) {
+                        element.title = translations[lang][key];
+                    } else {
+                        element.innerHTML = translations[lang][key];
+                    }
+                }
+            });
+            
+            // Update current language display
+            const langNames = {
+                'en': '🌐 EN',
+                'hi': '🌐 हिं',
+                'ta': '🌐 த',
+                'te': '🌐 తె',
+                'bn': '🌐 বা',
+                'mr': '🌐 म'
+            };
+            document.getElementById('currentLang').textContent = langNames[lang];
+            
+            // Close dropdown
+            document.getElementById('languageDropdown').classList.remove('show');
+            
+            // Save to localStorage
+            localStorage.setItem('language', lang);
+            
+            // Store for voice input
+            window.currentChatLanguage = lang;
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('languageDropdown');
+            const selector = document.querySelector('.language-selector');
+            if (dropdown && selector && !selector.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // ==== VOICE INPUT ====
+        let recognition = null;
+        let isRecording = false;
+
+        // Initialize Web Speech API
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            recognition.onstart = function() {
+                isRecording = true;
+                const voiceBtn = document.getElementById('voiceBtn');
+                voiceBtn.classList.add('recording');
+                voiceBtn.title = 'Recording... Click to stop';
+            };
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('messageInput').value = transcript;
+            };
+            
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                let errorMsg = 'Voice input error';
+                switch(event.error) {
+                    case 'no-speech':
+                        errorMsg = 'No speech detected. Please try again.';
+                        break;
+                    case 'audio-capture':
+                        errorMsg = 'Microphone not found. Please check your device.';
+                        break;
+                    case 'not-allowed':
+                        errorMsg = 'Microphone permission denied. Please allow access.';
+                        break;
+                }
+                alert(errorMsg);
+                stopRecording();
+            };
+            
+            recognition.onend = function() {
+                stopRecording();
+            };
+        }
+
+        function toggleVoiceInput() {
+            if (!recognition) {
+                alert('Voice input is not supported in your browser. Please use Chrome, Edge, or Safari.');
+                return;
+            }
+            
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                // Set language based on current UI language
+                const langMap = {
+                    'en': 'en-US',
+                    'hi': 'hi-IN',
+                    'ta': 'ta-IN',
+                    'te': 'te-IN',
+                    'bn': 'bn-IN',
+                    'mr': 'mr-IN'
+                };
+                recognition.lang = langMap[currentLanguage] || 'en-US';
+                recognition.start();
+            }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            const voiceBtn = document.getElementById('voiceBtn');
+            if (voiceBtn) {
+                voiceBtn.classList.remove('recording');
+                voiceBtn.title = 'Voice Input';
+            }
+        }
+
+        // ==== SETTINGS PANEL ====
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('open');
+        }
+
+        function loadSettings() {
+            // Load dark mode toggle state
+            const darkMode = localStorage.getItem('theme') === 'dark';
+            updateToggle('darkModeToggle', darkMode);
+            
+            // Load other settings
+            const animations = localStorage.getItem('animations') !== 'false';
+            updateToggle('animationsToggle', animations);
+            
+            const shortcuts = localStorage.getItem('shortcuts') !== 'false';
+            updateToggle('shortcutsToggle', shortcuts);
+            
+            const voice = localStorage.getItem('voiceEnabled') !== 'false';
+            updateToggle('voiceToggle', voice);
+            
+            const sound = localStorage.getItem('soundEnabled') !== 'false';
+            updateToggle('soundToggle', sound);
+            
+            const contrast = localStorage.getItem('highContrast') === 'true';
+            updateToggle('contrastToggle', contrast);
+            if (contrast) document.body.classList.add('high-contrast');
+            
+            const motion = localStorage.getItem('reduceMotion') === 'true';
+            updateToggle('motionToggle', motion);
+            if (motion) document.body.classList.add('reduce-motion');
+            
+            const largeText = localStorage.getItem('largeText') === 'true';
+            updateToggle('largeTextToggle', largeText);
+            if (largeText) document.body.classList.add('large-text');
+            
+            const history = localStorage.getItem('saveHistory') !== 'false';
+            updateToggle('historyToggle', history);
+        }
+
+        function updateToggle(id, active) {
+            const toggle = document.getElementById(id);
+            if (toggle) {
+                if (active) {
+                    toggle.classList.add('active');
+                } else {
+                    toggle.classList.remove('active');
+                }
+            }
+        }
+
+        function toggleAnimations() {
+            const toggle = document.getElementById('animationsToggle');
+            const isActive = toggle.classList.toggle('active');
+            localStorage.setItem('animations', isActive);
+            
+            if (!isActive) {
+                document.body.classList.add('no-animations');
+            } else {
+                document.body.classList.remove('no-animations');
+            }
+        }
+
+        function toggleShortcuts() {
+            const toggle = document.getElementById('shortcutsToggle');
+            const isActive = toggle.classList.toggle('active');
+            localStorage.setItem('shortcuts', isActive);
+            
+            if (isActive) {
+                console.log('✅ Keyboard shortcuts enabled');
+            } else {
+                console.log('❌ Keyboard shortcuts disabled');
+            }
+        }
+
+        function toggleVoiceSetting() {
+            const toggle = document.getElementById('voiceToggle');
+            const isActive = toggle.classList.toggle('active');
+            localStorage.setItem('voiceEnabled', isActive);
+        }
+
+        function toggleSound() {
+            const toggle = document.getElementById('soundToggle');
+            const isActive = toggle.classList.toggle('active');
+            localStorage.setItem('soundEnabled', isActive);
+        }
+
+        function toggleContrast() {
+            const toggle = document.getElementById('contrastToggle');
+            const isActive = toggle.classList.toggle('active');
+            localStorage.setItem('highContrast', isActive);
+            document.body.classList.toggle('high-contrast');
+        }
+
+        function toggleMotion() {
+            const toggle = document.getElementById('motionToggle');
+            const isActive = toggle.classList.toggle('active');
+            localStorage.setItem('reduceMotion', isActive);
+            document.body.classList.toggle('reduce-motion');
+        }
+
+        function toggleLargeText() {
+            const toggle = document.getElementById('largeTextToggle');
+            const isActive = toggle.classList.toggle('active');
+            localStorage.setItem('largeText', isActive);
+            document.body.classList.toggle('large-text');
+        }
+
+        function toggleHistory() {
+            const toggle = document.getElementById('historyToggle');
+            const isActive = toggle.classList.toggle('active');
+            localStorage.setItem('saveHistory', isActive);
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all saved data? This includes chat history, settings, and preferences.')) {
+                localStorage.clear();
+                alert('All data cleared! The page will now reload.');
+                location.reload();
+            }
+        }
+
+        // ==== KEYBOARD SHORTCUTS ====
+        let shortcutsVisible = false;
+
+        document.addEventListener('keydown', (e) => {
+            // Check if shortcuts are enabled
+            const shortcutsEnabled = localStorage.getItem('shortcuts') !== 'false';
+            if (!shortcutsEnabled) return;
+            
+            // Ignore if typing in input/textarea
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                // Allow Ctrl+D, Ctrl+L, Ctrl+S, Ctrl+V, Ctrl+K even in inputs
+                if (!e.ctrlKey) return;
+            }
+            
+            // Ctrl+D - Toggle Dark Mode
+            if (e.ctrlKey && e.key === 'd') {
+                e.preventDefault();
+                toggleTheme();
+                showNotification('🌓 Dark Mode Toggled');
+            }
+            
+            // Ctrl+L - Language Selector
+            if (e.ctrlKey && e.key === 'l') {
+                e.preventDefault();
+                toggleLanguageDropdown();
+                showNotification('🌐 Language Selector');
+            }
+            
+            // Ctrl+V - Voice Input
+            if (e.ctrlKey && e.key === 'v') {
+                e.preventDefault();
+                const voiceEnabled = localStorage.getItem('voiceEnabled') !== 'false';
+                if (voiceEnabled) {
+                    toggleVoiceInput();
+                    showNotification('🎤 Voice Input');
+                }
+            }
+            
+            // Ctrl+S - Settings
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                toggleSettings();
+                showNotification('⚙️ Settings');
+            }
+            
+            // Ctrl+K - Show/Hide Keyboard Shortcuts
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                const shortcuts = document.getElementById('keyboardShortcuts');
+                shortcuts.classList.toggle('show');
+                shortcutsVisible = !shortcutsVisible;
+                
+                if (shortcutsVisible) {
+                    setTimeout(() => {
+                        shortcuts.classList.remove('show');
+                        shortcutsVisible = false;
+                    }, 5000);
+                }
+            }
+            
+            // Escape - Close modals/dropdowns/settings
+            if (e.key === 'Escape') {
+                document.getElementById('languageDropdown').classList.remove('show');
+                document.getElementById('settingsPanel').classList.remove('open');
+                document.getElementById('keyboardShortcuts').classList.remove('show');
+                shortcutsVisible = false;
+            }
+        });
+
+        function showNotification(message) {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(135deg, #0D9488 0%, #14b8a6 100%);
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 12px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                font-weight: 600;
+                animation: slideInRight 0.3s ease-out;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        // ==== DOCUMENT GENERATOR ====
+        let selectedTemplate = null;
+        let documentTemplates = {};
+
+        async function openDocumentGenerator() {
+            const modal = document.getElementById('docGenModal');
+            modal.classList.add('show');
+            
+            // Load templates if not already loaded
+            if (Object.keys(documentTemplates).length === 0) {
+                await loadDocumentTemplates();
+            }
+        }
+
+        function closeDocumentGenerator() {
+            document.getElementById('docGenModal').classList.remove('show');
+            resetDocumentGenerator();
+        }
+
+        async function loadDocumentTemplates() {
+            try {
+                const response = await fetch('/api/document/templates');
+                const data = await response.json();
+                
+                if (data.success) {
+                    documentTemplates = data.templates;
+                    displayTemplates();
+                }
+            } catch (error) {
+                console.error('Error loading templates:', error);
+                showNotification('❌ Error loading document templates');
+            }
+        }
+
+        function displayTemplates() {
+            const grid = document.getElementById('templateGrid');
+            grid.innerHTML = '';
+            
+            const icons = {
+                'rent_agreement': '🏠',
+                'affidavit': '📜',
+                'notice': '⚖️',
+                'power_of_attorney': '🖊️',
+                'sale_deed': '📝',
+                'employment_contract': '💼',
+                'nda': '🤐',
+                'loan_agreement': '💰'
+            };
+            
+            for (const [key, name] of Object.entries(documentTemplates)) {
+                const card = document.createElement('div');
+                card.className = 'template-card';
+                card.onclick = () => selectTemplate(key);
+                card.innerHTML = `
+                    <div class="template-icon">${icons[key] || '📄'}</div>
+                    <div class="template-name">${name}</div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        async function selectTemplate(templateKey) {
+            selectedTemplate = templateKey;
+            
+            // Highlight selected
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.template-card').classList.add('selected');
+            
+            // Load fields
+            await loadTemplateFields(templateKey);
+        }
+
+        async function loadTemplateFields(templateKey) {
+            try {
+                const response = await fetch(`/api/document/fields/${templateKey}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayForm(data.fields);
+                    document.getElementById('templateSelection').style.display = 'none';
+                    document.getElementById('docForm').classList.add('show');
+                }
+            } catch (error) {
+                console.error('Error loading fields:', error);
+                showNotification('❌ Error loading form');
+            }
+        }
+
+        function displayForm(fields) {
+            const form = document.getElementById('docFormFields');
+            form.innerHTML = '';
+            
+            for (const [field, type] of Object.entries(fields)) {
+                const group = document.createElement('div');
+                group.className = 'form-group';
+                
+                const label = document.createElement('label');
+                label.textContent = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                
+                let input;
+                if (type === 'textarea') {
+                    input = document.createElement('textarea');
+                } else {
+                    input = document.createElement('input');
+                    input.type = type;
+                }
+                input.name = field;
+                input.id = `field_${field}`;
+                
+                group.appendChild(label);
+                group.appendChild(input);
+                form.appendChild(group);
+            }
+        }
+
+        async function generateDocument() {
+            const form = document.getElementById('docFormFields');
+            const formData = {};
+            
+            // Collect form data
+            form.querySelectorAll('input, textarea').forEach(field => {
+                formData[field.name] = field.value;
+            });
+            
+            try {
+                const response = await fetch('/api/document/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        doc_type: selectedTemplate,
+                        data: formData
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayGeneratedDocument(data);
+                    showNotification('✅ Document generated successfully!');
+                } else {
+                    showNotification('❌ ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error generating document:', error);
+                showNotification('❌ Error generating document');
+            }
+        }
+
+        function displayGeneratedDocument(data) {
+            document.getElementById('docForm').classList.remove('show');
+            document.getElementById('generatedDoc').classList.add('show');
+            document.getElementById('docPreview').textContent = data.content;
+            
+            // Store for download
+            window.currentDocument = data;
+        }
+
+        function downloadDocument() {
+            if (!window.currentDocument) return;
+            
+            const blob = new Blob([window.currentDocument.content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${window.currentDocument.document_type}_${new Date().getTime()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('📥 Document downloaded!');
+        }
+
+        function copyDocument() {
+            const content = document.getElementById('docPreview').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                showNotification('📋 Document copied to clipboard!');
+            });
+        }
+
+        function backToTemplates() {
+            document.getElementById('docForm').classList.remove('show');
+            document.getElementById('generatedDoc').classList.remove('show');
+            document.getElementById('templateSelection').style.display = 'block';
+            selectedTemplate = null;
+        }
+
+        function resetDocumentGenerator() {
+            document.getElementById('docForm').classList.remove('show');
+            document.getElementById('generatedDoc').classList.remove('show');
+            document.getElementById('templateSelection').style.display = 'block';
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            selectedTemplate = null;
+        }
+
+        // ==== TEXT-TO-SPEECH ====
+        let speechSynthesis = window.speechSynthesis;
+        let currentUtterance = null;
+
+        function speakText(text, lang = 'en') {
+            // Stop any ongoing speech
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+            }
+            
+            const langMap = {
+                'en': 'en-US',
+                'hi': 'hi-IN',
+                'ta': 'ta-IN',
+                'te': 'te-IN',
+                'bn': 'bn-IN',
+                'mr': 'mr-IN'
+            };
+            
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            currentUtterance.lang = langMap[lang] || 'en-US';
+            currentUtterance.rate = 0.9;
+            currentUtterance.pitch = 1;
+            
+            speechSynthesis.speak(currentUtterance);
+        }
+
+        function addTTSButton(messageElement) {
+            // Check if TTS button already exists
+            if (messageElement.querySelector('.tts-btn')) return;
+            
+            const messageText = messageElement.querySelector('.message-text');
+            if (!messageText) return;
+            
+            const text = messageText.textContent;
+            const currentLang = currentLanguage || 'en';
+            
+            const ttsBtn = document.createElement('button');
+            ttsBtn.className = 'tts-btn';
+            ttsBtn.innerHTML = '🔊 Listen';
+            ttsBtn.onclick = function(e) {
+                e.stopPropagation();
+                
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                    ttsBtn.innerHTML = '🔊 Listen';
+                    ttsBtn.classList.remove('playing');
+                } else {
+                    speakText(text, currentLang);
+                    ttsBtn.innerHTML = '⏸️ Stop';
+                    ttsBtn.classList.add('playing');
+                    
+                    // Reset button when speech ends
+                    currentUtterance.onend = () => {
+                        ttsBtn.innerHTML = '🔊 Listen';
+                        ttsBtn.classList.remove('playing');
+                    };
+                }
+            };
+            
+            messageText.appendChild(ttsBtn);
+        }
+
+        // Add TTS to AI messages after they're displayed
+        const originalAddMessage = window.addMessage || function() {};
+        window.addMessage = function(message, isUser) {
+            originalAddMessage(message, isUser);
+            
+            // Add TTS button to AI responses after a short delay
+            if (!isUser) {
+                setTimeout(() => {
+                    const lastMessage = document.querySelector('.message:not(.user):last-of-type');
+                    if (lastMessage) {
+                        addTTSButton(lastMessage);
+                    }
+                }, 500);
+            }
+        };
+
+        // ==== PWA SERVICE WORKER REGISTRATION ====
+        let deferredPrompt;
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('/static/service-worker.js');
+                    console.log('✅ Service Worker registered:', registration.scope);
+
+                    // Listen for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'activated') {
+                                showNotification('✨ App updated! Refresh for new features', 'success');
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error('❌ Service Worker registration failed:', error);
+                }
+            });
+        }
+
+        // Listen for install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallPrompt();
+        });
+
+        // Show install prompt
+        function showInstallPrompt() {
+            const installBanner = document.createElement('div');
+            installBanner.id = 'installBanner';
+            installBanner.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                max-width: 300px;
+                animation: slideInUp 0.5s ease;
+            `;
+            
+            installBanner.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="font-size: 16px;">📱 Install LegalAI</strong>
+                    <button onclick="dismissInstallPrompt()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">×</button>
+                </div>
+                <p style="margin: 0; font-size: 14px; opacity: 0.9;">Get quick access and work offline!</p>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="installPWA()" style="flex: 1; padding: 10px; background: white; color: #667eea; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        Install Now
+                    </button>
+                    <button onclick="dismissInstallPrompt()" style="flex: 1; padding: 10px; background: rgba(255, 255, 255, 0.2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        Maybe Later
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(installBanner);
+        }
+
+        // Install PWA
+        async function installPWA() {
+            if (!deferredPrompt) return;
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('✅ PWA installed');
+                showNotification('✨ App installed successfully!', 'success');
+            }
+            
+            deferredPrompt = null;
+            dismissInstallPrompt();
+        }
+
+        // Dismiss install prompt
+        function dismissInstallPrompt() {
+            const banner = document.getElementById('installBanner');
+            if (banner) {
+                banner.style.animation = 'slideOutDown 0.5s ease';
+                setTimeout(() => banner.remove(), 500);
+            }
+        }
+
+        // Track successful installation
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA installed successfully');
+            showNotification('🎉 Welcome! You can now use the app offline.', 'success');
+        });
+
+        // Listen for messages from service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data.type === 'SYNC_COMPLETE') {
+                    showNotification(`✅ Synced ${event.data.count} offline messages`, 'success');
+                }
+            });
+        }
+
+        // Check online/offline status
+        window.addEventListener('online', () => {
+            showNotification('✅ Back online! Syncing data...', 'success');
+            // Trigger background sync if available
+            if ('serviceWorker' in navigator && 'sync' in registration) {
+                navigator.serviceWorker.ready.then(registration => {
+                    return registration.sync.register('sync-messages');
+                });
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            showNotification('⚠️ You are offline. Messages will sync when reconnected.', 'warning');
+        });
+
+        // ==== LOAD SAVED PREFERENCES ====
+        window.addEventListener('DOMContentLoaded', () => {
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeIcon').textContent = '☀️';
+            }
+            
+            // Load saved language
+            const savedLang = localStorage.getItem('language') || 'en';
+            changeLanguage(savedLang);
+            
+            // Load saved settings
+            loadSettings();
+            
+            // Show welcome message with shortcuts hint
+            setTimeout(() => {
+                showNotification('💡 Press Ctrl+K to see keyboard shortcuts');
+            }, 2000);
+        });
     </script>
+
+    <!-- Document Generator Modal -->
+    <div class="doc-gen-modal" id="docGenModal">
+        <div class="doc-gen-content">
+            <div class="doc-gen-header">
+                <h2>📄 Legal Document Generator</h2>
+                <button class="close-doc-gen" onclick="closeDocumentGenerator()">×</button>
+            </div>
+            <div class="doc-gen-body">
+                <!-- Template Selection -->
+                <div id="templateSelection">
+                    <h3 style="margin-bottom: 1rem; color: #475569;">Select Document Type:</h3>
+                    <div class="template-grid" id="templateGrid">
+                        <!-- Templates loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Document Form -->
+                <div class="doc-form" id="docForm">
+                    <h3 style="margin-bottom: 1rem; color: #475569;">Fill Document Details:</h3>
+                    <div id="docFormFields">
+                        <!-- Form fields loaded dynamically -->
+                    </div>
+                    <div class="doc-actions">
+                        <button class="btn-back" onclick="backToTemplates()">← Back</button>
+                        <button class="btn-generate" onclick="generateDocument()">📄 Generate Document</button>
+                    </div>
+                </div>
+
+                <!-- Generated Document -->
+                <div class="generated-doc" id="generatedDoc">
+                    <h3 style="margin-bottom: 1rem; color: #475569;">Your Generated Document:</h3>
+                    <div class="doc-preview" id="docPreview"></div>
+                    <div class="doc-download-actions">
+                        <button class="btn-copy" onclick="copyDocument()">📋 Copy to Clipboard</button>
+                        <button class="btn-download" onclick="downloadDocument()">📥 Download as TXT</button>
+                    </div>
+                    <div class="doc-actions" style="margin-top: 1rem;">
+                        <button class="btn-back" onclick="backToTemplates()">← Generate Another</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h2>⚙️ Settings</h2>
+            <button class="close-settings" onclick="toggleSettings()">×</button>
+        </div>
+        <div class="settings-content">
+            <div class="setting-group">
+                <h3>🎨 Appearance</h3>
+                <div class="setting-item">
+                    <span class="setting-label">Dark Mode</span>
+                    <div class="toggle-switch" id="darkModeToggle" onclick="toggleTheme()"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Smooth Animations</span>
+                    <div class="toggle-switch active" id="animationsToggle" onclick="toggleAnimations()"></div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>⌨️ Keyboard Shortcuts</h3>
+                <div class="setting-item">
+                    <span class="setting-label">Enable Shortcuts</span>
+                    <div class="toggle-switch active" id="shortcutsToggle" onclick="toggleShortcuts()"></div>
+                </div>
+                <div style="margin-top: 1rem; padding: 1rem; background: rgba(45, 212, 191, 0.1); border-radius: 8px;">
+                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.75rem;"><strong>Available Shortcuts:</strong></p>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem; color: #64748b;">
+                        <div><kbd style="background: #0D9488; color: white; padding: 0.2rem 0.4rem; border-radius: 4px;">Ctrl+D</kbd> - Toggle Dark Mode</div>
+                        <div><kbd style="background: #0D9488; color: white; padding: 0.2rem 0.4rem; border-radius: 4px;">Ctrl+L</kbd> - Language Selector</div>
+                        <div><kbd style="background: #0D9488; color: white; padding: 0.2rem 0.4rem; border-radius: 4px;">Ctrl+V</kbd> - Voice Input</div>
+                        <div><kbd style="background: #0D9488; color: white; padding: 0.2rem 0.4rem; border-radius: 4px;">Ctrl+S</kbd> - Settings</div>
+                        <div><kbd style="background: #0D9488; color: white; padding: 0.2rem 0.4rem; border-radius: 4px;">Ctrl+K</kbd> - Show Shortcuts</div>
+                        <div><kbd style="background: #0D9488; color: white; padding: 0.2rem 0.4rem; border-radius: 4px;">Enter</kbd> - Send Message</div>
+                        <div><kbd style="background: #0D9488; color: white; padding: 0.2rem 0.4rem; border-radius: 4px;">Esc</kbd> - Close Dialogs</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>🔊 Voice & Sound</h3>
+                <div class="setting-item">
+                    <span class="setting-label">Voice Input Enabled</span>
+                    <div class="toggle-switch active" id="voiceToggle" onclick="toggleVoiceSetting()"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Sound Effects</span>
+                    <div class="toggle-switch active" id="soundToggle" onclick="toggleSound()"></div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>♿ Accessibility</h3>
+                <div class="setting-item">
+                    <span class="setting-label">High Contrast Mode</span>
+                    <div class="toggle-switch" id="contrastToggle" onclick="toggleContrast()"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Reduce Motion</span>
+                    <div class="toggle-switch" id="motionToggle" onclick="toggleMotion()"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Larger Text</span>
+                    <div class="toggle-switch" id="largeTextToggle" onclick="toggleLargeText()"></div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>💾 Data</h3>
+                <div class="setting-item">
+                    <span class="setting-label">Save Chat History</span>
+                    <div class="toggle-switch active" id="historyToggle" onclick="toggleHistory()"></div>
+                </div>
+                <button style="width: 100%; padding: 0.75rem; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 0.5rem;" onclick="clearAllData()">
+                    🗑️ Clear All Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Indicator -->
+    <div class="keyboard-shortcuts" id="keyboardShortcuts">
+        <h4>⌨️ Keyboard Shortcuts</h4>
+        <div class="shortcut-item">
+            <span class="shortcut-label">Dark Mode</span>
+            <span class="shortcut-key">Ctrl+D</span>
+        </div>
+        <div class="shortcut-item">
+            <span class="shortcut-label">Language</span>
+            <span class="shortcut-key">Ctrl+L</span>
+        </div>
+        <div class="shortcut-item">
+            <span class="shortcut-label">Voice Input</span>
+            <span class="shortcut-key">Ctrl+V</span>
+        </div>
+        <div class="shortcut-item">
+            <span class="shortcut-label">Settings</span>
+            <span class="shortcut-key">Ctrl+S</span>
+        </div>
+        <div class="shortcut-item">
+            <span class="shortcut-label">Close</span>
+            <span class="shortcut-key">Esc</span>
+        </div>
+    </div>
+
+    <!-- Optional Authentication UI -->
+    <script src="/static/optional-auth-ui.js"></script>
+
 </body>
+```
 </html>

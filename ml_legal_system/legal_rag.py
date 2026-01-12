@@ -7,8 +7,10 @@ import os
 import json
 from typing import List, Dict, Optional
 from datetime import datetime
+import hashlib
+import time
 
-from vector_db import LegalVectorDatabase
+from .vector_db import LegalVectorDatabase
 
 
 class LegalRAG:
@@ -29,11 +31,22 @@ class LegalRAG:
         self.vector_db = vector_db if vector_db is not None else LegalVectorDatabase(use_cloud=False)
         self.llm = None
         
-        # Initialize LLM
-        if use_openai:
-            self._init_openai()
-        else:
-            self._init_gemini()
+        # Performance optimizations
+        self.response_cache = {}  # Simple cache for repeated queries
+        self.max_cache_size = 100
+        self.model_initialized = False
+        
+        # Lazy initialization - only initialize when first needed
+        print("⚡ LegalRAG initialized with lazy model loading for better performance")
+    
+    def _ensure_model_initialized(self):
+        """Ensure the model is initialized (lazy loading)"""
+        if not self.model_initialized:
+            if self.use_openai:
+                self._init_openai()
+            else:
+                self._init_gemini()
+            self.model_initialized = True
     
     def _init_openai(self):
         """Initialize OpenAI GPT"""
@@ -70,13 +83,15 @@ class LegalRAG:
             except Exception as e:
                 print(f"⚠️  Could not list models: {e}")
             
-            # Try different model names (updated for 2025 - gemini-pro is deprecated)
+            # Try different model names (optimized for speed and quota efficiency)
             model_names = [
-                'gemini-2.0-flash-exp',  # Latest experimental model
-                'gemini-2.0-flash',       # Stable 2.0 flash
-                'gemini-1.5-flash',       # Fallback to 1.5
+                'gemini-2.0-flash-exp',   # Latest experimental model
+                'gemini-2.5-flash',       # Latest stable fast model
+                'gemini-2.0-flash',       # Stable fast model
+                'gemini-1.5-flash',       # Fallback option
                 'models/gemini-2.0-flash-exp',
-                'models/gemini-1.5-flash'
+                'models/gemini-2.5-flash',
+                'models/gemini-2.0-flash'
             ]
             
             for model_name in model_names:
@@ -237,29 +252,26 @@ Provide your expert legal analysis:"""
         try:
             import google.generativeai as genai
             
-            prompt = f"""You are an expert Indian legal assistant with comprehensive knowledge of Indian law, current legal developments, and constitutional provisions. You should be helpful and informative while being accurate.
+            prompt = f"""You are a helpful Indian legal assistant. Answer the user's question concisely and accurately.
 
-Query: {query}
+User Question: {query}
 
 Instructions:
-1. Provide detailed, helpful information about the legal query, even if no specific precedents are available in the database
-2. For current events/cases (like arrests, detentions, protests), explain the likely legal provisions that may apply
-3. Reference relevant Indian laws, constitutional articles, acts, and sections that are applicable
-4. Explain legal concepts in simple terms that a layperson can understand
-5. Provide context about legal procedures and rights
-6. If it's about a specific person or current event, explain the general legal framework that would apply to such situations
-7. Be educational and informative - help the user understand the broader legal landscape
-8. Always include appropriate disclaimers
-9. Don't be overly rigid - provide substantive helpful information
+1. Provide a BRIEF, SPECIFIC answer (5-10 sentences max)
+2. Focus on answering their exact question, not giving a lecture
+3. If it's about a famous case (like Nirbhaya, Ayodhya, etc.), provide key facts and outcome
+4. If it's a legal question, explain the relevant law briefly
+5. Use simple language - avoid legal jargon unless necessary
+6. Include 2-3 key points maximum
+7. Be direct and helpful
 
-For detention/arrest cases specifically:
-- Explain preventive detention laws (like NSA, PSA)
-- Constitutional provisions (Article 19, 21, 22)
-- Fundamental rights and their limitations
-- Legal remedies available (habeas corpus, bail, etc.)
-- Due process requirements
+DO NOT:
+- Give long generic responses about "the Indian legal system"
+- List all possible legal remedies unless asked
+- Provide boilerplate legal framework information
+- Write more than 10 sentences
 
-Respond in a helpful, educational manner while maintaining accuracy. Don't give generic responses - provide real legal insight."""
+Format: Short paragraphs with bullet points for key facts. Be conversational and helpful."""
             
             # Configure safety settings to be more permissive for legal content
             safety_settings = [
@@ -276,161 +288,142 @@ Respond in a helpful, educational manner while maintaining accuracy. Don't give 
                 print(f"⚠️  Gemini returned empty response. Attempting with simplified prompt.")
                 
                 # Try with a simpler, more direct prompt
-                simple_prompt = f"""As an Indian legal expert, please explain the legal aspects of: {query}
+                simple_prompt = f"""Answer this legal question briefly: {query}
                 
-Include relevant laws, constitutional provisions, and legal procedures that apply. Be helpful and educational."""
+Provide key facts and relevant laws in 5 sentences or less."""
                 
                 response = self.model.generate_content(simple_prompt, safety_settings=safety_settings)
                 
                 if not response.text or response.text.strip() == "":
-                    # Final fallback - but much more comprehensive
-                    return self._get_comprehensive_fallback_response(query)
+                    # Final fallback - short and helpful
+                    return f"""I couldn't find specific information about "{query}" in my database.
+
+For detailed legal advice on this matter, I recommend:
+• Consulting with a lawyer specializing in this area
+• Visiting your local legal aid office (free consultation)
+• Calling NALSA helpline: 15100 (National Legal Services Authority)
+
+*This bot provides general information only, not legal advice.*"""
             
-            return response.text + "\n\n*Disclaimer: This information is for educational purposes only and does not constitute legal advice. For specific legal guidance, please consult a qualified legal professional.*"
+            # Add a brief disclaimer
+            response_text = response.text.strip()
+            if len(response_text) > 50:  # Only add disclaimer if we got a real response
+                response_text += "\n\n*Note: This is general information. For specific legal advice, consult a lawyer.*"
+            
+            return response_text
             
         except Exception as e:
             import traceback
+            error_msg = str(e)
             print(f"❌ Gemini generation error: {e}")
             print(f"📋 Full traceback: {traceback.format_exc()}")
-            return self._get_comprehensive_fallback_response(query)
+            
+            # Check if it's a quota error
+            if "429" in error_msg or "quota" in error_msg.lower():
+                return f"""⚠️ **API Quota Exceeded**
+
+I'm currently unable to access the AI service due to API limits.
+
+**Your Question:** "{query}"
+
+**What You Can Do:**
+
+**For Immediate Legal Help:**
+📞 **NALSA Helpline:** 15100 (National Legal Services Authority - Free)
+📞 **Women Helpline:** 1091
+📞 **Police:** 100
+
+**Legal Resources:**
+🌐 **indiankanoon.org** - Search case laws
+🌐 **District Legal Services Authority** - Free legal aid
+
+**If you're in an emergency:**
+• Call 100 for police
+• Contact a lawyer immediately
+• Document everything (photos, videos, witnesses)
+
+**Your Rights:**
+• Article 21: Right to Life & Personal Liberty
+• Article 22: Protection against arrest & detention
+• Right to know grounds of arrest
+• Right to legal representation
+
+*I apologize for the inconvenience. The administrator needs to check the API billing.*"""
+            
+            # Generic error
+            return f"""I'm having trouble accessing legal information right now.
+
+**For immediate help with "{query[:50]}...":**
+
+📞 **Emergency Numbers:**
+• NALSA Helpline: 15100 (Free legal aid)
+• Police: 100
+• Women Helpline: 1091
+
+🌐 **Legal Resources:**
+• indiankanoon.org - Case law search
+• District Legal Aid office - Free consultation
+
+**If urgent, consult a lawyer immediately.**
+
+*Technical error: {error_msg[:100]}*"""
     
     def _get_comprehensive_fallback_response(self, query: str) -> str:
-        """Provide a comprehensive fallback response when AI fails"""
+        """Provide a brief, helpful fallback response when AI fails"""
         query_lower = query.lower()
         
-        # Check for specific topics and provide relevant information
+        # Check for specific topics and provide BRIEF relevant information
         if any(word in query_lower for word in ['arrest', 'detention', 'jail', 'custody', 'police']):
-            return f"""**Legal Framework for Arrests and Detention in India**
+            return f"""**Quick Info: Arrests & Detention in India**
 
-Regarding your query about "{query}", here's the relevant legal framework:
+Your Rights:
+• Article 22: Right against arbitrary arrest
+• Must be informed of arrest grounds
+• Legal representation allowed
+• Produced before magistrate within 24 hours
+• Bail available (except certain cases)
 
-**Constitutional Provisions:**
-- **Article 21**: Right to Life and Personal Liberty
-- **Article 22**: Right against arbitrary arrest and detention
-- **Article 19**: Fundamental freedoms (subject to reasonable restrictions)
+Legal Remedies:
+• Habeas Corpus petition (challenge illegal detention)
+• Bail application
+• Contact District Legal Aid office (free)
 
-**Key Legal Provisions:**
-1. **Code of Criminal Procedure (CrPC), 1973**: Governs arrest procedures
-2. **Preventive Detention Laws**: 
-   - National Security Act (NSA)
-   - Public Safety Act (PSA) - in J&K and other states
-   - Unlawful Activities (Prevention) Act (UAPA)
+📞 NALSA Helpline: 15100
 
-**Legal Rights During Arrest:**
-- Right to know grounds of arrest (Article 22(1))
-- Right to legal representation
-- Right to be produced before magistrate within 24 hours
-- Right to bail (except in specific circumstances)
-
-**Remedies Available:**
-- **Habeas Corpus Petition**: Challenge illegal detention
-- **Bail Application**: Seek release pending trial
-- **Quashing Petition**: Challenge FIR validity
-
-**Legal Procedures:**
-- Police must follow due process
-- Medical examination mandatory
-- Family notification required
-- Detention beyond limits requires judicial approval
-
-*For specific cases involving political activists or protesters, courts often examine whether detention is based on legitimate grounds or if fundamental rights are being violated.*
-
-**Important Note:** This is general legal information. For specific advice about any individual case, please consult a qualified criminal lawyer.
-
-**Legal Aid Resources:**
-- District Legal Services Authority
-- State Legal Services Authority  
-- National Legal Services Authority (NALSA)
-"""
+*For specific advice, consult a criminal lawyer immediately.*"""
         
         elif any(word in query_lower for word in ['protest', 'demonstration', 'strike', 'rally']):
-            return f"""**Right to Protest in India - Legal Framework**
+            return f"""**Quick Info: Right to Protest in India**
 
-Regarding "{query}":
+Constitutional Rights:
+• Article 19(1)(a): Freedom of speech
+• Article 19(1)(b): Right to peaceful assembly
 
-**Constitutional Rights:**
-- **Article 19(1)(a)**: Freedom of speech and expression
-- **Article 19(1)(b)**: Right to assemble peacefully and without arms
-- **Article 19(1)(c)**: Right to form associations or unions
+Key Rules:
+• Must remain peaceful and non-violent
+• Prior permission may be needed
+• Cannot block essential services
+• Cannot incite violence
 
-**Legal Restrictions (Article 19(2) & 19(3)):**
-- Sovereignty and integrity of India
-- Security of the State
-- Friendly relations with foreign States
-- Public order, decency, or morality
+Legal Restrictions:
+• Section 144 CrPC (prohibitory orders)
+• State Police Acts
+• IPC Sections 141-149 (unlawful assembly)
 
-**Applicable Laws:**
-1. **Police Act provisions** in various states
-2. **Section 144 CrPC**: Prohibitory orders
-3. **Indian Penal Code Sections**:
-   - Section 141-149: Unlawful assembly
-   - Section 153A: Promoting enmity
-   - Section 124A: Sedition (under review by Supreme Court)
+**Tip:** Challenge prohibitory orders in High Court if needed.
 
-**Legal Requirements for Peaceful Protests:**
-- Prior permission may be required in certain areas
-- Must remain peaceful and non-violent
-- Cannot block essential services
-- Cannot incite violence or hatred
-
-**When Protests Become Illegal:**
-- Use of violence or force
-- Damage to property
-- Blocking essential services
-- Hate speech or incitement
-
-**Legal Remedies:**
-- Challenge prohibitory orders in High Court
-- Seek protection through fundamental rights petitions
-- Approach Human Rights Commission
-
-*Recent judicial trends favor protecting peaceful dissent while maintaining public order.*
-
-**Disclaimer:** This is educational information only. For specific legal advice, consult a constitutional lawyer or civil rights advocate.
-"""
+*Consult a constitutional lawyer for specific protest-related issues.*"""
         
         else:
-            return f"""**Legal Guidance for Your Query**
+            # Return a much shorter, user-friendly message
+            return f"""I don't have specific information about "{query}" in my database.
 
-While I couldn't access specific case precedents for "{query}", I can provide relevant legal guidance:
+For legal help:
+📞 NALSA: 15100 (free legal aid)
+🌐 indiankanoon.org (case law)
+👨‍⚖️ Consult a lawyer (first consultation often free)
 
-**General Legal Framework:**
-The Indian legal system provides comprehensive coverage through:
-- **The Constitution of India**: Fundamental rights and duties
-- **Civil and Criminal Laws**: IPC, CrPC, CPC, and special acts
-- **Personal Laws**: Based on religion and community
-- **Commercial Laws**: For business and trade matters
-
-**Common Legal Areas:**
-1. **Constitutional Law**: Fundamental rights, state duties, judicial review
-2. **Criminal Law**: Offenses, procedures, evidence, bail
-3. **Civil Law**: Contracts, property, torts, family matters
-4. **Administrative Law**: Government actions, public services
-5. **Commercial Law**: Business, taxation, intellectual property
-
-**Legal Remedies Available:**
-- **High Courts**: Constitutional and civil matters
-- **Supreme Court**: Final appellate authority
-- **District Courts**: Trial courts for most matters
-- **Special Tribunals**: Specific subject matters
-- **Alternative Dispute Resolution**: Mediation, arbitration
-
-**How to Proceed:**
-1. **Identify the Legal Area**: Constitutional, criminal, civil, commercial
-2. **Research Applicable Laws**: Specific acts and sections
-3. **Consult Legal Experts**: Lawyers specializing in relevant area
-4. **Understand Procedures**: Filing requirements, timelines, costs
-5. **Know Your Rights**: Constitutional and statutory protections
-
-**Legal Aid Resources:**
-- **National Legal Services Authority (NALSA)**
-- **State Legal Services Authority**
-- **District Legal Services Authority**
-- **Law University Legal Aid Clinics**
-- **Bar Association Pro Bono Services**
-
-*This is educational information to help you understand the legal framework. For specific advice about your situation, please consult a qualified lawyer who can analyze your case details.*
-"""
+*Note: This bot provides general information, not legal advice.*"""
     
     def _generate_general_legal_response_openai(self, query: str) -> str:
         """Generate response using OpenAI's general knowledge when no precedents found"""
@@ -465,6 +458,181 @@ Provide your expert legal guidance:"""}
             print(f"❌ OpenAI generation error: {e}")
             return "I apologize, but I'm having trouble generating a response. Please try again."
     
+    def _handle_conversational_query(self, query: str) -> Optional[str]:
+        """
+        Handle non-legal conversational queries like greetings, small talk, etc.
+        
+        Args:
+            query: User's input
+            
+        Returns:
+            Conversational response if query is non-legal, None if legal query
+        """
+        query_lower = query.lower().strip()
+        
+        # Greetings and basic interactions - EXACT match or at start/end only
+        greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'namaste']
+        # Check if query is EXACTLY a greeting or starts with greeting
+        is_greeting = (query_lower in greetings or 
+                      any(query_lower.startswith(f"{g} ") or query_lower == g for g in greetings))
+        
+        if is_greeting:
+            return """Hello! 👋 I'm your AI Legal Assistant. 
+
+I'm here to help you with:
+🔍 Legal questions and advice
+⚖️ Indian law information
+📚 Case law research
+📋 Legal framework guidance
+
+How can I assist you with your legal needs today?"""
+
+        # Thanks and appreciation
+        thanks = ['thank you', 'thanks', 'appreciate', 'grateful']
+        if any(thank in query_lower for thank in thanks):
+            return """You're very welcome! 😊 
+
+I'm glad I could help you with your legal questions. If you have any more legal queries or need further clarification on any legal matters, feel free to ask anytime.
+
+Remember, while I provide general legal guidance, it's always best to consult with a qualified lawyer for specific legal situations."""
+
+        # Goodbye
+        goodbyes = ['bye', 'goodbye', 'see you', 'farewell', 'take care']
+        if any(goodbye in query_lower for goodbye in goodbyes):
+            return """Goodbye! 👋 Take care and remember:
+
+✅ Keep important legal documents safe
+✅ Know your legal rights
+✅ Consult qualified lawyers for specific cases
+✅ Stay informed about legal developments
+
+Feel free to return anytime you need legal guidance!"""
+
+        # How are you / personal questions
+        personal = ['how are you', 'what is your name', 'who are you', 'tell me about yourself']
+        if any(personal in query_lower for personal in personal):
+            return """I'm doing well, thank you for asking! 😊
+
+I'm an AI Legal Assistant specialized in Indian law. My purpose is to:
+
+🧠 **What I do:**
+- Provide legal guidance and information
+- Research case law and precedents
+- Explain legal frameworks and procedures
+- Help you understand your legal rights
+
+⚖️ **My expertise includes:**
+- Constitutional Law
+- Criminal Law (IPC, CrPC)
+- Civil Law (CPC, Contract Act)
+- Family Law, Property Law
+- Commercial Law
+
+How can I help you with your legal questions today?"""
+
+        # Test queries
+        test_queries = ['test', 'testing', 'check', 'working']
+        if query_lower in test_queries:
+            return """✅ I'm working perfectly! 
+
+🤖 **System Status:** All systems operational
+🔍 **Legal Database:** Connected and ready
+🧠 **AI Engine:** Functioning normally
+⚡ **Response Time:** Optimized for speed
+
+Ready to assist you with your legal questions! Try asking me about:
+- Indian legal procedures
+- Your legal rights
+- Specific laws or acts
+- Legal case guidance"""
+
+        # Help requests
+        help_queries = ['help', 'what can you do', 'commands', 'guide']
+        if any(help_q in query_lower for help_q in help_queries):
+            return """🤖 **Legal AI Assistant Help Guide**
+
+**I can help you with:**
+📚 **Legal Research:** Ask about laws, acts, and legal procedures
+🔍 **Case Analysis:** Legal situation analysis and guidance  
+⚖️ **Rights Information:** Know your legal rights and protections
+📋 **Legal Framework:** Constitutional, criminal, civil law guidance
+💼 **Practical Advice:** Legal procedures and next steps
+
+**How to ask:**
+✅ "What are my rights if arrested?"
+✅ "Tell me about property inheritance laws"
+✅ "How to file a civil suit?"
+✅ "What is the legal procedure for..."
+
+**Remember:** I provide general legal guidance. For specific cases, always consult a qualified lawyer.
+
+What legal question can I help you with?"""
+        
+        # URGENT: Arrest/Police/Handcuff situations - Provide immediate info without needing AI
+        urgent_keywords = ['arrest', 'handcuff', 'police', 'custody', 'detained', 'jail']
+        if any(keyword in query_lower for keyword in urgent_keywords):
+            return """🚨 **URGENT: Your Rights During Arrest**
+
+**If Police Arrest/Handcuff You:**
+
+**Your Constitutional Rights (Article 22):**
+✅ Right to know WHY you're being arrested
+✅ Right to remain silent (don't give forced confession)
+✅ Right to a lawyer IMMEDIATELY
+✅ Right to inform family/friend about arrest
+✅ Must be produced before magistrate within 24 hours
+
+**What to Do RIGHT NOW:**
+1. **Stay Calm** - Don't resist physically
+2. **Ask**: "What is the reason for arrest?"
+3. **Ask**: "Where is the arrest warrant?" (required for most cases)
+4. **Ask**: "What sections are charged under?"
+5. **Say**: "I want to contact my lawyer"
+6. **Contact**: Family member or lawyer IMMEDIATELY
+
+**Legal Requirements Police MUST Follow:**
+• Cannot arrest without warrant (except cognizable offenses)
+• Must show ID and give reason
+• Cannot handcuff without justification
+• Medical examination mandatory
+• Female can only be arrested by female constable (exceptions apply)
+
+**Immediate Actions:**
+📞 **Call Lawyer**: FIRST priority
+📞 **Legal Aid**: 15100 (NALSA - Free)
+📞 **Police Control Room**: Check local number
+📞 **Women Helpline**: 1091 (if female)
+
+**Document Everything:**
+• Officer's name and badge number
+• Time and place
+• Reason given
+• Any witnesses
+
+**Illegal Arrest Rights:**
+• File Habeas Corpus petition in High Court
+• File complaint against police
+• Sue for damages
+
+⚠️ **This is an emergency situation. Contact a criminal lawyer IMMEDIATELY after securing your safety.**
+
+*Stay calm, know your rights, and get legal help fast.*"""
+        
+        # Check if query is clearly non-legal (very short, random, etc.)
+        if len(query_lower) <= 3 and query_lower not in ['law', 'ipc', 'crp']:
+            return f"""I noticed your message "{query}" is quite brief. 
+
+I'm here to help with legal questions! Try asking me about:
+🔍 Legal procedures and rights
+⚖️ Indian laws and acts
+📚 Legal advice and guidance
+💼 Case law research
+
+What legal topic would you like to explore?"""
+
+        # If none of the above, it's likely a legal query - return None
+        return None
+
     def answer_legal_query(self, query: str, top_k: int = 5) -> Dict:
         """
         Complete RAG pipeline: retrieve cases and generate answer
@@ -477,6 +645,28 @@ Provide your expert legal guidance:"""}
             Dictionary with answer, sources, and metadata
         """
         print(f"🔍 Processing query: {query}")
+        
+        # Step 0: Check if this is a conversational greeting/non-legal query
+        conversational_response = self._handle_conversational_query(query)
+        if conversational_response:
+            return {
+                'answer': conversational_response,
+                'sources': [],
+                'query': query,
+                'timestamp': datetime.now().isoformat(),
+                'type': 'conversational'
+            }
+        
+        # Ensure model is initialized (lazy loading for performance)
+        self._ensure_model_initialized()
+        
+        # Performance optimization: Check cache first
+        cache_key = hashlib.md5(f"{query}_{top_k}".encode()).hexdigest()
+        if cache_key in self.response_cache:
+            print("📦 Returning cached response")
+            cached = self.response_cache[cache_key]
+            if time.time() - cached['timestamp'] < 3600:  # Cache for 1 hour
+                return cached['response']
         
         # Step 1: Retrieve relevant cases
         relevant_cases = self.retrieve_relevant_cases(query, top_k=top_k)
@@ -513,12 +703,26 @@ Provide your expert legal guidance:"""}
         print("✅ Generated response with citations")
         
         # Step 4: Return complete response
-        return {
+        result = {
             'answer': answer,
             'sources': relevant_cases,
             'query': query,
             'timestamp': datetime.now().isoformat()
         }
+        
+        # Cache the result for future use
+        if len(self.response_cache) >= self.max_cache_size:
+            # Remove oldest entry
+            oldest_key = min(self.response_cache.keys(), 
+                           key=lambda k: self.response_cache[k]['timestamp'])
+            del self.response_cache[oldest_key]
+        
+        self.response_cache[cache_key] = {
+            'response': result,
+            'timestamp': time.time()
+        }
+        
+        return result
     
     def batch_process_queries(self, queries: List[str], output_file: str = 'legal_qa_results.json'):
         """

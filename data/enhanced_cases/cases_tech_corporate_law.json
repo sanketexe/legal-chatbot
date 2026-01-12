@@ -1,0 +1,235 @@
+[
+  {
+    "id": "tech_corp_001",
+    "case_name": "Startup Equity and ESOP Disputes",
+    "category": "Corporate Law - Tech Sector",
+    "subcategory": "Stock Options & Equity",
+    "scenario": "An early-stage employee of a tech startup was promised 2% equity through ESOP but upon funding round, the equity was diluted to 0.5% without proper notification. The employee challenged this dilution.",
+    "facts": "The employee joined a pre-seed startup as employee #5. Verbal promise of 2% equity was made. ESOP grant letter stated 2% but did not mention anti-dilution provisions. After Series A funding, effective stake reduced to 0.5%.",
+    "legal_issues": [
+      "ESOP terms and dilution clauses",
+      "Employee stock option plan enforceability",
+      "Fiduciary duties of directors towards option holders",
+      "Rights of ESOP holders during funding rounds",
+      "Doctrine of promissory estoppel"
+    ],
+    "applicable_laws": [
+      "Companies Act, 2013 - Section 62 (ESOP regulations)",
+      "SEBI (Share Based Employee Benefits) Regulations, 2014",
+      "Indian Contract Act, 1872 - Section 115 (Promissory estoppel)",
+      "Companies Act, 2013 - Section 166 (Director's duties)"
+    ],
+    "judgment": "The court held partially in favor of the employee. While dilution is normal in funding rounds, the company failed to: 1) Clearly communicate dilution provisions, 2) Provide anti-dilution protection as industry standard, 3) Act in good faith towards option holders. The court ordered the company to either: a) Provide additional options to restore effective ownership to 1.5%, or b) Allow employee to sell back options at fair market value with 50% premium.",
+    "key_principles": [
+      "ESOP grant letters must clearly state dilution and vesting terms",
+      "Anti-dilution provisions for early employees are industry standard",
+      "Directors have fiduciary duty of good faith towards ESOP holders",
+      "Verbal promises backed by partial documentation can be enforced",
+      "Company must act fairly and transparently with employee stakeholders",
+      "SEBI regulations mandate proper ESOP disclosures"
+    ],
+    "precedents": [
+      "Needle Industries (India) Ltd. v. Needle Industries Newey (India) Holding Ltd. (1981)",
+      "Securities and Exchange Board of India v. Shri Kanaiyalal Baldevbhai Patel (2017)",
+      "Gherulal Parakh v. Mahadeodas Maiya (1959) - Promissory Estoppel"
+    ],
+    "practical_advice": [
+      "Always get ESOP terms in writing, never rely on verbal promises",
+      "Understand vesting schedule (typically 4 years with 1-year cliff)",
+      "Check for anti-dilution provisions in ESOP agreement",
+      "Understand difference between percentage ownership vs. number of shares",
+      "Ask about company's valuation cap and expected dilution",
+      "Review ESOP grant letter with lawyer before accepting",
+      "Maintain all written communications about equity promises",
+      "Understand tax implications of ESOPs in India"
+    ],
+    "importance_score": 94
+  },
+  {
+    "id": "tech_corp_002",
+    "case_name": "Founder-Employee Dispute on Vesting Acceleration",
+    "category": "Corporate Law - Tech Sector",
+    "subcategory": "Founder Agreements & Vesting",
+    "scenario": "A co-founder CTO was forced to resign by other founders due to personal conflicts. Upon resignation, the company refused to accelerate vesting of unvested shares, resulting in forfeiture of 60% of promised equity.",
+    "facts": "The CTO co-founded the company with 25% equity subject to 4-year vesting with 1-year cliff. After 18 months, due to disagreements, other founders created hostile work environment forcing resignation. Founders' agreement had no acceleration clause for termination without cause.",
+    "legal_issues": [
+      "Constructive dismissal and forced resignation",
+      "Vesting acceleration in case of wrongful termination",
+      "Oppression and mismanagement under Companies Act",
+      "Breach of founder's agreement",
+      "Fiduciary duties among co-founders"
+    ],
+    "applicable_laws": [
+      "Companies Act, 2013 - Section 241-242 (Oppression & Mismanagement)",
+      "Companies Act, 2013 - Section 166 (Director's duties)",
+      "Indian Contract Act, 1872 - Breach of contract",
+      "Specific Relief Act, 1963 - Section 14 (Specific performance)"
+    ],
+    "judgment": "The court ruled in favor of the CTO, holding that: 1) The resignation was constructive dismissal due to hostile environment, 2) Founders breached their fiduciary duties, 3) Forfeiture of equity in such circumstances amounts to oppression. The court ordered: a) Full acceleration of vesting for all unvested shares, b) Company to purchase shares at fair market value if CTO wishes to exit, c) Damages for mental harassment and loss of reputation.",
+    "key_principles": [
+      "Constructive dismissal triggers same protections as wrongful termination",
+      "Co-founders owe fiduciary duties to each other",
+      "Oppression and mismanagement provisions protect minority shareholders",
+      "Vesting acceleration may be ordered in cases of bad faith termination",
+      "Founders' agreements must have clear dispute resolution mechanisms",
+      "Courts can order fair value buyout in founder disputes"
+    ],
+    "precedents": [
+      "Shanti Prasad Jain v. Kalinga Tubes Ltd. (1965) - Oppression",
+      "Cyrus Investments Pvt. Ltd. v. Tata Sons Ltd. (2020) - Shareholder rights",
+      "Vodafone International Holdings v. Union of India (2012) - Shareholder agreements"
+    ],
+    "practical_advice": [
+      "Always have a detailed founders' agreement with vesting terms",
+      "Include acceleration clauses for termination without cause",
+      "Define 'good leaver' and 'bad leaver' scenarios clearly",
+      "Single trigger vs. double trigger acceleration - understand the difference",
+      "Document all founder decisions and disagreements",
+      "Consider having independent board members for founder disputes",
+      "Reverse vesting protects all founders equally",
+      "Include mediation/arbitration clauses in founders' agreement"
+    ],
+    "importance_score": 91
+  },
+  {
+    "id": "tech_corp_003",
+    "case_name": "Tech Company - Employee Moonlighting and Conflict of Interest",
+    "category": "Corporate Law - Tech Sector",
+    "subcategory": "Conflict of Interest & Loyalty",
+    "scenario": "A senior engineer was discovered working for two tech companies simultaneously, dedicating full-time hours to both. The primary employer filed suit for breach of contract and recovery of paid wages.",
+    "facts": "The engineer worked 9 AM to 6 PM for Company A and 7 PM to 2 AM for Company B (both remote positions). Both companies believed they had an exclusive full-time employee. Neither employment contract explicitly prohibited dual employment but had clauses requiring 'full dedication and loyalty'.",
+    "legal_issues": [
+      "Dual employment and moonlighting in IT sector",
+      "Implied duty of loyalty and good faith",
+      "Conflict of interest in competing companies",
+      "Unjust enrichment and restitution",
+      "Fraud in employment relationship"
+    ],
+    "applicable_laws": [
+      "Indian Contract Act, 1872 - Section 17 (Fraud), 72 (Unjust enrichment)",
+      "Shops and Establishments Act - Multiple employment restrictions",
+      "Companies Act, 2013 - Director's duties (by analogy)",
+      "Specific Relief Act, 1963 - Injunction"
+    ],
+    "judgment": "The court held in favor of the primary employer. Key findings: 1) Dual full-time employment amounts to fraud by misrepresentation, 2) Even without explicit prohibition, implied duty of loyalty was breached, 3) Working for competitor creates inherent conflict of interest, 4) Employee must return 50% of wages received as unjust enrichment. The court granted: a) Permanent injunction against working for competitor, b) Recovery of wages for period of dual employment, c) Damages for breach of loyalty.",
+    "key_principles": [
+      "Employees have implied duty of loyalty towards employer",
+      "Dual full-time employment amounts to fraud and breach of contract",
+      "Moonlighting without disclosure is breach of good faith",
+      "Working for direct competitor creates conflict of interest",
+      "Unjust enrichment doctrine applies to wages earned through breach",
+      "Remote work doesn't change fundamental employment duties"
+    ],
+    "precedents": [
+      "Percept D'Mark (India) Pvt. Ltd. v. Zaheer Khan (2006) - Duty of loyalty",
+      "Niranjan Shankar Golikari v. Century Spinning (1967) - Employee obligations",
+      "Raman Tech. & Process Engg. Co. v. Solanki Traders (2008) - Good faith"
+    ],
+    "practical_advice": [
+      "Always disclose any dual employment or side work to primary employer",
+      "Check employment contract for moonlighting clauses",
+      "Remote work doesn't make dual employment acceptable",
+      "Working for competitors creates significant legal risks",
+      "Freelancing or consulting may be acceptable with disclosure",
+      "Some companies now allow moonlighting with restrictions - check policy",
+      "Maintain clear separation of work if moonlighting is permitted",
+      "Consider legal advice before taking on secondary employment"
+    ],
+    "importance_score": 87
+  },
+  {
+    "id": "tech_corp_004",
+    "case_name": "Startup Acquisition - Employee Rights and Retention",
+    "category": "Corporate Law - Tech Sector",
+    "subcategory": "Mergers & Acquisitions",
+    "scenario": "A tech startup was acquired by a larger company. Employees were promised retention bonuses and continued employment for 2 years. Six months post-acquisition, several employees were terminated without cause and denied retention bonuses.",
+    "facts": "During acquisition, employees signed new contracts with 2-year retention clauses and significant retention bonuses payable on completion. Acquiring company restructured 6 months later, laying off 40% of acquired company's staff. Terminated employees sought retention bonuses and damages.",
+    "legal_issues": [
+      "Employee rights in company acquisition/merger",
+      "Enforceability of retention agreements",
+      "Change of control provisions",
+      "Constructive dismissal in post-acquisition integration",
+      "Transfer of undertakings and employment protection"
+    ],
+    "applicable_laws": [
+      "Companies Act, 2013 - Section 230-232 (Merger & Amalgamation)",
+      "Industrial Disputes Act, 1947 - Section 25N (Transfer of undertaking)",
+      "Indian Contract Act, 1872 - Breach of retention agreement",
+      "Payment of Gratuity Act, 1972"
+    ],
+    "judgment": "The court ruled in favor of the employees, holding that: 1) Retention agreements are enforceable contracts, 2) Termination within retention period without cause triggers full bonus payment, 3) The restructuring was designed to avoid retention obligations, amounting to fraud, 4) Employees entitled to full retention bonus plus severance. The court ordered: a) Payment of full retention bonuses to all terminated employees, b) Severance pay of 3 months salary, c) Accelerated vesting of all unvested stock options.",
+    "key_principles": [
+      "Retention agreements are binding contractual obligations",
+      "Early termination within retention period triggers full payment",
+      "Change of control cannot be used to avoid employee obligations",
+      "Transfer of undertaking protects employee rights",
+      "Employees are not mere assets in M&A transactions",
+      "Constructive dismissal principles apply in post-acquisition changes"
+    ],
+    "precedents": [
+      "Air India Statutory Corporation v. United Labour Union (1997)",
+      "Buckingham and Carnatic Co. Ltd. v. Workers of the Company (1952)",
+      "Hamdard Dawakhana v. Union of India (2019) - Business transfer"
+    ],
+    "practical_advice": [
+      "Understand your rights in company acquisitions",
+      "Review and negotiate retention agreements carefully",
+      "Retention bonuses should have clear payment triggers",
+      "Document all promises made during acquisition process",
+      "Change of control clauses protect employee interests",
+      "Understand difference between stock deal and asset deal",
+      "Consult with lawyer before signing acquisition-related documents",
+      "Join employee groups to collectively negotiate better terms",
+      "Track vesting schedules during M&A transitions"
+    ],
+    "importance_score": 89
+  },
+  {
+    "id": "tech_corp_005",
+    "case_name": "Software Licensing and Open Source Compliance",
+    "category": "Corporate Law - Tech Sector",
+    "subcategory": "Licensing & Compliance",
+    "scenario": "A software company was sued for violating GPL license by incorporating open-source code into their proprietary product without releasing source code.",
+    "facts": "The company used several open-source libraries with GPL v3 license in their commercial product. The product was sold as proprietary software without source code disclosure. Open-source community discovered the violation and initiated legal action.",
+    "legal_issues": [
+      "Open source license compliance and violations",
+      "GPL copyleft provisions enforcement",
+      "Commercial use of open source software",
+      "Software copyright infringement",
+      "Derivative works and linking issues"
+    ],
+    "applicable_laws": [
+      "Copyright Act, 1957 - Software copyright protection",
+      "Information Technology Act, 2000",
+      "Indian Contract Act, 1872 - License as contract",
+      "GPL v3 License Terms (Contractual obligation)"
+    ],
+    "judgment": "The court ruled in favor of the open-source copyright holders. Key findings: 1) GPL license is a valid and enforceable contract, 2) Use of GPL-licensed code in proprietary software without disclosure is copyright infringement, 3) Violation of copyleft provision requires disclosure of entire derivative work, 4) Company's claim of 'accidental inclusion' rejected due to negligence. The court ordered: a) Immediate release of full source code under GPL v3, b) Monetary damages for past violations, c) Permanent injunction against further violations.",
+    "key_principles": [
+      "Open source licenses are legally enforceable contracts",
+      "GPL copyleft requires release of derivative works under GPL",
+      "Linking and incorporating GPL code creates derivative work",
+      "Ignorance of license terms is not a valid defense",
+      "Companies must have open source compliance policies",
+      "Violation can result in forced open-sourcing of entire product"
+    ],
+    "precedents": [
+      "Burlington Home Shopping Pvt. Ltd. v. Rajnish Chibber (1995) - Software copyright",
+      "Microsoft Corporation v. Yogesh Popat (2005) - License enforcement",
+      "Telemecanique & Controls (I) Pvt. Ltd. v. Schneider Electric Industries (2007)"
+    ],
+    "practical_advice": [
+      "Implement strict open source compliance policies",
+      "Maintain software bill of materials (SBOM) for all dependencies",
+      "Understand different open source licenses: GPL, MIT, Apache, BSD",
+      "GPL is copyleft - requires source disclosure for derivatives",
+      "Permissive licenses (MIT, Apache) allow proprietary use",
+      "Use license scanning tools to detect GPL code",
+      "Train developers on license compliance",
+      "Consider LGPL or linking exceptions for libraries",
+      "Document all third-party software and licenses",
+      "Consult IP lawyer for complex licensing scenarios"
+    ],
+    "importance_score": 93
+  }
+]

@@ -6,10 +6,11 @@ Analyzes uploaded legal documents (wills, agreements, contracts) without storing
 import os
 import sys
 import io
-from typing import Dict, List, Optional
+import re
+from typing import Dict, List, Optional, Tuple
 import PyPDF2
 import docx
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Add ml_legal_system to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'ml_legal_system'))
@@ -223,7 +224,259 @@ class DocumentAnalyzer:
         
         return info
     
-    def analyze_document(self, filename: str, file_content: bytes, 
+    def extract_contract_clauses(self, text: str, doc_type: str) -> Dict:
+        """
+        Extract and analyze key contract clauses from legal documents
+        
+        Returns:
+            Dictionary with identified clauses and their content
+        """
+        # Define legal clause patterns and keywords
+        clause_patterns = {
+            'termination': {
+                'keywords': ['termination', 'terminate', 'end of agreement', 'expiry', 'dissolution'],
+                'context_phrases': ['may be terminated', 'shall terminate', 'termination notice', 'upon termination'],
+                'importance': 'high'
+            },
+            'payment': {
+                'keywords': ['payment', 'amount', 'consideration', 'fee', 'salary', 'compensation'],
+                'context_phrases': ['shall pay', 'payment due', 'amount of', 'consideration for'],
+                'importance': 'high'
+            },
+            'liability': {
+                'keywords': ['liability', 'liable', 'damages', 'responsible', 'indemnify', 'indemnification'],
+                'context_phrases': ['shall be liable', 'liability for', 'damages arising', 'indemnify against'],
+                'importance': 'high'
+            },
+            'confidentiality': {
+                'keywords': ['confidential', 'non-disclosure', 'proprietary', 'trade secret'],
+                'context_phrases': ['confidential information', 'shall not disclose', 'proprietary information'],
+                'importance': 'medium'
+            },
+            'jurisdiction': {
+                'keywords': ['jurisdiction', 'governing law', 'court', 'dispute resolution', 'arbitration'],
+                'context_phrases': ['governed by', 'jurisdiction of', 'subject to the laws'],
+                'importance': 'medium'
+            },
+            'force_majeure': {
+                'keywords': ['force majeure', 'act of god', 'unforeseen circumstances', 'beyond control'],
+                'context_phrases': ['force majeure', 'acts of god', 'circumstances beyond'],
+                'importance': 'medium'
+            },
+            'intellectual_property': {
+                'keywords': ['intellectual property', 'copyright', 'trademark', 'patent', 'proprietary rights'],
+                'context_phrases': ['intellectual property rights', 'proprietary rights', 'copyright in'],
+                'importance': 'medium'
+            },
+            'warranty': {
+                'keywords': ['warranty', 'warrants', 'guarantee', 'representation'],
+                'context_phrases': ['warrants that', 'represents and warrants', 'guarantee that'],
+                'importance': 'medium'
+            }
+        }
+        
+        identified_clauses = {}
+        text_lower = text.lower()
+        sentences = self._split_into_sentences(text)
+        
+        for clause_type, patterns in clause_patterns.items():
+            clause_content = []
+            
+            # Look for sentences containing clause keywords or context phrases
+            for sentence in sentences:
+                sentence_lower = sentence.lower()
+                
+                # Check for direct keyword matches
+                keyword_matches = any(keyword in sentence_lower for keyword in patterns['keywords'])
+                context_matches = any(phrase in sentence_lower for phrase in patterns['context_phrases'])
+                
+                if keyword_matches or context_matches:
+                    # Clean and add the sentence
+                    clean_sentence = sentence.strip()
+                    if len(clean_sentence) > 20:  # Filter out very short matches
+                        clause_content.append(clean_sentence)
+            
+            if clause_content:
+                identified_clauses[clause_type] = {
+                    'content': clause_content[:3],  # Limit to top 3 most relevant sentences
+                    'importance': patterns['importance'],
+                    'count': len(clause_content)
+                }
+        
+        return identified_clauses
+    
+    def _split_into_sentences(self, text: str) -> List[str]:
+        """Split text into sentences for clause analysis"""
+        # Simple sentence splitting - can be enhanced with NLTK
+        sentence_endings = r'[.!?]+\s+'
+        sentences = re.split(sentence_endings, text)
+        
+        # Clean and filter sentences
+        cleaned_sentences = []
+        for sentence in sentences:
+            clean = sentence.strip()
+            if len(clean) > 10:  # Filter very short fragments
+                cleaned_sentences.append(clean)
+        
+        return cleaned_sentences
+    
+    def extract_key_dates_and_deadlines(self, text: str) -> Dict:
+        """
+        Extract important dates and calculate deadlines from legal documents
+        
+        Returns:
+            Dictionary with dates, deadlines, and time-sensitive information
+        """
+        date_info = {
+            'identified_dates': [],
+            'deadlines': [],
+            'time_sensitive_clauses': [],
+            'notice_periods': []
+        }
+        
+        # Enhanced date pattern matching
+        date_patterns = [
+            (r'\b(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})\b', 'DD/MM/YYYY'),
+            (r'\b(\d{4})[-/](\d{1,2})[-/](\d{1,2})\b', 'YYYY-MM-DD'),
+            (r'\b(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})\b', 'DD Month YYYY'),
+            (r'\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),?\s+(\d{4})\b', 'Month DD, YYYY'),
+        ]
+        
+        # Find all dates
+        for pattern, format_type in date_patterns:
+            matches = re.finditer(pattern, text, re.IGNORECASE)
+            for match in matches:
+                context_start = max(0, match.start() - 50)
+                context_end = min(len(text), match.end() + 50)
+                context = text[context_start:context_end].strip()
+                
+                date_info['identified_dates'].append({
+                    'date': match.group(),
+                    'format': format_type,
+                    'context': context
+                })
+        
+        # Look for deadline-related phrases
+        deadline_patterns = [
+            r'within\s+(\d+)\s+(days?|weeks?|months?|years?)',
+            r'not later than\s+(\d+)\s+(days?|weeks?|months?|years?)',
+            r'deadline of\s+(\d+)\s+(days?|weeks?|months?|years?)',
+            r'expires?\s+(?:on|in)\s+(\d+)\s+(days?|weeks?|months?|years?)',
+        ]
+        
+        for pattern in deadline_patterns:
+            matches = re.finditer(pattern, text, re.IGNORECASE)
+            for match in matches:
+                context_start = max(0, match.start() - 100)
+                context_end = min(len(text), match.end() + 100)
+                context = text[context_start:context_end].strip()
+                
+                date_info['deadlines'].append({
+                    'period': match.group(),
+                    'context': context
+                })
+        
+        # Look for notice periods
+        notice_patterns = [
+            r'(\d+)\s+(days?|weeks?|months?)\s+notice',
+            r'notice\s+of\s+(\d+)\s+(days?|weeks?|months?)',
+            r'(\d+)\s+(days?|weeks?|months?)\s+prior\s+notice',
+        ]
+        
+        for pattern in notice_patterns:
+            matches = re.finditer(pattern, text, re.IGNORECASE)
+            for match in matches:
+                context_start = max(0, match.start() - 80)
+                context_end = min(len(text), match.end() + 80)
+                context = text[context_start:context_end].strip()
+                
+                date_info['notice_periods'].append({
+                    'period': match.group(),
+                    'context': context
+                })
+        
+        return date_info
+    
+    def assess_legal_risks(self, text: str, doc_type: str, clauses: Dict) -> Dict:
+        """
+        Assess potential legal risks in the document
+        
+        Returns:
+            Dictionary with risk assessment and recommendations
+        """
+        risks = {
+            'high_risk_issues': [],
+            'medium_risk_issues': [],
+            'low_risk_issues': [],
+            'missing_protections': [],
+            'overall_risk_score': 0
+        }
+        
+        text_lower = text.lower()
+        
+        # High-risk indicators
+        high_risk_patterns = [
+            ('unlimited liability', 'Document may contain unlimited liability clauses'),
+            ('waiver of rights', 'Rights waiver clauses detected'),
+            ('no warranty', 'Warranty disclaimers present'),
+            ('sole discretion', 'One-sided discretionary powers identified'),
+            ('non-refundable', 'Non-refundable payment terms'),
+        ]
+        
+        # Medium-risk indicators  
+        medium_risk_patterns = [
+            ('automatic renewal', 'Automatic renewal clauses present'),
+            ('penalty', 'Penalty clauses identified'),
+            ('liquidated damages', 'Liquidated damages provisions'),
+            ('assignment', 'Assignment rights may be unclear'),
+            ('modification', 'Document modification terms'),
+        ]
+        
+        # Low-risk indicators
+        low_risk_patterns = [
+            ('subject to approval', 'Approval-dependent clauses'),
+            ('reasonable efforts', 'Performance standards may be vague'),
+            ('best efforts', 'Effort-based obligations'),
+        ]
+        
+        # Check for risk patterns
+        for pattern, description in high_risk_patterns:
+            if pattern in text_lower:
+                risks['high_risk_issues'].append(description)
+        
+        for pattern, description in medium_risk_patterns:
+            if pattern in text_lower:
+                risks['medium_risk_issues'].append(description)
+        
+        for pattern, description in low_risk_patterns:
+            if pattern in text_lower:
+                risks['low_risk_issues'].append(description)
+        
+        # Check for missing critical clauses
+        if 'termination' not in clauses:
+            risks['missing_protections'].append('No clear termination clause identified')
+        
+        if 'liability' not in clauses:
+            risks['missing_protections'].append('Liability limitations not found')
+        
+        if 'jurisdiction' not in clauses:
+            risks['missing_protections'].append('Governing law and jurisdiction not specified')
+        
+        if doc_type.lower() in ['employment', 'service'] and 'confidentiality' not in clauses:
+            risks['missing_protections'].append('Confidentiality provisions missing')
+        
+        # Calculate overall risk score (0-100)
+        risk_score = 0
+        risk_score += len(risks['high_risk_issues']) * 20
+        risk_score += len(risks['medium_risk_issues']) * 10
+        risk_score += len(risks['low_risk_issues']) * 5
+        risk_score += len(risks['missing_protections']) * 15
+        
+        risks['overall_risk_score'] = min(100, risk_score)
+        
+        return risks
+
+    def analyze_document(self, filename: str, file_content: bytes,
                         specific_questions: Optional[List[str]] = None) -> Dict:
         """
         Analyze legal document and provide insights
@@ -260,14 +513,26 @@ class DocumentAnalyzer:
             # Extract key information
             key_info = self.extract_key_information(text, doc_type)
             
+            # ✨ NEW: Extract contract clauses
+            contract_clauses = self.extract_contract_clauses(text, doc_type)
+            
+            # ✨ NEW: Extract dates and deadlines
+            date_analysis = self.extract_key_dates_and_deadlines(text)
+            
+            # ✨ NEW: Assess legal risks
+            risk_assessment = self.assess_legal_risks(text, doc_type, contract_clauses)
+            
             # Generate analysis using RAG if available
             analysis = self._generate_analysis(text, doc_type, specific_questions)
+            
+            # ✨ NEW: Generate document summary
+            document_summary = self._generate_document_summary(text, doc_type, contract_clauses)
             
             # Calculate statistics
             word_count = len(text.split())
             char_count = len(text)
             
-            # Return analysis (in-memory only, NOT stored)
+            # Return enhanced analysis (in-memory only, NOT stored)
             return {
                 'success': True,
                 'filename': filename,
@@ -278,6 +543,10 @@ class DocumentAnalyzer:
                     'pages_estimated': max(1, word_count // 300)
                 },
                 'key_information': key_info,
+                'contract_clauses': contract_clauses,
+                'date_analysis': date_analysis,
+                'risk_assessment': risk_assessment,
+                'document_summary': document_summary,
                 'analysis': analysis,
                 'timestamp': datetime.now().isoformat(),
                 'disclaimer': 'This analysis is for informational purposes only and does not constitute legal advice. Consult a qualified attorney for specific guidance.'
@@ -341,6 +610,97 @@ class DocumentAnalyzer:
                     print(f"⚠️  Question answering failed: {e}")
         
         return analysis
+    
+    def _generate_document_summary(self, text: str, doc_type: str, clauses: Dict) -> Dict:
+        """
+        Generate a comprehensive document summary with key highlights
+        
+        Returns:
+            Dictionary with document summary and key insights
+        """
+        summary = {
+            'overview': '',
+            'key_highlights': [],
+            'important_clauses': [],
+            'action_items': [],
+            'compliance_notes': []
+        }
+        
+        # Generate overview based on document type
+        if 'employment' in doc_type.lower():
+            summary['overview'] = f"Employment agreement document with {len(text.split())} words. Contains employment terms, conditions, and obligations for both employer and employee."
+        elif 'rental' in doc_type.lower() or 'lease' in doc_type.lower():
+            summary['overview'] = f"Rental/lease agreement document outlining terms between landlord and tenant for property rental arrangements."
+        elif 'sale' in doc_type.lower():
+            summary['overview'] = f"Sale agreement document establishing terms for transfer of ownership between buyer and seller."
+        elif 'will' in doc_type.lower():
+            summary['overview'] = f"Last Will and Testament document outlining distribution of assets and final wishes of the testator."
+        else:
+            summary['overview'] = f"{doc_type} document containing legal terms, conditions, and obligations between parties."
+        
+        # Extract key highlights from important clauses
+        important_clause_types = ['termination', 'payment', 'liability']
+        for clause_type in important_clause_types:
+            if clause_type in clauses and clauses[clause_type]['content']:
+                summary['important_clauses'].append({
+                    'type': clause_type.replace('_', ' ').title(),
+                    'content': clauses[clause_type]['content'][0][:200] + "..."
+                })
+        
+        # Generate key highlights
+        text_lower = text.lower()
+        
+        # Look for monetary amounts
+        money_pattern = r'\$[\d,]+(?:\.\d{2})?|\b(?:rupees?|rs\.?)\s*[\d,]+(?:\.\d{2})?'
+        money_matches = re.findall(money_pattern, text, re.IGNORECASE)
+        if money_matches:
+            summary['key_highlights'].append(f"Financial terms: {', '.join(money_matches[:3])}")
+        
+        # Look for time periods
+        time_pattern = r'\b\d+\s+(?:days?|weeks?|months?|years?)\b'
+        time_matches = re.findall(time_pattern, text, re.IGNORECASE)
+        if time_matches:
+            summary['key_highlights'].append(f"Time periods: {', '.join(set(time_matches[:3]))}")
+        
+        # Generate action items based on document type
+        if 'employment' in doc_type.lower():
+            summary['action_items'] = [
+                "Review compensation and benefits terms",
+                "Understand notice period requirements", 
+                "Check confidentiality and non-compete clauses",
+                "Verify job responsibilities and reporting structure"
+            ]
+        elif 'rental' in doc_type.lower():
+            summary['action_items'] = [
+                "Verify rent amount and due dates",
+                "Review security deposit terms",
+                "Understand maintenance responsibilities",
+                "Check notice period for termination"
+            ]
+        elif 'sale' in doc_type.lower():
+            summary['action_items'] = [
+                "Verify purchase price and payment terms",
+                "Check delivery and possession dates", 
+                "Review warranty and return policies",
+                "Understand transfer of ownership process"
+            ]
+        else:
+            summary['action_items'] = [
+                "Review all financial obligations",
+                "Understand termination procedures",
+                "Check dispute resolution mechanisms",
+                "Verify all parties' responsibilities"
+            ]
+        
+        # Add compliance notes
+        summary['compliance_notes'] = [
+            "Ensure all parties have legal capacity to enter the agreement",
+            "Verify compliance with applicable local and federal laws",
+            "Consider tax implications of the agreement terms",
+            "Review insurance and liability coverage requirements"
+        ]
+        
+        return summary
     
     def _generate_basic_summary(self, text: str, doc_type: str) -> str:
         """Generate basic summary without RAG"""

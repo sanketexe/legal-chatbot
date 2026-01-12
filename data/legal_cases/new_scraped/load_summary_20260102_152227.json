@@ -1,0 +1,32 @@
+{
+  "load_date": "2026-01-02T15:22:27.046834",
+  "cases_before": 370,
+  "cases_added": 48,
+  "cases_after": 418,
+  "source_files": [
+    "famous_cases_batch1.json",
+    "progress_query_1.json",
+    "progress_query_10.json",
+    "progress_query_2.json",
+    "progress_query_3.json",
+    "progress_query_4.json",
+    "progress_query_5.json",
+    "progress_query_6.json",
+    "progress_query_7.json",
+    "progress_query_8.json",
+    "progress_query_9.json",
+    "test_scrape.json"
+  ],
+  "queries": [
+    "minerva mills case",
+    "golaknath case fundamental rights",
+    "maneka gandhi passport article 21",
+    "hyderabad rape murder case",
+    "kesavananda bharati basic structure",
+    "kathua rape case",
+    "unnao rape case",
+    "nirbhaya gangrape delhi 2012",
+    "shah bano case",
+    "mukesh singh death penalty"
+  ]
+}

@@ -10,6 +10,9 @@ from typing import Dict, List, Optional
 # Add ml_legal_system to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'ml_legal_system'))
 
+# Import conversation manager for context-aware responses
+from conversation_manager import ConversationManager
+
 try:
     from ml_legal_system.legal_rag import LegalRAG
     from ml_legal_system.vector_db import LegalVectorDatabase
@@ -34,6 +37,9 @@ class LegalEngine:
         # Force use of ChromaDB for now since Pinecone index appears empty
         self.use_pinecone = False  # Temporarily disabled
         
+        # Initialize conversation manager
+        self.conversation_manager = ConversationManager()
+        
         if self.ml_available:
             try:
                 # Use ChromaDB local vector database (has data)
@@ -49,22 +55,64 @@ class LegalEngine:
     
     def get_legal_response(self, query: str, user_context: Dict = None) -> Dict:
         """
-        Get legal response for query
+        Get legal response for query with conversation context
         
         Args:
             query: User's legal question
-            user_context: Optional user context (history, preferences)
+            user_context: Optional context with:
+                - session_id: Conversation session identifier
+                - user_id: User identifier
+                - other metadata
             
         Returns:
-            Dictionary with response, sources, and metadata
+            Dictionary with response, sources, session_id, and metadata
         """
+        # Extract or create session
+        session_id = None
+        session = None
+        
+        if user_context and 'session_id' in user_context:
+            session_id = user_context['session_id']
+            session = self.conversation_manager.get_session(session_id)
+        
+        # Create new session if needed
+        if not session:
+            session = self.conversation_manager.create_session()
+            session_id = session.session_id
+        
+        # Get context-enhanced query for RAG
+        enhanced_query = session.get_context_for_query(query) if session else query
+        
+        # Get response from RAG or basic system
         if self.ml_available and self.rag:
-            return self._get_rag_response(query)
+            result = self._get_rag_response(enhanced_query, original_query=query)
         else:
-            return self._get_basic_response(query)
+            result = self._get_basic_response(query)
+        
+        # Add conversation exchange to history
+        if session:
+            session.add_message('user', query)
+            session.add_message('assistant', result['response'], metadata={
+                'sources_count': len(result.get('sources', [])),
+                'type': result.get('type', 'unknown')
+            })
+            # Save session after adding messages
+            self.conversation_manager._save_session(session)
+        
+        # Add session_id to result
+        result['session_id'] = session_id
+        result['conversation_context'] = session.context.to_dict() if session and session.context else None
+        
+        return result
     
-    def _get_rag_response(self, query: str) -> Dict:
-        """Get RAG-powered response with case citations"""
+    def _get_rag_response(self, query: str, original_query: str = None) -> Dict:
+        """
+        Get RAG-powered response with case citations
+        
+        Args:
+            query: Enhanced query with conversation context
+            original_query: Original user query (for display)
+        """
         try:
             result = self.rag.answer_legal_query(query, top_k=5)
             
@@ -183,46 +231,334 @@ Please provide more specific details about your legal issue.
     
     def search_cases(self, query: str, filters: Dict = None) -> List[Dict]:
         """
-        Search legal cases directly
+        Search legal cases with advanced filters
         
         Args:
-            query: Search query
-            filters: Optional filters (court, date, etc.)
+            query: Search query string
+            filters: Optional dictionary with filters:
+                - from_date: Start date (YYYY-MM-DD or YYYY)
+                - to_date: End date (YYYY-MM-DD or YYYY)
+                - courts: List of court names to filter
+                - jurisdiction: Specific jurisdiction/state
+                - legal_domain: Legal category (Criminal, Civil, Family, Property, etc.)
+                - min_relevance: Minimum relevance score (0.0 to 1.0)
+                - has_judges: Boolean, only cases with judge information
+                - has_citations: Boolean, only cases with citations
+                - top_k: Number of results (default 10, max 100)
+                - sort_by: Sort field (relevance, date, court)
+                - sort_order: asc or desc
             
         Returns:
-            List of matching cases
+            List of matching cases with metadata
         """
         if not self.ml_available:
             return []
         
         try:
-            db = LegalVectorDatabase(use_cloud=False)
-            results = db.search_similar_cases(query, top_k=10, filters=filters)
+            # Parse and validate filters
+            parsed_filters = self._parse_search_filters(filters or {})
             
-            return [
-                {
-                    'title': case['metadata']['title'],
-                    'court': case['metadata']['court'],
-                    'date': case['metadata']['date'],
+            # Get top_k from filters or use default
+            top_k = parsed_filters.pop('top_k', 10)
+            top_k = min(top_k, 100)  # Cap at 100
+            
+            # Extract post-processing filters
+            min_relevance = parsed_filters.pop('min_relevance', 0.0)
+            has_judges = parsed_filters.pop('has_judges', None)
+            has_citations = parsed_filters.pop('has_citations', None)
+            sort_by = parsed_filters.pop('sort_by', 'relevance')
+            sort_order = parsed_filters.pop('sort_order', 'desc')
+            legal_domain = parsed_filters.pop('legal_domain', None)
+            
+            # Search with vector database filters
+            db = LegalVectorDatabase(use_cloud=False)
+            results = db.search_similar_cases(query, top_k=top_k * 2, filters=parsed_filters)
+            
+            # Format and filter results
+            formatted_results = []
+            for case in results:
+                metadata = case.get('metadata', {})
+                relevance = 1 - case.get('distance', 0)
+                
+                # Apply relevance filter
+                if relevance < min_relevance:
+                    continue
+                
+                # Apply judge filter
+                if has_judges and not metadata.get('judges'):
+                    continue
+                
+                # Apply citation filter
+                if has_citations:
+                    citations = metadata.get('citations', '[]')
+                    if not citations or citations == '[]':
+                        continue
+                
+                # Apply legal domain filter (keyword-based)
+                if legal_domain:
+                    text_content = case.get('document', '').lower()
+                    title = metadata.get('title', '').lower()
+                    domain_keywords = self._get_domain_keywords(legal_domain)
+                    
+                    if not any(keyword in text_content or keyword in title for keyword in domain_keywords):
+                        continue
+                
+                formatted_results.append({
+                    'title': metadata.get('title', 'Untitled Case'),
+                    'court': metadata.get('court', 'Unknown Court'),
+                    'date': metadata.get('date', 'Unknown Date'),
+                    'judges': metadata.get('judges', 'Not specified'),
+                    'url': metadata.get('url', ''),
                     'excerpt': case.get('document', '')[:300],
-                    'relevance': 1 - case.get('distance', 0)
-                }
-                for case in results
-            ]
+                    'relevance': round(relevance, 4),
+                    'citations': metadata.get('citations', '[]'),
+                    'legal_acts': metadata.get('legal_acts', '[]'),
+                    'search_query': metadata.get('search_query', '')
+                })
+            
+            # Sort results
+            formatted_results = self._sort_results(formatted_results, sort_by, sort_order)
+            
+            # Return top_k results after filtering
+            return formatted_results[:top_k]
             
         except Exception as e:
             print(f"❌ Case search error: {e}")
+            import traceback
+            traceback.print_exc()
             return []
     
+    def _parse_search_filters(self, filters: Dict) -> Dict:
+        """
+        Parse and validate search filters
+        
+        Args:
+            filters: Raw filter dictionary
+            
+        Returns:
+            Parsed filter dictionary for ChromaDB
+        """
+        from datetime import datetime
+        import json
+        
+        parsed = {}
+        
+        # Date range filters
+        if 'from_date' in filters:
+            try:
+                # Support YYYY or YYYY-MM-DD format
+                date_str = str(filters['from_date'])
+                if len(date_str) == 4:  # Year only
+                    parsed['from_year'] = date_str
+                else:
+                    # Parse full date
+                    dt = datetime.strptime(date_str, '%Y-%m-%d')
+                    parsed['from_year'] = str(dt.year)
+            except ValueError:
+                print(f"⚠️  Invalid from_date format: {filters['from_date']}")
+        
+        if 'to_date' in filters:
+            try:
+                date_str = str(filters['to_date'])
+                if len(date_str) == 4:
+                    parsed['to_year'] = date_str
+                else:
+                    dt = datetime.strptime(date_str, '%Y-%m-%d')
+                    parsed['to_year'] = str(dt.year)
+            except ValueError:
+                print(f"⚠️  Invalid to_date format: {filters['to_date']}")
+        
+        # Court filters (passed through for ChromaDB)
+        if 'courts' in filters and filters['courts']:
+            parsed['courts'] = filters['courts']
+        
+        # Jurisdiction filter
+        if 'jurisdiction' in filters and filters['jurisdiction']:
+            parsed['jurisdiction'] = filters['jurisdiction']
+        
+        # Pass through remaining filters
+        for key in ['top_k', 'min_relevance', 'has_judges', 'has_citations', 
+                    'sort_by', 'sort_order', 'legal_domain']:
+            if key in filters:
+                parsed[key] = filters[key]
+        
+        return parsed
+    
+    def _get_domain_keywords(self, domain: str) -> List[str]:
+        """
+        Get keywords for legal domain filtering
+        
+        Args:
+            domain: Legal domain name
+            
+        Returns:
+            List of keywords
+        """
+        domain_map = {
+            'Criminal': ['criminal', 'penal', 'ipc', 'crpc', 'murder', 'theft', 'assault', 
+                        'cheating', 'fraud', 'bail', 'conviction', 'accused', 'prosecution'],
+            'Civil': ['civil', 'suit', 'plaintiff', 'defendant', 'damages', 'injunction', 
+                     'decree', 'cpc', 'contract', 'breach'],
+            'Family': ['family', 'marriage', 'divorce', 'custody', 'maintenance', 'adoption', 
+                      'succession', 'inheritance', 'matrimonial', 'alimony', 'child'],
+            'Property': ['property', 'land', 'real estate', 'partition', 'possession', 
+                        'ownership', 'lease', 'tenancy', 'title', 'immovable'],
+            'Constitutional': ['constitutional', 'fundamental rights', 'article', 'writ', 
+                             'habeas corpus', 'mandamus', 'certiorari', 'prohibition', 'quo warranto'],
+            'Corporate': ['corporate', 'company', 'director', 'shareholder', 'securities', 
+                         'merger', 'acquisition', 'corporate law', 'companies act'],
+            'Tax': ['tax', 'income tax', 'gst', 'customs', 'excise', 'taxation', 
+                   'revenue', 'assessment', 'tribunal'],
+            'Labor': ['labor', 'labour', 'employment', 'industrial', 'worker', 'wages', 
+                     'dismissal', 'retrenchment', 'trade union', 'workmen'],
+            'Consumer': ['consumer', 'product', 'service', 'complaint', 'deficiency', 
+                        'compensation', 'consumer protection'],
+            'Environmental': ['environment', 'pollution', 'forest', 'wildlife', 'green', 
+                            'ecology', 'environmental law']
+        }
+        
+        return domain_map.get(domain, [domain.lower()])
+    
+    def _sort_results(self, results: List[Dict], sort_by: str, sort_order: str) -> List[Dict]:
+        """
+        Sort search results
+        
+        Args:
+            results: List of case dictionaries
+            sort_by: Field to sort by (relevance, date, court)
+            sort_order: asc or desc
+            
+        Returns:
+            Sorted list
+        """
+        reverse = (sort_order.lower() == 'desc')
+        
+        if sort_by == 'relevance':
+            return sorted(results, key=lambda x: x.get('relevance', 0), reverse=reverse)
+        elif sort_by == 'date':
+            # Sort by date (handle various date formats)
+            def get_sort_key(case):
+                date_str = case.get('date', '')
+                try:
+                    # Extract year from date string
+                    if '-' in date_str:
+                        year = date_str.split('-')[0]
+                    elif '/' in date_str:
+                        parts = date_str.split('/')
+                        year = parts[-1] if len(parts[-1]) == 4 else parts[0]
+                    else:
+                        year = date_str[:4] if len(date_str) >= 4 else '0000'
+                    return int(year) if year.isdigit() else 0
+                except:
+                    return 0
+            
+            return sorted(results, key=get_sort_key, reverse=reverse)
+        elif sort_by == 'court':
+            return sorted(results, key=lambda x: x.get('court', ''), reverse=reverse)
+        else:
+            return results
+    
+    # Conversation Management Methods
+    
+    def create_conversation_session(self, metadata: Dict = None) -> str:
+        """
+        Create a new conversation session
+        
+        Args:
+            metadata: Optional metadata (user_id, source, etc.) - Currently not used but kept for API compatibility
+            
+        Returns:
+            Session ID
+        """
+        session = self.conversation_manager.create_session()
+        return session.session_id
+    
+    def get_conversation_history(self, session_id: str, format_type: str = 'dict') -> Optional[Dict]:
+        """
+        Get conversation history for a session
+        
+        Args:
+            session_id: Session identifier
+            format_type: 'dict', 'formatted', or 'raw'
+            
+        Returns:
+            Conversation history or None
+        """
+        session = self.conversation_manager.get_session(session_id)
+        if not session:
+            return None
+        
+        if format_type == 'formatted':
+            return {'history': session.get_formatted_history()}
+        elif format_type == 'raw':
+            return {'messages': [msg.__dict__ for msg in session.get_history()]}
+        else:
+            return {
+                'session_id': session_id,
+                'created_at': session.created_at,
+                'messages': [msg.to_dict() for msg in session.get_history()],
+                'context': session.context.to_dict() if session.context else None
+            }
+    
+    def get_conversation_context(self, session_id: str) -> Optional[Dict]:
+        """
+        Get conversation context summary
+        
+        Args:
+            session_id: Session identifier
+            
+        Returns:
+            Context dictionary or None
+        """
+        session = self.conversation_manager.get_session(session_id)
+        if not session and session.context:
+            return session.context.to_dict()
+        return None
+    
+    def delete_conversation_session(self, session_id: str) -> bool:
+        """
+        Delete a conversation session
+        
+        Args:
+            session_id: Session identifier
+            
+        Returns:
+            True if deleted, False otherwise
+        """
+        return self.conversation_manager.delete_session(session_id)
+    
+    def list_active_sessions(self) -> List[Dict]:
+        """
+        Get list of all active conversation sessions
+        
+        Returns:
+            List of session summaries
+        """
+        stats = self.conversation_manager.get_statistics()
+        return {
+            'total_sessions': stats['total_sessions'],
+            'active_sessions': stats['active_sessions_24h'],
+            'cached_sessions': stats['cached_sessions']
+        }
+    
     def get_system_status(self) -> Dict:
-        """Get status of ML system"""
+        """Get status of ML system and conversation manager"""
+        conv_stats = self.conversation_manager.get_statistics()
+        
         return {
             'ml_available': self.ml_available,
             'rag_initialized': self.rag is not None,
+            'conversation_manager': {
+                'available': True,
+                'total_sessions': conv_stats['total_sessions'],
+                'active_sessions': conv_stats['active_sessions_24h']
+            },
             'features': {
                 'case_search': self.ml_available,
                 'rag_responses': self.ml_available and self.rag is not None,
-                'citations': self.ml_available
+                'citations': self.ml_available,
+                'conversation_memory': True,
+                'context_tracking': True
             }
         }
 
