@@ -1,0 +1,127 @@
+{
+  "topic": "Wrongful Termination in Tech Industry",
+  "num_cases": 3,
+  "summary": "# Legal Research Summary: Wrongful Termination in Tech Industry\nGenerated: 2026-01-12 14:39\nCases Analyzed: 3\n\n## Executive Summary\n\nThis research summary analyzes 3 legal cases related to Wrongful Termination in Tech Industry. The most common outcome was 'Employee Favorable' (100.0% of cases). The analysis identified 1 key legal principles, with 'Section 25F of Industrial Disputes Act, 1947' being the most frequently cited.\n\n## Outcome Analysis\n\n- **Employee Favorable**: 3 cases (100.0%)\n\n## Key Legal Principles\n\n1. **Section 25F of Industrial Disputes Act, 1947** - Referenced in 1 case(s) (Cases: 1)\n\n## Individual Case Summaries\n\n### Case 1: Software Engineer v. TechStartup Ltd\n\n**Category**: Tech Employment Law\n**Outcome**: Employee Favorable\n\n**Facts**: The employee was terminated after 2 years of service without notice.\n            The company cited poor performance but provided no documentation of warnings\n            or performance improvement plans.\n\n**Legal Issues**:\n- Whether termination without notice violates Section 25F of the\n            Industrial Disputes Act, 1947.\n- termination without notice violates Section 25F of the\n            Industrial Disputes Act, 1947\n\n**Holding**: in favor of the employee\n\n---\n\n### Case 2: DevOps Engineer v. CloudTech Inc\n\n**Category**: Tech Employment Law\n**Outcome**: Employee Favorable\n\n**Facts**: Employee claimed unpaid overtime for work beyond 9 hours per day.\n            The company argued that IT professionals are exempt from overtime provisions.\n\n**Legal Issues**:\n- Whether IT professionals are entitled to overtime compensation under\n            the Factories Act and state labor laws.\n- IT professionals are entitled to overtime compensation under\n            the Factories Act and state labor laws\n\n**Holding**: while certain exemptions exist, prolonged\n            overtime without compensation violates fundamental labor rights\n\n---\n\n### Case 3: QA Analyst v. Software Solutions Ltd\n\n**Category**: Tech Employment Law\n**Outcome**: Employee Favorable\n\n**Facts**: The employer terminated an employee during medical leave for chronic\n            illness. The employee alleged disability discrimination.\n\n**Legal Issues**:\n- Whether termination during medical leave constitutes unfair\n            discrimination under the Rights of Persons with Disabilities Act, 2016.\n- termination during medical leave constitutes unfair\n            discrimination under the Rights of Persons with Disabilities Act, 2016\n\n**Holding**: Holding not clearly identified\n\n---\n\n## Conclusion\n\nBased on the analysis of 3 cases, the following conclusions can be drawn:\n\n1. Courts tend to rule in favor of 'Employee Favorable' in 100.0% of similar cases.\n2. The principle of 'Section 25F of Industrial Disputes Act, 1947' is frequently cited and appears to be well-established.\n\n**Disclaimer**: This is an automated summary for research purposes only. Consult a qualified legal professional for legal advice.\n",
+  "key_points": [
+    {
+      "case_number": 1,
+      "title": "Software Engineer v. TechStartup Ltd",
+      "category": "Tech Employment Law",
+      "key_facts": "The employee was terminated after 2 years of service without notice.\n            The company cited poor performance but provided no documentation of warnings\n            or performance improvement plans.",
+      "legal_issues": [
+        "Whether termination without notice violates Section 25F of the\n            Industrial Disputes Act, 1947.",
+        "termination without notice violates Section 25F of the\n            Industrial Disputes Act, 1947"
+      ],
+      "holding": "in favor of the employee",
+      "outcome": "Employee Favorable"
+    },
+    {
+      "case_number": 2,
+      "title": "DevOps Engineer v. CloudTech Inc",
+      "category": "Tech Employment Law",
+      "key_facts": "Employee claimed unpaid overtime for work beyond 9 hours per day.\n            The company argued that IT professionals are exempt from overtime provisions.",
+      "legal_issues": [
+        "Whether IT professionals are entitled to overtime compensation under\n            the Factories Act and state labor laws.",
+        "IT professionals are entitled to overtime compensation under\n            the Factories Act and state labor laws"
+      ],
+      "holding": "while certain exemptions exist, prolonged\n            overtime without compensation violates fundamental labor rights",
+      "outcome": "Employee Favorable"
+    },
+    {
+      "case_number": 3,
+      "title": "QA Analyst v. Software Solutions Ltd",
+      "category": "Tech Employment Law",
+      "key_facts": "The employer terminated an employee during medical leave for chronic\n            illness. The employee alleged disability discrimination.",
+      "legal_issues": [
+        "Whether termination during medical leave constitutes unfair\n            discrimination under the Rights of Persons with Disabilities Act, 2016.",
+        "termination during medical leave constitutes unfair\n            discrimination under the Rights of Persons with Disabilities Act, 2016"
+      ],
+      "holding": "Holding not clearly identified",
+      "outcome": "Employee Favorable"
+    }
+  ],
+  "legal_principles": [
+    {
+      "principle": "Section 25F of Industrial Disputes Act, 1947",
+      "frequency": 1,
+      "cases": [
+        1
+      ]
+    }
+  ],
+  "outcome_analysis": {
+    "total_cases": 3,
+    "statistics": [
+      {
+        "outcome": "Employee Favorable",
+        "count": 3,
+        "percentage": 100.0,
+        "cases": [
+          {
+            "case_number": 1,
+            "title": "Software Engineer v. TechStartup Ltd",
+            "category": "Tech Employment Law"
+          },
+          {
+            "case_number": 2,
+            "title": "DevOps Engineer v. CloudTech Inc",
+            "category": "Tech Employment Law"
+          },
+          {
+            "case_number": 3,
+            "title": "QA Analyst v. Software Solutions Ltd",
+            "category": "Tech Employment Law"
+          }
+        ]
+      }
+    ],
+    "most_common": "Employee Favorable"
+  },
+  "citations": [
+    {
+      "case_number": 1,
+      "title": "Software Engineer v. TechStartup Ltd",
+      "court": "High Court of Karnataka",
+      "year": "2023",
+      "citation": "2023 KHC 145",
+      "relevance": 85
+    },
+    {
+      "case_number": 3,
+      "title": "QA Analyst v. Software Solutions Ltd",
+      "court": "High Court of Delhi",
+      "year": "2023",
+      "citation": "2023 DHC 267",
+      "relevance": 80
+    },
+    {
+      "case_number": 2,
+      "title": "DevOps Engineer v. CloudTech Inc",
+      "court": "Labour Court, Mumbai",
+      "year": "2022",
+      "citation": "2022 MLR 89",
+      "relevance": 70
+    }
+  ],
+  "timeline": [
+    {
+      "year": "2022",
+      "title": "DevOps Engineer v. CloudTech Inc",
+      "outcome": "Employee Favorable",
+      "significance": 70
+    },
+    {
+      "year": "2023",
+      "title": "Software Engineer v. TechStartup Ltd",
+      "outcome": "Employee Favorable",
+      "significance": 85
+    },
+    {
+      "year": "2023",
+      "title": "QA Analyst v. Software Solutions Ltd",
+      "outcome": "Employee Favorable",
+      "significance": 80
+    }
+  ],
+  "generated_at": "2026-01-12T14:39:34.174751"
+}
