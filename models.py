@@ -526,3 +526,198 @@ class CasePrediction(db.Model):
         
         db.session.commit()
         logger.info(f"Updated feedback for prediction {self.id}")
+
+
+class Bookmark(db.Model):
+    """User bookmarks for cases, queries, and conversations"""
+    __tablename__ = 'bookmarks'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False, index=True)
+    
+    # Bookmark types: 'case', 'query', 'conversation', 'document'
+    bookmark_type = db.Column(db.String(20), nullable=False, index=True)
+    
+    # Reference to bookmarked item
+    item_id = db.Column(db.String(100), nullable=False, index=True)  # case_id, session_id, etc.
+    item_title = db.Column(db.String(500), nullable=True)
+    item_preview = db.Column(db.Text, nullable=True)  # Short preview/snippet
+    
+    # Bookmark organization
+    folder = db.Column(db.String(100), default='default')  # User-defined folders
+    tags = db.Column(db.JSON, nullable=True)  # List of tags
+    notes = db.Column(db.Text, nullable=True)  # User notes
+    
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    last_accessed = db.Column(db.DateTime, default=datetime.utcnow)
+    access_count = db.Column(db.Integer, default=0)
+    is_favorite = db.Column(db.Boolean, default=False)  # Star/favorite flag
+    
+    # Relationship
+    user = db.relationship('User', backref='bookmarks', foreign_keys=[user_id])
+    
+    def to_dict(self):
+        """Convert bookmark to dictionary"""
+        return {
+            'id': self.id,
+            'type': self.bookmark_type,
+            'item_id': self.item_id,
+            'title': self.item_title,
+            'preview': self.item_preview,
+            'folder': self.folder,
+            'tags': self.tags or [],
+            'notes': self.notes,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'last_accessed': self.last_accessed.isoformat() if self.last_accessed else None,
+            'access_count': self.access_count,
+            'is_favorite': self.is_favorite
+        }
+    
+    def update_access(self):
+        """Update last accessed time and increment count"""
+        self.last_accessed = datetime.utcnow()
+        self.access_count += 1
+        db.session.commit()
+    
+    @classmethod
+    def create_bookmark(cls, user_id: str, bookmark_type: str, item_id: str, 
+                       title: str = None, preview: str = None, folder: str = 'default',
+                       tags: list = None, notes: str = None):
+        """Create a new bookmark"""
+        # Check if bookmark already exists
+        existing = cls.query.filter_by(
+            user_id=user_id,
+            bookmark_type=bookmark_type,
+            item_id=item_id
+        ).first()
+        
+        if existing:
+            logger.info(f"Bookmark already exists for {bookmark_type}:{item_id}")
+            return existing
+        
+        bookmark = cls(
+            user_id=user_id,
+            bookmark_type=bookmark_type,
+            item_id=item_id,
+            item_title=title,
+            item_preview=preview,
+            folder=folder,
+            tags=tags or [],
+            notes=notes
+        )
+        
+        db.session.add(bookmark)
+        db.session.commit()
+        
+        logger.info(f"Created bookmark {bookmark.id} for user {user_id}")
+        return bookmark
+    
+    @classmethod
+    def get_user_bookmarks(cls, user_id: str, bookmark_type: str = None, 
+                          folder: str = None, favorites_only: bool = False):
+        """Get user's bookmarks with optional filters"""
+        query = cls.query.filter_by(user_id=user_id)
+        
+        if bookmark_type:
+            query = query.filter_by(bookmark_type=bookmark_type)
+        if folder:
+            query = query.filter_by(folder=folder)
+        if favorites_only:
+            query = query.filter_by(is_favorite=True)
+        
+        return query.order_by(cls.created_at.desc()).all()
+
+
+class ExportHistory(db.Model):
+    """Track document exports for users"""
+    __tablename__ = 'export_history'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False, index=True)
+    
+    # Export details
+    export_type = db.Column(db.String(20), nullable=False)  # 'conversation', 'case', 'research', 'document'
+    export_format = db.Column(db.String(10), nullable=False)  # 'pdf', 'docx', 'txt', 'json'
+    
+    # Content reference
+    content_id = db.Column(db.String(100), nullable=True)  # session_id, case_id, etc.
+    content_title = db.Column(db.String(500), nullable=True)
+    
+    # File details
+    filename = db.Column(db.String(500), nullable=False)
+    file_size = db.Column(db.Integer, nullable=True)  # Size in bytes
+    file_path = db.Column(db.String(1000), nullable=True)  # Storage path if saved
+    
+    # Export status
+    status = db.Column(db.String(20), default='pending')  # 'pending', 'completed', 'failed'
+    error_message = db.Column(db.Text, nullable=True)
+    
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    completed_at = db.Column(db.DateTime, nullable=True)
+    download_count = db.Column(db.Integer, default=0)
+    last_downloaded = db.Column(db.DateTime, nullable=True)
+    
+    # Relationship
+    user = db.relationship('User', backref='exports', foreign_keys=[user_id])
+    
+    def to_dict(self):
+        """Convert export record to dictionary"""
+        return {
+            'id': self.id,
+            'export_type': self.export_type,
+            'export_format': self.export_format,
+            'content_id': self.content_id,
+            'content_title': self.content_title,
+            'filename': self.filename,
+            'file_size': self.file_size,
+            'status': self.status,
+            'error_message': self.error_message,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+            'download_count': self.download_count,
+            'last_downloaded': self.last_downloaded.isoformat() if self.last_downloaded else None
+        }
+    
+    def mark_completed(self, file_size: int = None, file_path: str = None):
+        """Mark export as completed"""
+        self.status = 'completed'
+        self.completed_at = datetime.utcnow()
+        if file_size:
+            self.file_size = file_size
+        if file_path:
+            self.file_path = file_path
+        db.session.commit()
+    
+    def mark_failed(self, error_message: str):
+        """Mark export as failed"""
+        self.status = 'failed'
+        self.error_message = error_message
+        self.completed_at = datetime.utcnow()
+        db.session.commit()
+    
+    def record_download(self):
+        """Record a download of this export"""
+        self.download_count += 1
+        self.last_downloaded = datetime.utcnow()
+        db.session.commit()
+    
+    @classmethod
+    def create_export(cls, user_id: str, export_type: str, export_format: str,
+                     filename: str, content_id: str = None, content_title: str = None):
+        """Create a new export record"""
+        export = cls(
+            user_id=user_id,
+            export_type=export_type,
+            export_format=export_format,
+            filename=filename,
+            content_id=content_id,
+            content_title=content_title
+        )
+        
+        db.session.add(export)
+        db.session.commit()
+        
+        logger.info(f"Created export {export.id} for user {user_id}")
+        return export
