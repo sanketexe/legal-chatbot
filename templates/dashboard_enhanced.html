@@ -255,6 +255,21 @@
             
             <!-- Content Area -->
             <div class="content-area">
+                <!-- Guest banner (shown when not authenticated) -->
+                <div id="guest-banner" style="display:none; margin-bottom:1rem;">
+                    <div class="card" style="padding:1rem; border-left:4px solid var(--info-color); background:#f0f9ff;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+                            <div>
+                                <strong>You're browsing as a guest</strong>
+                                <div class="text-muted">Login to view your personalized dashboard, recent conversations, bookmarks and exports.</div>
+                            </div>
+                            <div style="display:flex; gap:0.5rem;">
+                                <button class="btn btn-outline" onclick="window.location.href='/login'">Login</button>
+                                <button class="btn btn-primary" onclick="window.location.href='/register-page'">Create Account</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <!-- Statistics -->
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -378,8 +393,16 @@
         // ====================================================================
         
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadDashboardData();
             setupNavigation();
+            const token = localStorage.getItem('token');
+            if (!token) {
+                // Show guest state and avoid calling protected APIs
+                showGuestDashboard();
+                return;
+            }
+
+            // If token exists, load personalized data
+            await loadDashboardData();
         });
         
         // ====================================================================
@@ -514,9 +537,9 @@
             const routes = {
                 'dashboard': '/dashboard',
                 'chat': '/conversation',
-                'conversations': '/conversation-history',
+                'conversations': '/conversation',
                 'bookmarks': '/bookmarks',
-                'prediction': '/case-predictor',
+                'prediction': '/case-prediction',
                 'drafting': '/document-drafting',
                 'research': '/research-summary',
                 'search': '/advanced-search',
@@ -526,6 +549,42 @@
             if (routes[page]) {
                 window.location.href = routes[page];
             }
+        }
+
+        // Show guest dashboard state (no auth token)
+        function showGuestDashboard() {
+            // Display banner
+            document.getElementById('guest-banner').style.display = 'block';
+
+            // Set stats to placeholder and provide login CTA
+            document.getElementById('stat-conversations').textContent = '—';
+            document.getElementById('conversations-count').textContent = '—';
+            document.getElementById('stat-bookmarks').textContent = '—';
+            document.getElementById('bookmarks-count').textContent = '—';
+            document.getElementById('stat-exports').textContent = '—';
+
+            // Recent sections: show CTA to login
+            const convContainer = document.getElementById('recent-conversations');
+            convContainer.innerHTML = `
+                <div class="text-center" style="padding:2rem;">
+                    <p class="text-muted">Sign in to view your recent conversations.</p>
+                    <div style="display:flex; gap:0.5rem; justify-content:center; margin-top:1rem;">
+                        <button class="btn btn-outline" onclick="window.location.href='/login'">Login</button>
+                        <button class="btn btn-primary" onclick="window.location.href='/register-page'">Create Account</button>
+                    </div>
+                </div>
+            `;
+
+            const bmContainer = document.getElementById('recent-bookmarks');
+            bmContainer.innerHTML = `
+                <div class="text-center" style="padding:2rem;">
+                    <p class="text-muted">Sign in to view your bookmarks.</p>
+                    <div style="display:flex; gap:0.5rem; justify-content:center; margin-top:1rem;">
+                        <button class="btn btn-outline" onclick="window.location.href='/login'">Login</button>
+                        <button class="btn btn-primary" onclick="window.location.href='/register-page'">Create Account</button>
+                    </div>
+                </div>
+            `;
         }
         
         function navigateToChat() {

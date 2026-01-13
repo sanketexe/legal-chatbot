@@ -14,24 +14,28 @@ class AuthManager {
     }
 
     setToken(token) {
+        // store token under both legacy 'token' key and new key for compatibility
         localStorage.setItem(this.TOKEN_KEY, token);
+        try { localStorage.setItem('token', token); } catch (e) { /* ignore */ }
     }
 
     getToken() {
-        return localStorage.getItem(this.TOKEN_KEY);
+        return localStorage.getItem(this.TOKEN_KEY) || localStorage.getItem('token');
     }
 
     removeToken() {
         localStorage.removeItem(this.TOKEN_KEY);
         localStorage.removeItem(this.USER_KEY);
+        try { localStorage.removeItem('token'); localStorage.removeItem('user'); } catch (e) { /* ignore */ }
     }
 
     setUser(user) {
         localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+        try { localStorage.setItem('user', JSON.stringify(user)); } catch (e) { /* ignore */ }
     }
 
     getUser() {
-        const userData = localStorage.getItem(this.USER_KEY);
+        const userData = localStorage.getItem(this.USER_KEY) || localStorage.getItem('user');
         return userData ? JSON.parse(userData) : null;
     }
 

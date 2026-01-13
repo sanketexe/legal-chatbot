@@ -85,13 +85,11 @@ class LegalRAG:
             
             # Try different model names (optimized for speed and quota efficiency)
             model_names = [
-                'gemini-2.0-flash-exp',   # Latest experimental model
-                'gemini-2.5-flash',       # Latest stable fast model
-                'gemini-2.0-flash',       # Stable fast model
-                'gemini-1.5-flash',       # Fallback option
-                'models/gemini-2.0-flash-exp',
-                'models/gemini-2.5-flash',
-                'models/gemini-2.0-flash'
+                'models/gemini-2.5-flash',   # Latest stable fast model (working)
+                'models/gemini-1.5-pro',     # Stable pro model
+                'models/gemini-pro',         # Classic pro model
+                'models/gemini-2.5-pro',     # Latest pro model
+                'models/gemini-1.5-flash',   # Flash model fallback
             ]
             
             for model_name in model_names:
@@ -208,6 +206,16 @@ Based on the above precedents, provide a comprehensive legal answer with citatio
     def generate_response_gemini(self, query: str, context: str) -> str:
         """Generate response using Google Gemini"""
         try:
+            print(f"🔍 generate_response_gemini called with query: {query[:50]}...")
+            print(f"🔧 Model status: {self.model is not None}")
+            print(f"🔧 Model initialized: {self.model_initialized}")
+            
+            if not self.model:
+                print("❌ Model is None! Forcing initialization...")
+                self._ensure_model_initialized()
+                if not self.model:
+                    return "Model initialization failed. Please try again."
+            
             prompt = f"""You are an expert Indian legal assistant with deep knowledge of Indian law.
 
 Query: {query}
@@ -224,6 +232,8 @@ Instructions:
 
 Provide your expert legal analysis:"""
             
+            print(f"📝 Prompt length: {len(prompt)} characters")
+            
             # Configure safety settings to be more permissive for legal content
             safety_settings = [
                 {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
@@ -232,13 +242,16 @@ Provide your expert legal analysis:"""
                 {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
             ]
             
+            print("🚀 Calling model.generate_content...")
             response = self.model.generate_content(prompt, safety_settings=safety_settings)
+            print(f"📡 Response received: {response is not None}")
             
             # Check if response was blocked or empty
             if not response.text or response.text.strip() == "":
                 print(f"⚠️  Gemini returned empty response")
                 return "I apologize, but I couldn't generate a proper response. This may be due to content filtering. Please try rephrasing your query."
             
+            print(f"✅ Response text length: {len(response.text)}")
             return response.text
             
         except Exception as e:

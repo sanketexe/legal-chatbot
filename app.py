@@ -409,6 +409,8 @@ def login():
         result = login_user(username, password)
         
         if result['success']:
+            # Add 'token' key for compatibility with frontend
+            result['token'] = result.get('access_token')
             return jsonify(result), 200
         else:
             return jsonify(result), 401
@@ -685,8 +687,18 @@ def index():
     """Main chat interface"""
     return render_template('simple.html')
 
+@app.route('/login')
+def login_page():
+    """Login page"""
+    return render_template('login.html')
+
+@app.route('/register-page')
+def register_page():
+    """Registration page"""
+    return render_template('register.html')
+
 @app.route('/dashboard')
-@auth_required
+@optional_auth
 def dashboard():
     """User dashboard with analytics"""
     return render_template('dashboard_enhanced.html')
@@ -942,9 +954,15 @@ def chat(current_user):
         result = None
         last_error = None
         
+        print(f"🔍 Processing chat request: '{user_message[:50]}...'")
+        print(f"⚙️  Legal engine status: {app.legal_engine is not None}")
+        
         while retry_count < max_retries and result is None:
             try:
+                print(f"🧪 Attempt {retry_count + 1}/{max_retries}")
+                
                 if app.legal_engine is None:
+                    print("⚠️  Legal engine not available, using fallback")
                     # Fallback to basic response if engine not available
                     result = {
                         'response': get_basic_fallback_response(user_message),
@@ -952,16 +970,20 @@ def chat(current_user):
                         'type': 'fallback'
                     }
                 else:
+                    print(f"🚀 Calling legal_engine.get_legal_response...")
                     result = app.legal_engine.get_legal_response(
                         user_message,
                         {'history': message_history}
                     )
+                    print(f"✅ Legal engine returned response: {len(result.get('response', ''))[:50]}...")
                 break  # Success, exit retry loop
                 
             except Exception as e:
+                import traceback
                 last_error = e
                 retry_count += 1
-                print(f"WARN: Attempt {retry_count}/{max_retries} failed: {e}")
+                print(f"❌ Attempt {retry_count}/{max_retries} failed: {e}")
+                print(f"📋 Full traceback:\n{traceback.format_exc()}")
                 
                 if retry_count >= max_retries:
                     # All retries exhausted, use fallback
